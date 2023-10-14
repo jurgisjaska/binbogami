@@ -1,0 +1,17 @@
+services:
+  mariadb:
+    image: mariadb:11.1
+    container_name: "binbogami_mariadb"
+    restart: "no"
+    volumes:
+      - "./docker/volume/mariadb:/var/lib/mysql"
+    ports:
+      - "3306:3306"
+    env_file:
+      - ".env.docker"
+    networks:
+      - "binbogami"
+networks:
+  binbogami:
+    name: "binbogami"
+    external: true
