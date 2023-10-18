@@ -2,12 +2,15 @@ package app
 
 import (
 	"fmt"
+	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )
 
 func ConnectDatabase(c *Database) (*sqlx.DB, error) {
+	log.Printf("%+v", c)
+
 	return sqlx.Connect(
 		"mysql",
 		fmt.Sprintf(

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/jurgisjaska/binbogami/app"
+	"github.com/jurgisjaska/binbogami/app/handler"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -20,5 +21,8 @@ func main() {
 	}
 	defer database.Close()
 
-	fmt.Println("binbogami")
+	e := echo.New()
+	handler.CreateCategory(e, database)
+
+	e.Logger.Fatal(e.Start(":8001"))
 }
