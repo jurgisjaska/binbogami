@@ -17,7 +17,7 @@ type (
 		DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
-	Categories []*Category
+	Categories []Category
 
 	CategoryRepository struct {
 		database *sqlx.DB
@@ -34,8 +34,14 @@ func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 	return category, nil
 }
 
-func (r *CategoryRepository) FindMany() *Categories {
-	return nil
+func (r *CategoryRepository) FindMany() (*Categories, error) {
+	categories := &Categories{}
+	err := r.database.Select(categories, "SELECT * FROM categories")
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
 }
 
 func CreateCategory(d *sqlx.DB) *CategoryRepository {

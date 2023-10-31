@@ -21,6 +21,7 @@ type (
 func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
 	h.echo.GET("/categories/:id", h.one)
+	h.echo.GET("/categories", h.many)
 
 	return h
 }
@@ -36,10 +37,18 @@ func (h *Category) one(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("category not found"))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(category, 1, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
 }
 
-// many
+func (h *Category) many(c echo.Context) error {
+	categories, err := h.repository.FindMany()
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no categories found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
+}
+
 // update
 // create
 // delete

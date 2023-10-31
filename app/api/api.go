@@ -2,6 +2,7 @@ package api
 
 import (
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 
@@ -27,7 +28,7 @@ type (
 	}
 
 	ResponseMetadata struct {
-		Total int     `json:"total"`
+		Total int     `json:"tp"`
 		Limit int     `json:"limit"`
 		Page  int     `json:"page"`
 		Pages float64 `json:"pages"`
@@ -62,22 +63,38 @@ func CreateRequest(c echo.Context) *Request {
 	return &Request{page, limit, orderBy, order}
 }
 
-func Success(d interface{}, t int, r *Request) *Response {
-	pages := math.Ceil(float64(t / r.Limit))
-	if pages == 0 {
-		pages = 1
-	}
+func Success(d interface{}, r *Request) *Response {
+	total, pages := tp(d, r)
 
 	return &Response{
 		Status: statusSuccess,
 		Data:   d,
 		Metadata: ResponseMetadata{
-			Total: t,
+			Total: total,
 			Limit: r.Limit,
 			Page:  r.Page,
 			Pages: pages,
 		},
 	}
+}
+
+func tp(d interface{}, r *Request) (int, float64) {
+	total := 1
+	dv := reflect.ValueOf(d)
+	if dv.Kind() == reflect.Pointer {
+		dv = dv.Elem()
+	}
+
+	if dv.Kind() == reflect.Slice || dv.Kind() == reflect.Array {
+		total = dv.Len()
+	}
+
+	pages := math.Ceil(float64(total / r.Limit))
+	if pages == 0 {
+		pages = 1
+	}
+
+	return total, pages
 }
 
 func Error(m string) *Response {
