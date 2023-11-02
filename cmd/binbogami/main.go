@@ -23,6 +23,7 @@ func main() {
 
 	e := echo.New()
 	handler.CreateCategory(e, database)
+	handler.CreateOrganization(e, database)
 
 	e.Logger.Fatal(e.Start(":8001"))
 }

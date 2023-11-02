@@ -1,10 +1,10 @@
 package database
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 )
 
 type (
@@ -21,6 +21,20 @@ type (
 	Organizations []Organization
 
 	OrganizationRepository struct {
-		database *sql.DB
+		database *sqlx.DB
 	}
 )
+
+func (r *OrganizationRepository) Find(id uuid.UUID) (*Organization, error) {
+	organization := &Organization{}
+	err := r.database.Get(organization, "SELECT * FROM organizations WHERE id = ? AND deleted_at IS NULL", id.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return organization, nil
+}
+
+func CreateOrganization(d *sqlx.DB) *OrganizationRepository {
+	return &OrganizationRepository{database: d}
+}
