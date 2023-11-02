@@ -26,7 +26,7 @@ type (
 
 func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 	category := &Category{}
-	err := r.database.Get(category, "SELECT * FROM categories WHERE id = ?", id.String())
+	err := r.database.Get(category, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id.String())
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +36,7 @@ func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 
 func (r *CategoryRepository) FindMany() (*Categories, error) {
 	categories := &Categories{}
-	err := r.database.Select(categories, "SELECT * FROM categories")
+	err := r.database.Select(categories, "SELECT * FROM categories WHERE deleted_at IS NULL")
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +57,21 @@ func (r *CategoryRepository) Create(category *Category) error {
 		INSERT INTO categories (id, name, description, created_at, updated_at, deleted_at)
 		VALUES (:id, :name, :description, :created_at, :updated_at, :deleted_at)
 	`, category)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *CategoryRepository) Remove(category *Category) error {
+	_, err := r.database.NamedExec(
+		`UPDATE categories SET deleted_at = :deleted WHERE id = :id`,
+		map[string]interface{}{
+			"deleted": time.Now(),
+			"id":      category.Id,
+		})
 
 	if err != nil {
 		return err
