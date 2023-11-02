@@ -28,7 +28,7 @@ type (
 	}
 
 	ResponseMetadata struct {
-		Total int     `json:"tp"`
+		Total int     `json:"total"`
 		Limit int     `json:"limit"`
 		Page  int     `json:"page"`
 		Pages float64 `json:"pages"`

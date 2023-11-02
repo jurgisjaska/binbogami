@@ -22,6 +22,7 @@ func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
 	h.echo.GET("/categories/:id", h.one)
 	h.echo.GET("/categories", h.many)
+	h.echo.POST("/categories", h.create)
 
 	return h
 }
@@ -49,8 +50,21 @@ func (h *Category) many(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
 }
 
+func (h *Category) create(c echo.Context) error {
+	category := &database.Category{}
+	if err := c.Bind(category); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))
+	}
+
+	err := h.repository.Create(category)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
+}
+
 // update
-// create
 // delete
 
 func CreateCategory(e *echo.Echo, d *sqlx.DB) *Category {

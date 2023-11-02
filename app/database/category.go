@@ -10,8 +10,8 @@ import (
 type (
 	Category struct {
 		Id          *uuid.UUID `json:"id"`
-		Name        string     `json:"name"`
-		Description string     `json:"description"`
+		Name        *string    `json:"name"`
+		Description *string    `json:"description"`
 		CreatedAt   time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt   *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at"`
@@ -42,6 +42,27 @@ func (r *CategoryRepository) FindMany() (*Categories, error) {
 	}
 
 	return categories, nil
+}
+
+func (r *CategoryRepository) Create(category *Category) error {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+
+	category.Id = &id
+	category.CreatedAt = time.Now()
+
+	_, err = r.database.NamedExec(`
+		INSERT INTO categories (id, name, description, created_at, updated_at, deleted_at)
+		VALUES (:id, :name, :description, :created_at, :updated_at, :deleted_at)
+	`, category)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CreateCategory(d *sqlx.DB) *CategoryRepository {
