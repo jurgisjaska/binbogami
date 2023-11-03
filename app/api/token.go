@@ -1,15 +1,16 @@
 package api
 
 import (
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jurgisjaska/binbogami/app"
 )
 
 type (
 	TokenClaims struct {
-		Id   string `json:"id"`
-		Name string `json:"name"`
-		jwt.StandardClaims
+		Id    string `json:"id"`
+		Email string `json:"email"`
+		Name  string `json:"name"`
+		jwt.RegisteredClaims
 	}
 
 	Token struct {
@@ -23,7 +24,7 @@ func (t *Token) CreateToken(c TokenClaims) (string, error) {
 	return token.SignedString(t.configuration.Salt)
 }
 
-func (t *Token) CreateRefreshToken(c jwt.StandardClaims) (string, error) {
+func (t *Token) CreateRefreshToken(c jwt.RegisteredClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, c)
 
 	return token.SignedString(t.configuration.Salt)
@@ -37,12 +38,12 @@ func (t *Token) ParseToken(ts string) *TokenClaims {
 	return token.Claims.(*TokenClaims)
 }
 
-func (t *Token) ParseRefreshToken(rt string) *jwt.StandardClaims {
-	token, _ := jwt.ParseWithClaims(rt, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+func (t *Token) ParseRefreshToken(rt string) *jwt.RegisteredClaims {
+	token, _ := jwt.ParseWithClaims(rt, &jwt.RegisteredClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return []byte(t.configuration.Salt), nil
 	})
 
-	return token.Claims.(*jwt.StandardClaims)
+	return token.Claims.(*jwt.RegisteredClaims)
 }
 
 func CreateToken(c *app.Config) *Token {
