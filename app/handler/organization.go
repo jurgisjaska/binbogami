@@ -37,7 +37,7 @@ func (h *Organization) one(c echo.Context) error {
 
 	organization, err := h.repository.Find(id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error(id.String()))
+		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(organization, api.CreateRequest(c)))
