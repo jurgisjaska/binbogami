@@ -13,6 +13,7 @@ type (
 		Name        *string    `json:"name"`
 		Description *string    `json:"description"`
 		CreatedBy   *uuid.UUID `db:"created_by_user_id" json:"created_by"`
+		OwnedBy     *uuid.UUID `db:"owned_by_user_id" json:"owned_by"`
 		CreatedAt   time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt   *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at"`
