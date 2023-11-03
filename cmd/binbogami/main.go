@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/jurgisjaska/binbogami/app"
+	"github.com/jurgisjaska/binbogami/app/api"
 	"github.com/jurgisjaska/binbogami/app/handler"
 	"github.com/labstack/echo/v4"
 )
@@ -22,6 +23,8 @@ func main() {
 	defer func() {
 		_ = database.Close()
 	}()
+
+	_ = api.CreateToken(config)
 
 	e := echo.New()
 	handler.CreateOrganization(e, database)
