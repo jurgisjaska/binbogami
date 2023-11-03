@@ -20,18 +20,18 @@ type (
 func (t *Token) CreateToken(c TokenClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, c)
 
-	return token.SignedString(t.configuration.SecretSalt)
+	return token.SignedString(t.configuration.Salt)
 }
 
 func (t *Token) CreateRefreshToken(c jwt.StandardClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS512, c)
 
-	return token.SignedString(t.configuration.SecretSalt)
+	return token.SignedString(t.configuration.Salt)
 }
 
 func (t *Token) ParseToken(ts string) *TokenClaims {
 	token, _ := jwt.ParseWithClaims(ts, &TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(t.configuration.SecretSalt), nil
+		return []byte(t.configuration.Salt), nil
 	})
 
 	return token.Claims.(*TokenClaims)
@@ -39,7 +39,7 @@ func (t *Token) ParseToken(ts string) *TokenClaims {
 
 func (t *Token) ParseRefreshToken(rt string) *jwt.StandardClaims {
 	token, _ := jwt.ParseWithClaims(rt, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(t.configuration.SecretSalt), nil
+		return []byte(t.configuration.Salt), nil
 	})
 
 	return token.Claims.(*jwt.StandardClaims)
