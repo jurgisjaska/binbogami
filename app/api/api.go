@@ -104,10 +104,10 @@ func Error(m string) *Response {
 	}
 }
 
-func Errors(m string, e interface{}) *Response {
-	return &Response{
-		Status:  statusError,
-		Message: strings.ToLower(m),
-		Data:    e,
-	}
-}
+// func Errors(m string, e interface{}) *Response {
+// 	return &Response{
+// 		Status:  statusError,
+// 		Message: strings.ToLower(m),
+// 		Data:    e,
+// 	}
+// }
