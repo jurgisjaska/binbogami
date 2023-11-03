@@ -19,7 +19,9 @@ func main() {
 	if err != nil {
 		log.Fatalln("database failure")
 	}
-	defer database.Close()
+	defer func() {
+		_ = database.Close()
+	}()
 
 	e := echo.New()
 	handler.CreateOrganization(e, database)
