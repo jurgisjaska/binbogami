@@ -3,6 +3,7 @@ package handler
 import (
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/app/api"
 	"github.com/jurgisjaska/binbogami/app/database"
@@ -20,7 +21,7 @@ type (
 func (h *Auth) initialize() *Auth {
 	h.repository = database.CreateUser(h.database)
 
-	h.echo.POST("/", h.signin)
+	h.echo.POST("/auth", h.signin)
 	h.echo.POST("/", h.signup)
 	h.echo.DELETE("/", h.signout)
 
@@ -28,16 +29,17 @@ func (h *Auth) initialize() *Auth {
 }
 
 func (h *Auth) signin(c echo.Context) error {
-	credentials := &struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}{}
-
+	credentials := &api.Credentials{}
 	if err := c.Bind(credentials); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
 
-	return nil
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(credentials); err != nil {
+		return c.JSON(http.StatusNotFound, api.Errors("incorrect credentials", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(credentials, api.CreateRequest(c)))
 }
 
 func (h *Auth) signup(c echo.Context) error {

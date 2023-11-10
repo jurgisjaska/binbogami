@@ -27,6 +27,7 @@ func main() {
 	_ = api.CreateToken(config)
 
 	e := echo.New()
+	handler.CreateAuth(e, database)
 	handler.CreateOrganization(e, database)
 	handler.CreateBook(e, database)
 	handler.CreateCategory(e, database)
