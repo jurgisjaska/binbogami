@@ -32,6 +32,7 @@ func (h *Auth) signin(c echo.Context) error {
 		Email    string `json:"email"`
 		Password string `json:"password"`
 	}{}
+
 	if err := c.Bind(credentials); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
