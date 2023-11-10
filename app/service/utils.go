@@ -1,7 +1,7 @@
 package service
 
 import (
-	"crypto/sha256"
+	"crypto/sha1"
 	"fmt"
 	"time"
 
@@ -16,7 +16,7 @@ func CreateSalt(email *string) string {
 		random.String(16),
 	)
 
-	hash := sha256.New()
+	hash := sha1.New()
 	hash.Write([]byte(s))
 
 	return fmt.Sprintf("%x", hash.Sum(nil))

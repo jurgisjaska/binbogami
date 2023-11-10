@@ -30,6 +30,17 @@ type (
 	}
 )
 
+func (r *UserRepository) FindBy(column string, email string) (*User, error) {
+	user := &User{}
+	sql := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
+	err := r.database.Get(user, sql, email)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *UserRepository) Create(user *User) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
