@@ -44,7 +44,6 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	// maybe there should be a service?
-	// validate if password is correct
 
 	user, err := h.repository.FindBy("email", credentials.Email)
 	if err != nil {
@@ -52,12 +51,13 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	password := fmt.Sprintf("%s%s%s", credentials.Password, user.Salt, h.configuration.Salt)
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password[:71]), bcrypt.DefaultCost)
-	if err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password[:71])); err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(hashedPassword, api.CreateRequest(c)))
+	// generate token
+
+	return c.JSON(http.StatusOK, api.Success("OK", api.CreateRequest(c)))
 }
 
 func (h *Auth) signup(c echo.Context) error {
