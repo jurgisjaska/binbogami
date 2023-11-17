@@ -35,24 +35,22 @@ func (h *Auth) initialize() *Auth {
 }
 
 func (h *Auth) signin(c echo.Context) error {
-	credentials := &api.SigninModel{}
-	if err := c.Bind(credentials); err != nil {
+	sm := &api.SigninModel{}
+	if err := c.Bind(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(credentials); err != nil {
+	if err := v.Struct(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
 
-	// maybe there should be a service?
-
-	user, err := h.repository.FindBy("email", credentials.Email)
+	user, err := h.repository.FindBy("email", sm.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
 
-	password := fmt.Sprintf("%s%s%s", credentials.Password, user.Salt, h.configuration.Salt)
+	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Salt)
 	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password[:71])); err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
@@ -73,8 +71,15 @@ func (h *Auth) signin(c echo.Context) error {
 }
 
 func (h *Auth) signup(c echo.Context) error {
-	// not sure if this is the best place for signup
-	// but putting in the users handler feels more dirty
+	sm := &api.SignupModel{}
+	if err := c.Bind(sm); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect signup information"))
+	}
+
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(sm); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Errors("incorrect signup information", err.Error()))
+	}
 
 	user := &database.User{}
 	if err := c.Bind(user); err != nil {
