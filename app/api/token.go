@@ -2,14 +2,15 @@ package api
 
 import (
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/app"
 )
 
 type (
 	TokenClaims struct {
-		Id    string `json:"id"`
-		Email string `json:"email"`
-		Name  string `json:"name"`
+		Id    uuid.UUID `json:"id"`
+		Email string    `json:"email"`
+		Name  string    `json:"name"`
 		jwt.RegisteredClaims
 	}
 

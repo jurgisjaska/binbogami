@@ -3,8 +3,10 @@ package handler
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/app"
 	"github.com/jurgisjaska/binbogami/app/api"
@@ -27,7 +29,7 @@ func (h *Auth) initialize() *Auth {
 
 	h.echo.POST("/auth/signin", h.signin)
 	h.echo.POST("/auth/signup", h.signup)
-	h.echo.DELETE("/auth/signout", h.signout)
+	// h.echo.DELETE("/auth/signout", h.signout)
 
 	return h
 }
@@ -56,8 +58,18 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	// generate token
+	expire := jwt.NewNumericDate(time.Now().Add(time.Hour * 72))
+	claim := &api.TokenClaims{
+		Id:    *user.Id,
+		Email: *user.Email,
+		Name:  *user.Name,
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: expire,
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
-	return c.JSON(http.StatusOK, api.Success("OK", api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(token, api.CreateRequest(c)))
 }
 
 func (h *Auth) signup(c echo.Context) error {
@@ -74,9 +86,9 @@ func (h *Auth) signup(c echo.Context) error {
 	return nil
 }
 
-func (h *Auth) signout(c echo.Context) error {
-	return nil
-}
+// func (h *Auth) signout(c echo.Context) error {
+// 	return nil
+// }
 
 // CreateAuth creates instance of the auth handler
 // Differs from other handlers authentication require application configuration and sal
