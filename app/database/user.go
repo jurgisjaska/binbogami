@@ -1,7 +1,6 @@
 package database
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"time"
 
@@ -49,17 +48,7 @@ func (r *UserRepository) Create(user *User) error {
 
 	user.Id = &id
 	user.CreatedAt = time.Now()
-
-	hash := sha256.Sum256([]byte(
-		fmt.Sprintf(
-			"%s%s%s",
-			user.Email,
-			time.Now().Format(time.RFC3339Nano),
-			random.String(16),
-		),
-	))
-
-	user.Salt = string(hash[:])
+	user.Salt = random.String(16)
 
 	return nil
 }

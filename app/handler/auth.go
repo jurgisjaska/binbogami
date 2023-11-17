@@ -81,14 +81,29 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect signup information", err.Error()))
 	}
 
-	user := &database.User{}
-	if err := c.Bind(user); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect user"))
+	user, err := h.repository.FindBy("email", sm.Email)
+	if err != nil { // this probably not needed, if there is an error finding user we should continue
+		return c.JSON(http.StatusInternalServerError, api.Errors("incorrect email address", err.Error()))
+	}
+	if user != nil {
+		return c.JSON(http.StatusBadRequest, api.Errors("email address already in use", err.Error()))
 	}
 
-	//
+	u := &database.User{}
+	u.Email = &sm.Email
+	u.Password = h.hashPassword(sm.Password)
 
-	return nil
+	err = h.repository.Create(u)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(u, api.CreateRequest(c)))
+}
+
+// hashPassword creates new password hash using bcrypt
+func (h *Auth) hashPassword(password string) string {
+	return ""
 }
 
 // func (h *Auth) signout(c echo.Context) error {
