@@ -1,11 +1,17 @@
 CREATE TABLE IF NOT EXISTS users
 (
-    id         CHAR(36)  NOT NULL
+    id         CHAR(36)     NOT NULL
         PRIMARY KEY,
-    name       INT       NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at TIMESTAMP NULL
+    email      VARCHAR(128) NOT NULL,
+    name       VARCHAR(64)  NOT NULL,
+    surname    VARCHAR(64)  NOT NULL,
+    salt       CHAR(40)     NOT NULL,
+    password   VARCHAR(256) NOT NULL,
+    created_at TIMESTAMP    NOT NULL,
+    updated_at TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at TIMESTAMP    NULL,
+    CONSTRAINT users_email_uindex
+        UNIQUE (email)
 );
 
 CREATE TABLE IF NOT EXISTS organizations
@@ -15,14 +21,14 @@ CREATE TABLE IF NOT EXISTS organizations
     name               VARCHAR(128) NOT NULL,
     description        TEXT         NULL,
     created_by_user_id CHAR(36)     NOT NULL,
-    owner_by_user_id   CHAR(36)     NOT NULL,
+    owned_by_user_id   CHAR(36)     NOT NULL,
     created_at         TIMESTAMP    NOT NULL,
     updated_at         TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at         TIMESTAMP    NULL,
     CONSTRAINT organizations_users_id_fk
         FOREIGN KEY (created_by_user_id) REFERENCES users (id),
     CONSTRAINT organizations_users_id_fk2
-        FOREIGN KEY (owner_by_user_id) REFERENCES users (id)
+        FOREIGN KEY (owned_by_user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS books

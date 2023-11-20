@@ -6,7 +6,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/labstack/gommon/random"
 )
 
 type (
@@ -48,7 +47,15 @@ func (r *UserRepository) Create(user *User) error {
 
 	user.Id = &id
 	user.CreatedAt = time.Now()
-	user.Salt = random.String(16)
+
+	_, err = r.database.NamedExec(`
+		INSERT INTO users (id, email, name, surname, salt, password, created_at)
+		VALUES (:id, :email, :name, :surname, :salt, :password, :created_at) 
+	`, user)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

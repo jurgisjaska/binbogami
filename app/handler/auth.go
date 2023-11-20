@@ -12,6 +12,7 @@ import (
 	"github.com/jurgisjaska/binbogami/app/api"
 	"github.com/jurgisjaska/binbogami/app/database"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/random"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,6 +28,7 @@ type (
 func (h *Auth) initialize() *Auth {
 	h.repository = database.CreateUser(h.database)
 
+	// @todo probably should use POST, PUT, DELETE to single endpoint
 	h.echo.POST("/auth/signin", h.signin)
 	h.echo.POST("/auth/signup", h.signup)
 	// h.echo.DELETE("/auth/signout", h.signout)
@@ -51,7 +53,11 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Salt)
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password[:71])); err != nil {
+	if len(password) > 71 {
+		password = password[:71]
+	}
+
+	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
@@ -82,11 +88,8 @@ func (h *Auth) signup(c echo.Context) error {
 	}
 
 	user, err := h.repository.FindBy("email", sm.Email)
-	if err != nil { // this probably not needed, if there is an error finding user we should continue
-		return c.JSON(http.StatusInternalServerError, api.Errors("incorrect email address", err.Error()))
-	}
 	if user != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("email address already in use", err.Error()))
+		return c.JSON(http.StatusBadRequest, api.Error("email address already in user"))
 	}
 
 	// @todo these pointer / no-pointer conversions feels incorrect for some reason.
@@ -94,7 +97,11 @@ func (h *Auth) signup(c echo.Context) error {
 	u.Email = &sm.Email
 	u.Name = &sm.Name
 	u.Surname = &sm.Surname
-	u.Password = h.hashPassword(sm.Password)
+	u.Salt = random.String(16)
+	u.Password, err = h.hashPassword(sm.Password, u.Salt)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
+	}
 
 	err = h.repository.Create(u)
 	if err != nil {
@@ -105,8 +112,19 @@ func (h *Auth) signup(c echo.Context) error {
 }
 
 // hashPassword creates new password hash using bcrypt
-func (h *Auth) hashPassword(password string) string {
-	return ""
+func (h *Auth) hashPassword(password string, salt string) (string, error) {
+	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Salt)
+
+	if len(p) > 71 {
+		p = p[:71]
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+
+	return string(hashedPassword), nil
 }
 
 // func (h *Auth) signout(c echo.Context) error {
