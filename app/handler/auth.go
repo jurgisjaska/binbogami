@@ -89,8 +89,11 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("email address already in use", err.Error()))
 	}
 
+	// @todo these pointer / no-pointer conversions feels incorrect for some reason.
 	u := &database.User{}
 	u.Email = &sm.Email
+	u.Name = &sm.Name
+	u.Surname = &sm.Surname
 	u.Password = h.hashPassword(sm.Password)
 
 	err = h.repository.Create(u)

@@ -10,5 +10,7 @@ type (
 		Email            string `validate:"required" json:"email"`
 		Password         string `validate:"required" json:"password"`
 		RepeatedPassword string `validate:"required" json:"repeated_password"`
+		Name             string `validate:"required" json:"name"`
+		Surname          string `validate:"required" json:"surname"`
 	}
 )
