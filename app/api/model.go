@@ -1,5 +1,9 @@
 package api
 
+import (
+	"github.com/jurgisjaska/binbogami/app/database"
+)
+
 type (
 	Signin struct {
 		Email    string `validate:"required,email" json:"email"`
@@ -12,5 +16,10 @@ type (
 		RepeatedPassword string  `validate:"required,gte=8" json:"repeated_password"`
 		Name             *string `validate:"required,gte=3" json:"name"`
 		Surname          *string `validate:"required,gte=3" json:"surname"`
+	}
+
+	SignupSuccess struct {
+		User  *database.User `json:"user"`
+		Token string         `json:"token"`
 	}
 )

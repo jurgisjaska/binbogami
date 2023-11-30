@@ -3,13 +3,12 @@ package handler
 import (
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/golang-jwt/jwt/v5"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/app"
 	"github.com/jurgisjaska/binbogami/app/api"
+	"github.com/jurgisjaska/binbogami/app/api/token"
 	"github.com/jurgisjaska/binbogami/app/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
@@ -57,7 +56,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
 
-	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Salt)
+	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Secret)
 	if len(password) > 71 {
 		password = password[:71]
 	}
@@ -66,19 +65,12 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	// generate token
-	expire := jwt.NewNumericDate(time.Now().Add(time.Hour * 72))
-	claim := &api.TokenClaims{
-		Id:    *user.Id,
-		Email: *user.Email,
-		Name:  *user.Name,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: expire,
-		},
+	t, err := token.CreateToken(user, h.configuration.Secret)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 
-	return c.JSON(http.StatusOK, api.Success(token, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(t, api.CreateRequest(c)))
 }
 
 // signup validates signup form data and creates new user
@@ -98,9 +90,9 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
 	}
 
-	user, err := h.repository.FindBy("email", *sm.Email)
-	if user != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("email address already in user"))
+	existingUser, err := h.repository.FindBy("email", *sm.Email)
+	if existingUser != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
 	}
 
 	u := &database.User{
@@ -120,12 +112,18 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(u, api.CreateRequest(c)))
+	// build token
+	t, err := token.CreateToken(u, h.configuration.Secret)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(api.SignupSuccess{u, t}, api.CreateRequest(c)))
 }
 
 // hashPassword creates new password hash using bcrypt
 func (h *Auth) hashPassword(password string, salt string) (string, error) {
-	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Salt)
+	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Secret)
 
 	if len(p) > 71 {
 		p = p[:71]

@@ -10,7 +10,7 @@ import (
 type (
 	Config struct {
 		Environment string
-		Salt        string
+		Secret      string
 
 		Database *Database
 	}
@@ -37,7 +37,7 @@ func CreateConfig() (*Config, error) {
 
 	return &Config{
 		Environment: os.Getenv("APP_ENVIRONMENT"),
-		Salt:        os.Getenv("APP_SALT"),
+		Secret:      os.Getenv("APP_SECRET"),
 		Database: &Database{
 			Name: os.Getenv("DATABASE_NAME"),
 			Connection: &Connection{
