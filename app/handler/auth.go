@@ -37,7 +37,7 @@ func (h *Auth) initialize() *Auth {
 }
 
 func (h *Auth) signin(c echo.Context) error {
-	sm := &api.SigninModel{}
+	sm := &api.Signin{}
 	if err := c.Bind(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
@@ -77,7 +77,7 @@ func (h *Auth) signin(c echo.Context) error {
 }
 
 func (h *Auth) signup(c echo.Context) error {
-	sm := &api.SignupModel{}
+	sm := &api.Signup{}
 	if err := c.Bind(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect signup information"))
 	}
