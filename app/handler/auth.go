@@ -16,6 +16,10 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const (
+	signupError string = "incorrect signup information"
+)
+
 type (
 	Auth struct {
 		echo          *echo.Echo
@@ -36,6 +40,7 @@ func (h *Auth) initialize() *Auth {
 	return h
 }
 
+// signin in creates new JWT token for the user if credentials are correct
 func (h *Auth) signin(c echo.Context) error {
 	sm := &api.Signin{}
 	if err := c.Bind(sm); err != nil {
@@ -76,28 +81,35 @@ func (h *Auth) signin(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(token, api.CreateRequest(c)))
 }
 
+// signup validates signup form data and creates new user
 func (h *Auth) signup(c echo.Context) error {
 	sm := &api.Signup{}
 	if err := c.Bind(sm); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect signup information"))
+		return c.JSON(http.StatusBadRequest, api.Error(signupError))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
 	if err := v.Struct(sm); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("incorrect signup information", err.Error()))
+		return c.JSON(http.StatusBadRequest, api.Errors(signupError, err.Error()))
 	}
 
-	user, err := h.repository.FindBy("email", sm.Email)
+	// verify that passwords match
+	if sm.Password != sm.RepeatedPassword {
+		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
+	}
+
+	user, err := h.repository.FindBy("email", *sm.Email)
 	if user != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("email address already in user"))
 	}
 
-	// @todo these pointer / no-pointer conversions feels incorrect for some reason.
-	u := &database.User{}
-	u.Email = &sm.Email
-	u.Name = &sm.Name
-	u.Surname = &sm.Surname
-	u.Salt = random.String(16)
+	u := &database.User{
+		Email:   sm.Email,
+		Name:    sm.Name,
+		Surname: sm.Surname,
+		Salt:    random.String(16),
+	}
+
 	u.Password, err = h.hashPassword(sm.Password, u.Salt)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
@@ -132,7 +144,6 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 // }
 
 // CreateAuth creates instance of the auth handler
-// Differs from other handlers authentication require application configuration and sal
 func CreateAuth(e *echo.Echo, d *sqlx.DB, c *app.Config) *Auth {
 	return (&Auth{echo: e, database: d, configuration: c}).initialize()
 }
