@@ -1,33 +1,34 @@
 package token
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/app/database"
+	echojwt "github.com/labstack/echo-jwt/v4"
+	"github.com/labstack/echo/v4"
 )
 
-const (
-	expire = 72
-)
+// expire is a constant representing the number of hours for token expiration.
+const expire = 72
 
-type (
-	Claims struct {
-		Id    *uuid.UUID `json:"id"`
-		Email *string    `json:"email"`
-		Name  *string    `json:"name"`
-		jwt.RegisteredClaims
-	}
-)
+// Claims represents the claims contained in a JWT token.
+type Claims struct {
+	Id    *uuid.UUID `json:"id"`
+	Email *string    `json:"email"`
+	Name  string     `json:"name"`
+	jwt.RegisteredClaims
+}
 
-// CreateToken creates new JTW token instance from user model
+// CreateToken creates a JWT token string for a given user.
 func CreateToken(u *database.User, key string) (string, error) {
 	expire := jwt.NewNumericDate(time.Now().Add(time.Hour * expire))
 	claim := &Claims{
 		Id:    u.Id,
 		Email: u.Email,
-		Name:  u.Name,
+		Name:  fmt.Sprintf("%s %s", *u.Name, *u.Surname),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: expire,
 		},
@@ -35,4 +36,15 @@ func CreateToken(u *database.User, key string) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	return token.SignedString([]byte(key))
+}
+
+// CreateJWTConfig creates a JWT token configuration for Echo framework.
+// The configuration includes a function to create new claims and the signing key.
+func CreateJWTConfig(key string) echojwt.Config {
+	return echojwt.Config{
+		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+			return new(Claims)
+		},
+		SigningKey: []byte(key),
+	}
 }

@@ -15,11 +15,14 @@ type (
 		Database *Database
 	}
 
+	// Database represents the database configuration.
+	// It holds the database name and connection configuration.
 	Database struct {
 		Name       string
 		Connection *Connection
 	}
 
+	// Connection represents the connection configuration for local or 3rd party service.
 	Connection struct {
 		Hostname string
 		Port     int
@@ -28,6 +31,7 @@ type (
 	}
 )
 
+// CreateConfig loads the configuration from the environment and creates an instance of config.
 func CreateConfig() (*Config, error) {
 	if err := godotenv.Load(); err != nil {
 		return nil, err

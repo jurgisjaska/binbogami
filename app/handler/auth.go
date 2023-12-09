@@ -32,9 +32,9 @@ func (h *Auth) initialize() *Auth {
 	h.repository = database.CreateUser(h.database)
 
 	// @todo probably should use POST, PUT, DELETE to single endpoint
-	h.echo.POST("/auth/signin", h.signin)
-	h.echo.POST("/auth/signup", h.signup)
-	// h.echo.DELETE("/auth/signout", h.signout)
+	h.echo.PUT("/auth", h.signin)
+	h.echo.POST("/auth", h.signup)
+	// h.echo.DELETE("/auth", h.signout)
 
 	return h
 }
@@ -70,7 +70,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(t, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(api.SigninSuccess{t}, api.CreateRequest(c)))
 }
 
 // signup validates signup form data and creates new user
@@ -112,7 +112,6 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
 	}
 
-	// build token
 	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
@@ -121,7 +120,7 @@ func (h *Auth) signup(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(api.SignupSuccess{u, t}, api.CreateRequest(c)))
 }
 
-// hashPassword creates new password hash using bcrypt
+// hashPassword creates new password hash using bcrypt.
 func (h *Auth) hashPassword(password string, salt string) (string, error) {
 	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Secret)
 

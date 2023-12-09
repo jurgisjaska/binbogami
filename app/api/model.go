@@ -5,9 +5,15 @@ import (
 )
 
 type (
+	// Signin struct is a data structure representing the user sign-in information.
 	Signin struct {
 		Email    string `validate:"required,email" json:"email"`
 		Password string `validate:"required" json:"password"`
+	}
+
+	// SigninSuccess struct represents the successful sign-in response.
+	SigninSuccess struct {
+		Token string `json:"token"`
 	}
 
 	Signup struct {

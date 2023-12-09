@@ -20,6 +20,7 @@ const (
 )
 
 type (
+	// Response represents the structure for the response.
 	Response struct {
 		Status   string           `json:"status"`
 		Data     interface{}      `json:"data,omitempty"`
@@ -27,6 +28,7 @@ type (
 		Metadata ResponseMetadata `json:"metadata"`
 	}
 
+	// ResponseMetadata represents the metadata for the response.
 	ResponseMetadata struct {
 		Total int     `json:"total"`
 		Limit int     `json:"limit"`
@@ -34,6 +36,7 @@ type (
 		Pages float64 `json:"pages"`
 	}
 
+	// Request represents the structure for making a request.
 	Request struct {
 		Page    int    `json:"page"`
 		Limit   int    `json:"limit"`
@@ -42,6 +45,7 @@ type (
 	}
 )
 
+// CreateRequest creates a new Request object based on the query parameters in the provided echo.Context.
 func CreateRequest(c echo.Context) *Request {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
