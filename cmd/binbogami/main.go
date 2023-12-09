@@ -44,6 +44,7 @@ func main() {
 	e.Logger.Fatal(e.Start(":8001"))
 }
 
+// customHTTPErrorHandler handles HTTP errors and provides custom error responses.
 func customHTTPErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
 		return
