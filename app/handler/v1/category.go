@@ -10,13 +10,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type (
-	Category struct {
-		echo       *echo.Echo
-		database   *sqlx.DB
-		repository *database.CategoryRepository
-	}
-)
+type Category struct {
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *database.CategoryRepository
+}
 
 func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
@@ -98,6 +96,6 @@ func (h *Category) delete(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(true, api.CreateRequest(c)))
 }
 
-func CreateCategory(e *echo.Echo, d *sqlx.DB) *Category {
-	return (&Category{echo: e, database: d}).initialize()
+func CreateCategory(g *echo.Group, d *sqlx.DB) *Category {
+	return (&Category{echo: g, database: d}).initialize()
 }

@@ -6,13 +6,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type (
-	Book struct {
-		echo       *echo.Echo
-		database   *sqlx.DB
-		repository *database.BookRepository
-	}
-)
+// Book represents a book handler.
+type Book struct {
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *database.BookRepository
+}
 
 func (h *Book) initialize() *Book {
 	h.repository = database.CreateBook(h.database)
@@ -25,6 +24,7 @@ func (h *Book) initialize() *Book {
 	return h
 }
 
-func CreateBook(e *echo.Echo, d *sqlx.DB) *Book {
-	return (&Book{echo: e, database: d}).initialize()
+// CreateBook creates a new instance of Book handler.
+func CreateBook(g *echo.Group, d *sqlx.DB) *Book {
+	return (&Book{echo: g, database: d}).initialize()
 }

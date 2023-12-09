@@ -34,8 +34,8 @@ func main() {
 
 	// temporary disabled before refactor
 	v1.CreateOrganization(g, database)
-	// g.CreateBook(e, database)
-	// g.CreateCategory(e, database)
+	v1.CreateBook(g, database)
+	v1.CreateCategory(g, database)
 
 	e.Logger.Fatal(e.Start(":8001"))
 }

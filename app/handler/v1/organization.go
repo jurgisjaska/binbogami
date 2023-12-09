@@ -10,13 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type (
-	Organization struct {
-		echo       *echo.Group
-		database   *sqlx.DB
-		repository *database.OrganizationRepository
-	}
-)
+// Organization represents an organization handler.
+type Organization struct {
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *database.OrganizationRepository
+}
 
 func (h *Organization) initialize() *Organization {
 	h.repository = database.CreateOrganization(h.database)
