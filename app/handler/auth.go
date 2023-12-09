@@ -31,10 +31,8 @@ type (
 func (h *Auth) initialize() *Auth {
 	h.repository = database.CreateUser(h.database)
 
-	// @todo probably should use POST, PUT, DELETE to single endpoint
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
-	// h.echo.DELETE("/auth", h.signout)
 
 	return h
 }
@@ -135,10 +133,6 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 
 	return string(hashedPassword), nil
 }
-
-// func (h *Auth) signout(c echo.Context) error {
-// 	return nil
-// }
 
 // CreateAuth creates instance of the auth handler
 func CreateAuth(e *echo.Echo, d *sqlx.DB, c *app.Config) *Auth {

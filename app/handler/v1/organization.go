@@ -12,7 +12,7 @@ import (
 
 type (
 	Organization struct {
-		echo       *echo.Echo
+		echo       *echo.Group
 		database   *sqlx.DB
 		repository *database.OrganizationRepository
 	}
@@ -43,6 +43,7 @@ func (h *Organization) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(organization, api.CreateRequest(c)))
 }
 
-func CreateOrganization(e *echo.Echo, d *sqlx.DB) *Organization {
-	return (&Organization{echo: e, database: d}).initialize()
+// CreateOrganization initializes and returns an instance of Organization handler.
+func CreateOrganization(g *echo.Group, d *sqlx.DB) *Organization {
+	return (&Organization{echo: g, database: d}).initialize()
 }

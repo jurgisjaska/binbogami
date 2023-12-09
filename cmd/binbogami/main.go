@@ -6,6 +6,7 @@ import (
 	"github.com/jurgisjaska/binbogami/app"
 	"github.com/jurgisjaska/binbogami/app/api/token"
 	"github.com/jurgisjaska/binbogami/app/handler"
+	"github.com/jurgisjaska/binbogami/app/handler/v1"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -28,13 +29,13 @@ func main() {
 	e := echo.New()
 	handler.CreateAuth(e, database, config)
 
-	v1 := e.Group("/v1")
-	v1.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
+	g := e.Group("/v1")
+	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
 	// temporary disabled before refactor
-	// v1.CreateOrganization(e, database)
-	// v1.CreateBook(e, database)
-	// v1.CreateCategory(e, database)
+	v1.CreateOrganization(g, database)
+	// g.CreateBook(e, database)
+	// g.CreateCategory(e, database)
 
 	e.Logger.Fatal(e.Start(":8001"))
 }
