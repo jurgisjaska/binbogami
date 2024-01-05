@@ -55,8 +55,8 @@ func (h *Organization) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect organization", err.Error()))
 	}
 
-	// @todo Single user should not be able to create multiple organization with the same name
-	// @todo Single user should not be able to own multiple organizations with the same name
+	// @todo single user should not be able to create multiple organization with the same name
+	// @todo single user should not be able to own multiple organizations with the same name
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
