@@ -10,8 +10,8 @@ import (
 type (
 	Organization struct {
 		Id          *uuid.UUID `json:"id"`
-		Name        *string    `json:"name"`
-		Description *string    `json:"description"`
+		Name        *string    `validate:"required,gte=3,lt=64" json:"name"`
+		Description *string    `validate:"required,gte=8" json:"description"`
 		CreatedBy   *uuid.UUID `db:"created_by_user_id" json:"created_by"`
 		OwnedBy     *uuid.UUID `db:"owned_by_user_id" json:"owned_by"`
 		CreatedAt   time.Time  `db:"created_at" json:"created_at"`
@@ -37,6 +37,27 @@ func (r *OrganizationRepository) Find(id uuid.UUID) (*Organization, error) {
 	}
 
 	return organization, nil
+}
+
+func (r *OrganizationRepository) Create(organization *Organization) error {
+	id, err := uuid.NewUUID()
+	if err != nil {
+		return err
+	}
+
+	organization.Id = &id
+	organization.CreatedAt = time.Now()
+
+	_, err = r.database.NamedExec(`
+		INSERT INTO organizations (id, name, description, created_by_user_id, owned_by_user_id, created_at, updated_at, deleted_at)
+		VALUES (:id, :name, :description, :created_by_user_id, :owned_by_user_id, :created_at, :updated_at, :deleted_at)
+	`, organization)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CreateOrganization(d *sqlx.DB) *OrganizationRepository {

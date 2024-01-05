@@ -48,3 +48,8 @@ func CreateJWTConfig(key string) echojwt.Config {
 		SigningKey: []byte(key),
 	}
 }
+
+func FromContext(c echo.Context) *Claims {
+	token := c.Get("user").(*jwt.Token)
+	return token.Claims.(*Claims)
+}
