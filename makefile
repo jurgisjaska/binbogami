@@ -1,11 +1,15 @@
-.PHONY: build run up down rm ps
+NAME=binbogami
+.PHONY: build run clean up down rm ps
 
 build:
-	@go build -o ./bin/binbogami ./cmd/binbogami
+	@go build -o ./bin/${NAME} ./cmd/${NAME}
 
 run:
 	@$(MAKE) build
-	@bin/binbogami
+	@bin/${NAME}
+
+clean:
+	@rm -f bin/${NAME}
 
 up:
 	@docker-compose up -d
