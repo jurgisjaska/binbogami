@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -41,7 +42,7 @@ func main() {
 	v1.CreateBook(g, database)
 	v1.CreateCategory(g, database)
 
-	e.Logger.Fatal(e.Start(":8001"))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
 }
 
 // customHTTPErrorHandler handles HTTP errors and provides custom error responses.

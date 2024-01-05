@@ -11,6 +11,7 @@ type (
 	Config struct {
 		Environment string
 		Secret      string
+		Port        int
 
 		Database *Database
 	}
@@ -38,10 +39,12 @@ func CreateConfig() (*Config, error) {
 	}
 
 	p, _ := strconv.Atoi(os.Getenv("DATABASE_PORT"))
+	ap, _ := strconv.Atoi(os.Getenv("APP_PORT"))
 
 	return &Config{
 		Environment: os.Getenv("APP_ENVIRONMENT"),
 		Secret:      os.Getenv("APP_SECRET"),
+		Port:        ap,
 		Database: &Database{
 			Name: os.Getenv("DATABASE_NAME"),
 			Connection: &Connection{
