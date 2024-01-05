@@ -5,8 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/app/api"
-	"github.com/jurgisjaska/binbogami/app/database"
+	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
 

@@ -6,10 +6,10 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/app"
-	"github.com/jurgisjaska/binbogami/app/api"
-	"github.com/jurgisjaska/binbogami/app/api/token"
-	"github.com/jurgisjaska/binbogami/app/database"
+	"github.com/jurgisjaska/binbogami/internal"
+	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/token"
+	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
 	"golang.org/x/crypto/bcrypt"
@@ -24,7 +24,7 @@ type (
 		echo          *echo.Echo
 		database      *sqlx.DB
 		repository    *database.UserRepository
-		configuration *app.Config
+		configuration *internal.Config
 	}
 )
 
@@ -135,6 +135,6 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 }
 
 // CreateAuth creates instance of the auth handler
-func CreateAuth(e *echo.Echo, d *sqlx.DB, c *app.Config) *Auth {
+func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config) *Auth {
 	return (&Auth{echo: e, database: d, configuration: c}).initialize()
 }

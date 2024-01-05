@@ -2,7 +2,7 @@ package v1
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/app/database"
+	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
 

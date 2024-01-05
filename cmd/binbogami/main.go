@@ -5,23 +5,23 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jurgisjaska/binbogami/app"
-	"github.com/jurgisjaska/binbogami/app/api"
-	"github.com/jurgisjaska/binbogami/app/api/token"
-	"github.com/jurgisjaska/binbogami/app/handler"
-	"github.com/jurgisjaska/binbogami/app/handler/v1"
+	"github.com/jurgisjaska/binbogami/internal"
+	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/token"
+	"github.com/jurgisjaska/binbogami/internal/handler"
+	"github.com/jurgisjaska/binbogami/internal/handler/v1"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
 
 func main() {
-	config, err := app.CreateConfig()
+	config, err := internal.CreateConfig()
 	if err != nil {
 		log.Printf("%+e", err)
 		log.Fatalln("configuration failure")
 	}
 
-	database, err := app.ConnectDatabase(config.Database)
+	database, err := internal.ConnectDatabase(config.Database)
 	if err != nil {
 		log.Fatalln("database failure")
 	}

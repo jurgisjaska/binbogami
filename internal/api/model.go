@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/jurgisjaska/binbogami/app/database"
+	"github.com/jurgisjaska/binbogami/internal/database"
 )
 
 type (
