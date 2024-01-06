@@ -27,6 +27,8 @@ func (h *Organization) initialize() *Organization {
 	// h.echo.PUT("/organizations/:id", h.update)
 	// h.echo.DELETE("/organizations/:id", h.delete)
 
+	h.echo.POST("/organizations/:id/members", h.addMembers)
+
 	return h
 }
 
@@ -71,6 +73,34 @@ func (h *Organization) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(organization, api.CreateRequest(c)))
+}
+
+func (h *Organization) addMembers(c echo.Context) error {
+	organization, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
+	}
+
+	// @todo validate that organization is valid
+	// @todo validate that current user is a member of the organization
+	// ??? should only owners be able to add new members to the organization?
+
+	// @todo this should be API model
+	m := &struct {
+		Members database.OrganizationMembers `json:"members"`
+	}{}
+	if err := c.Bind(m); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
+	}
+
+	// @todo verify that all UUID in there belongs to the users
+
+	err = h.repository.AddMember(&organization, m.Members)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(m, api.CreateRequest(c)))
 }
 
 // CreateOrganization initializes and returns an instance of Organization handler.

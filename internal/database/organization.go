@@ -15,7 +15,7 @@ type (
 		CreatedBy   *uuid.UUID `db:"created_by_user_id" json:"created_by"`
 		OwnedBy     *uuid.UUID `db:"owned_by_user_id" json:"owned_by"`
 
-		Members []*uuid.UUID `json:"members"`
+		Members OrganizationMembers `json:"members"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
@@ -32,7 +32,8 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
-	Organizations []Organization
+	OrganizationMembers []*uuid.UUID
+	Organizations       []Organization
 
 	OrganizationRepository struct {
 		database *sqlx.DB
@@ -71,18 +72,35 @@ func (r *OrganizationRepository) Create(organization *Organization) error {
 	}
 
 	// @todo what happens if this fails?
-	ou := &OrganizationUser{
-		OrganizationId: organization.Id,
-		UserId:         organization.CreatedBy,
-		CreatedAt:      time.Now(),
-	}
-	_, err = r.database.NamedExec(`
-		INSERT INTO organizations_users (id, organization_id, user_id, created_at)
-		VALUES (NULL, :organization_id, :user_id, :created_at)
-	`, ou)
-
+	err = r.AddMember(organization.Id, OrganizationMembers{organization.CreatedBy})
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (r *OrganizationRepository) AddMember(organization *uuid.UUID, members OrganizationMembers) error {
+
+	// organizations_users should contain unique records only
+	// if member was deleted but added once gain it should allow that
+	// also there should not be duplicates
+
+	for _, member := range members {
+		ou := &OrganizationUser{
+			OrganizationId: organization,
+			UserId:         member,
+			CreatedAt:      time.Now(),
+		}
+
+		_, err := r.database.NamedExec(`
+			INSERT INTO organizations_users (id, organization_id, user_id, created_at)
+			VALUES (NULL, :organization_id, :user_id, :created_at)
+		`, ou)
+
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
