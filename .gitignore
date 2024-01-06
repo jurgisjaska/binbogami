@@ -1,2 +1,5 @@
 .idea
 .env
+
+# the notes which should not be in the git
+note.md
