@@ -7,6 +7,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+const (
+	defaultInvitationDuration = 24
+)
+
 type (
 	Organization struct {
 		Id          *uuid.UUID `json:"id"`
@@ -22,14 +26,30 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
+	// OrganizationUser defines an entity for Organization and User mapping table.
+	// Id defines unique identifier and use numeric value as it should not be exposed.
 	OrganizationUser struct {
-		// @todo need to figure out how to manage uuids better
 		Id             int        `json:"id"`
 		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
 		UserId         *uuid.UUID `db:"user_id" json:"user_id"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+	}
+
+	// OrganizationInvitation defines an entity of every invitation to join an organization send out by the email.
+	// Id is used as unique key to ensure the invitation can only be used once.
+	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
+	OrganizationInvitation struct {
+		Id             *uuid.UUID
+		Email          string
+		CreatedBy      *uuid.UUID
+		OrganizationId *uuid.UUID
+
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+		ExpiredAt time.Time  `db:"expired_at" json:"expired_at"`
 	}
 
 	OrganizationMembers []*uuid.UUID
@@ -53,31 +73,63 @@ func (r *OrganizationRepository) Find(id uuid.UUID) (*Organization, error) {
 	return organization, nil
 }
 
-func (r *OrganizationRepository) Create(organization *Organization) error {
+func (r *OrganizationRepository) Create(org *Organization) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
 	}
 
-	organization.Id = &id
-	organization.CreatedAt = time.Now()
+	org.Id = &id
+	org.CreatedAt = time.Now()
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO organizations (id, name, description, created_by_user_id, owned_by_user_id, created_at, updated_at, deleted_at)
-		VALUES (:id, :name, :description, :created_by_user_id, :owned_by_user_id, :created_at, :updated_at, :deleted_at)
-	`, organization)
+		INSERT INTO organizations (id, name, description, created_by_user_id, owned_by_user_id, created_at)
+		VALUES (:id, :name, :description, :created_by_user_id, :owned_by_user_id, :created_at)
+	`, org)
 
 	if err != nil {
 		return err
 	}
 
 	// @todo what happens if this fails?
-	err = r.AddMember(organization.Id, OrganizationMembers{organization.CreatedBy})
+	err = r.AddMember(org.Id, OrganizationMembers{org.CreatedBy})
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (r *OrganizationRepository) CreateInvitation(emails []string, author *uuid.UUID, org *uuid.UUID) ([]*OrganizationInvitation, error) {
+	invitations := []*OrganizationInvitation{}
+	for _, email := range emails {
+		id, err := uuid.NewUUID()
+		if err != nil {
+			return nil, err
+		}
+
+		invitation := &OrganizationInvitation{
+			Id:             &id,
+			Email:          email,
+			CreatedBy:      author,
+			OrganizationId: org,
+			CreatedAt:      time.Now(),
+			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
+		}
+
+		_, err = r.database.NamedExec(`
+			INSERT INTO organizations_invitations (id, email, created_by, organization_id, created_at, expired_at)
+			VALUES (:id, :email, :created_by, :organization_id, :created_at, :expired_at)
+		`, org)
+
+		if err != nil {
+			return nil, err
+		}
+
+		invitations = append(invitations, invitation)
+	}
+
+	return invitations, nil
 }
 
 func (r *OrganizationRepository) AddMember(organization *uuid.UUID, members OrganizationMembers) error {
