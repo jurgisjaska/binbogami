@@ -37,8 +37,9 @@ func main() {
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
-	// temporary disabled before refactor
 	v1.CreateOrganization(g, database)
+	v1.CreateUser(g, database)
+
 	v1.CreateBook(g, database)
 	v1.CreateCategory(g, database)
 

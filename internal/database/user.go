@@ -28,15 +28,43 @@ type (
 	}
 )
 
-func (r *UserRepository) FindBy(column string, email string) (*User, error) {
+func (r *UserRepository) FindBy(column string, value interface{}) (*User, error) {
 	user := &User{}
 	sql := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
-	err := r.database.Get(user, sql, email)
+	err := r.database.Get(user, sql, value)
 	if err != nil {
 		return nil, err
 	}
 
 	return user, nil
+}
+
+func (r *UserRepository) FindMany(filter string) (*Users, error) {
+	users := &Users{}
+
+	if len(filter) == 0 {
+		query := "SELECT * FROM users WHERE deleted_at IS NULL"
+		err := r.database.Select(users, query)
+		if err != nil {
+			return nil, err
+		}
+
+		return users, nil
+	}
+
+	// @todo this is a horrible way to search for things
+	query := `
+		SELECT * FROM users 
+		WHERE (email LIKE ? OR CONCAT(users.name, ' ', users.surname) LIKE ?) AND deleted_at IS NULL
+	 `
+	filter = fmt.Sprintf("%%%s%%", filter)
+
+	err := r.database.Select(users, query, filter, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 func (r *UserRepository) Create(user *User) error {
