@@ -28,7 +28,6 @@ func (h *Organization) initialize() *Organization {
 	// h.echo.DELETE("/organizations/:id", h.delete)
 
 	h.echo.POST("/organizations/:id/members", h.addMember)
-	h.echo.POST("/organizations/:id/members/invite", h.inviteMember)
 
 	return h
 }
@@ -63,7 +62,7 @@ func (h *Organization) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
+		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
 	}
 	organization.CreatedBy = claims.Id
 	organization.OwnedBy = claims.Id
@@ -102,35 +101,6 @@ func (h *Organization) addMember(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(m, api.CreateRequest(c)))
-}
-
-func (h *Organization) inviteMember(c echo.Context) error {
-	organization, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
-	}
-
-	m := &struct {
-		Emails []string `json:"emails"`
-	}{}
-	if err := c.Bind(m); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect emails"))
-	}
-
-	// create invitation
-	// send (from service)
-
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
-	}
-
-	invitations, err := h.repository.CreateInvitation(m.Emails, claims.Id, &organization)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
-	}
-
-	return nil
 }
 
 // CreateOrganization initializes and returns an instance of Organization handler.

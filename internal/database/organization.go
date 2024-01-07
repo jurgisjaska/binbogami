@@ -7,10 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-const (
-	defaultInvitationDuration = 24
-)
-
 type (
 	Organization struct {
 		Id          *uuid.UUID `json:"id"`
@@ -35,21 +31,6 @@ type (
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
-	}
-
-	// OrganizationInvitation defines an entity of every invitation to join an organization send out by the email.
-	// Id is used as unique key to ensure the invitation can only be used once.
-	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
-	OrganizationInvitation struct {
-		Id             *uuid.UUID
-		Email          string
-		CreatedBy      *uuid.UUID
-		OrganizationId *uuid.UUID
-
-		CreatedAt time.Time  `db:"created_at" json:"created_at"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
-		ExpiredAt time.Time  `db:"expired_at" json:"expired_at"`
 	}
 
 	OrganizationMembers []*uuid.UUID
@@ -98,38 +79,6 @@ func (r *OrganizationRepository) Create(org *Organization) error {
 	}
 
 	return nil
-}
-
-func (r *OrganizationRepository) CreateInvitation(emails []string, author *uuid.UUID, org *uuid.UUID) ([]*OrganizationInvitation, error) {
-	invitations := []*OrganizationInvitation{}
-	for _, email := range emails {
-		id, err := uuid.NewUUID()
-		if err != nil {
-			return nil, err
-		}
-
-		invitation := &OrganizationInvitation{
-			Id:             &id,
-			Email:          email,
-			CreatedBy:      author,
-			OrganizationId: org,
-			CreatedAt:      time.Now(),
-			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
-		}
-
-		_, err = r.database.NamedExec(`
-			INSERT INTO organizations_invitations (id, email, created_by, organization_id, created_at, expired_at)
-			VALUES (:id, :email, :created_by, :organization_id, :created_at, :expired_at)
-		`, org)
-
-		if err != nil {
-			return nil, err
-		}
-
-		invitations = append(invitations, invitation)
-	}
-
-	return invitations, nil
 }
 
 func (r *OrganizationRepository) AddMember(organization *uuid.UUID, members OrganizationMembers) error {

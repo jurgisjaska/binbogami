@@ -11,6 +11,17 @@ services:
       - ".env.docker"
     networks:
       - "binbogami"
+  mailcatcher:
+    image: dockage/mailcatcher:0.9
+    container_name: "binbogami_mailcatcher"
+    restart: "no"
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    env_file:
+      - ".env.docker"
+    networks:
+      - "binbogami"
 networks:
   binbogami:
     name: "binbogami"

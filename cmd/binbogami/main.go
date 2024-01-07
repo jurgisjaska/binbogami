@@ -18,7 +18,6 @@ import (
 func main() {
 	config, err := internal.CreateConfig()
 	if err != nil {
-		log.Printf("%+e", err)
 		log.Fatalln("configuration failure")
 	}
 
@@ -26,22 +25,28 @@ func main() {
 	if err != nil {
 		log.Fatalln("database failure")
 	}
-	defer func() {
-		_ = database.Close()
-	}()
+	defer func() { _ = database.Close() }()
+
+	mail, err := internal.ConnectMail(config.Mail)
+	if err != nil {
+		log.Fatalln("mail failure")
+	}
+	defer func() { _ = mail.Close() }()
 
 	e := echo.New()
 	e.HTTPErrorHandler = customHTTPErrorHandler
 	handler.CreateAuth(e, database, config)
+	// @todo add handler for public resources
 
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
 	v1.CreateOrganization(g, database)
 	v1.CreateUser(g, database)
+	v1.CreateInvitation(g, database, mail, config)
 
-	v1.CreateBook(g, database)
-	v1.CreateCategory(g, database)
+	// v1.CreateBook(g, database)
+	// v1.CreateCategory(g, database)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
 }

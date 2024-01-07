@@ -34,8 +34,6 @@ func (h *Auth) initialize() *Auth {
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
 
-	h.echo.POST("/auth/:token", h.signup)
-
 	return h
 }
 
