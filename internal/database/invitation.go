@@ -35,6 +35,26 @@ type (
 	}
 )
 
+func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
+	invitation := &Invitation{}
+	if err := r.database.Get(
+		invitation,
+		"SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()",
+		id,
+	); err != nil {
+		return nil, err
+	}
+
+	now := time.Now()
+	invitation.OpenedAt = &now
+
+	if err := r.flush(invitation); err != nil {
+		return nil, err
+	}
+
+	return invitation, nil
+}
+
 func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Emails {
@@ -52,12 +72,7 @@ func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, err
 			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
 		}
 
-		_, err = r.database.NamedExec(`
-			INSERT INTO invitations (id, email, created_by, organization_id, created_at, expired_at)
-			VALUES (:id, :email, :created_by, :organization_id, :created_at, :expired_at)
-		`, invitation)
-
-		if err != nil {
+		if err := r.flush(invitation); err != nil {
 			return nil, err
 		}
 
@@ -65,6 +80,20 @@ func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, err
 	}
 
 	return invitations, nil
+}
+
+func (r *InvitationRepository) flush(invitation *Invitation) error {
+	_, err := r.database.NamedExec(`
+			INSERT INTO invitations (id, email, created_by, organization_id, created_at, opened_at, expired_at, deleted_at)
+			VALUES (:id, :email, :created_by, :organization_id, :created_at, :opened_at, :expired_at, :deleted_at)
+			ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at
+		`, invitation)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func CreateInvitation(d *sqlx.DB) *InvitationRepository {

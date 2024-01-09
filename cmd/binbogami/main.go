@@ -36,7 +36,7 @@ func main() {
 	e := echo.New()
 	e.HTTPErrorHandler = customHTTPErrorHandler
 	handler.CreateAuth(e, database, config)
-	// @todo add handler for public resources
+	handler.CreatePublic(e, database)
 
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
