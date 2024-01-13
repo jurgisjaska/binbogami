@@ -24,6 +24,7 @@ type (
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
@@ -44,8 +45,8 @@ func (r *MemberRepository) Create(org *uuid.UUID, user *uuid.UUID, role int, cre
 	}
 
 	_, err := r.database.NamedExec(`
-			INSERT INTO members (id, organization_id, user_id, role, created_at)
-			VALUES (NULL, :organization_id, :user_id, :role, :created_at)
+			INSERT INTO members (id, organization_id, user_id, role, created_by, created_at)
+			VALUES (NULL, :organization_id, :user_id, :role, :created_by, :created_at)
 		`, member)
 
 	if err != nil {
