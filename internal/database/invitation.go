@@ -93,6 +93,13 @@ func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, err
 	return invitations, nil
 }
 
+func (r *InvitationRepository) Delete(invitation *Invitation) error {
+	now := time.Now()
+	invitation.DeletedAt = &now
+
+	return r.flush(invitation)
+}
+
 func (r *InvitationRepository) flush(invitation *Invitation) error {
 	_, err := r.database.NamedExec(`
 			INSERT INTO invitations (id, email, created_by, organization_id, created_at, opened_at, expired_at, deleted_at)

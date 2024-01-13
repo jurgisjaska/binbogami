@@ -26,6 +26,7 @@ type (
 		database      *sqlx.DB
 		user          *database.UserRepository
 		invitation    *database.InvitationRepository
+		member        *database.MemberRepository
 		configuration *internal.Config
 	}
 )
@@ -33,6 +34,7 @@ type (
 func (h *Auth) initialize() *Auth {
 	h.user = database.CreateUser(h.database)
 	h.invitation = database.CreateInvitation(h.database)
+	h.member = database.CreateMember(h.database)
 
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
@@ -118,10 +120,13 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	if sm.Invitation != nil {
-		invitation, err := h.invitation.Find(sm.Invitation)
-		if err == nil && invitation != nil {
-			// @todo add new user as a member to the organization
+	if sm.InvitationId != nil {
+		invitation, err := h.invitation.Find(sm.InvitationId)
+		if err == nil {
+			_, err := h.member.Create(invitation.OrganizationId, u.Id, database.MemberRoleDefault, invitation.CreatedBy)
+			if err == nil {
+				_ = h.invitation.Delete(invitation)
+			}
 		}
 	}
 

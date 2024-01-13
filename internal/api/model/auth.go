@@ -22,7 +22,7 @@ type (
 		RepeatedPassword string     `validate:"required,gte=8" json:"repeated_password"`
 		Name             *string    `validate:"required,gte=3" json:"name"`
 		Surname          *string    `validate:"required,gte=3" json:"surname"`
-		Invitation       *uuid.UUID `json:"invitation"`
+		InvitationId     *uuid.UUID `json:"invitation_id"`
 	}
 
 	SignupSuccess struct {
