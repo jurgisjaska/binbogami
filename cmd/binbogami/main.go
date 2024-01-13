@@ -44,6 +44,7 @@ func main() {
 	v1.CreateOrganization(g, database)
 	v1.CreateUser(g, database)
 	v1.CreateInvitation(g, database, mail, config)
+	v1.CreateMember(g, database)
 
 	// v1.CreateBook(g, database)
 	// v1.CreateCategory(g, database)

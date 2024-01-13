@@ -2,7 +2,6 @@ package model
 
 import (
 	"github.com/google/uuid"
-	"github.com/jurgisjaska/binbogami/internal/database"
 )
 
 type (
@@ -27,7 +26,7 @@ type (
 	}
 
 	SignupSuccess struct {
-		User  *database.User `json:"user"`
-		Token string         `json:"token"`
+		User  interface{} `json:"user"`
+		Token string      `json:"token"`
 	}
 )
