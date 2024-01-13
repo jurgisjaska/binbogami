@@ -35,13 +35,10 @@ type (
 	}
 )
 
+// Open retrieves the invitation entity from the database by its UUID and marks invitation as opened.
 func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
-	invitation := &Invitation{}
-	if err := r.database.Get(
-		invitation,
-		"SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()",
-		id,
-	); err != nil {
+	invitation, err := r.Find(id)
+	if err != nil {
 		return nil, err
 	}
 
@@ -49,6 +46,20 @@ func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
 	invitation.OpenedAt = &now
 
 	if err := r.flush(invitation); err != nil {
+		return nil, err
+	}
+
+	return invitation, nil
+}
+
+// Find retrieves the invitation entity form the database by its UUID.
+func (r *InvitationRepository) Find(id *uuid.UUID) (*Invitation, error) {
+	invitation := &Invitation{}
+	if err := r.database.Get(
+		invitation,
+		"SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()",
+		id,
+	); err != nil {
 		return nil, err
 	}
 

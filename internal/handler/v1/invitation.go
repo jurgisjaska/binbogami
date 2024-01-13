@@ -70,6 +70,7 @@ func (h *Invitation) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
 }
 
+// @todo move to separate service, the handler should not be responsible for the emails
 func (h *Invitation) send(invitation *database.Invitation) error {
 	if err := h.mail.Mail(h.configuration.Mail.Sender); err != nil {
 		return err

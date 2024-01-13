@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
@@ -23,13 +24,15 @@ type (
 	Auth struct {
 		echo          *echo.Echo
 		database      *sqlx.DB
-		repository    *database.UserRepository
+		user          *database.UserRepository
+		invitation    *database.InvitationRepository
 		configuration *internal.Config
 	}
 )
 
 func (h *Auth) initialize() *Auth {
-	h.repository = database.CreateUser(h.database)
+	h.user = database.CreateUser(h.database)
+	h.invitation = database.CreateInvitation(h.database)
 
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
@@ -39,7 +42,7 @@ func (h *Auth) initialize() *Auth {
 
 // signin in creates new JWT token for the user if credentials are correct
 func (h *Auth) signin(c echo.Context) error {
-	sm := &api.Signin{}
+	sm := &model.Signin{}
 	if err := c.Bind(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
@@ -49,7 +52,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
 
-	user, err := h.repository.FindBy("email", sm.Email)
+	user, err := h.user.FindBy("email", sm.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
@@ -68,12 +71,13 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(api.SigninSuccess{t}, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(model.SigninSuccess{t}, api.CreateRequest(c)))
 }
 
 // signup validates signup form data and creates new user
+// if the invitation UUID is present adds the new user to the organization
 func (h *Auth) signup(c echo.Context) error {
-	sm := &api.Signup{}
+	sm := &model.Signup{}
 	if err := c.Bind(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(signupError))
 	}
@@ -83,12 +87,11 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, err.Error()))
 	}
 
-	// verify that passwords match
 	if sm.Password != sm.RepeatedPassword {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.repository.FindBy("email", *sm.Email)
+	existingUser, err := h.user.FindBy("email", *sm.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
 	}
@@ -105,7 +108,7 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
 	}
 
-	err = h.repository.Create(u)
+	err = h.user.Create(u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
 	}
@@ -115,7 +118,14 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(api.SignupSuccess{u, t}, api.CreateRequest(c)))
+	if sm.Invitation != nil {
+		invitation, err := h.invitation.Find(sm.Invitation)
+		if err == nil && invitation != nil {
+			// @todo add new user as a member to the organization
+		}
+	}
+
+	return c.JSON(http.StatusOK, api.Success(model.SignupSuccess{u, t}, api.CreateRequest(c)))
 }
 
 // hashPassword creates new password hash using bcrypt.

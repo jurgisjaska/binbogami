@@ -1,6 +1,7 @@
-package api
+package model
 
 import (
+	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/database"
 )
 
@@ -17,11 +18,12 @@ type (
 	}
 
 	Signup struct {
-		Email            *string `validate:"required,email" json:"email"`
-		Password         string  `validate:"required,gte=8" json:"password"`
-		RepeatedPassword string  `validate:"required,gte=8" json:"repeated_password"`
-		Name             *string `validate:"required,gte=3" json:"name"`
-		Surname          *string `validate:"required,gte=3" json:"surname"`
+		Email            *string    `validate:"required,email" json:"email"`
+		Password         string     `validate:"required,gte=8" json:"password"`
+		RepeatedPassword string     `validate:"required,gte=8" json:"repeated_password"`
+		Name             *string    `validate:"required,gte=3" json:"name"`
+		Surname          *string    `validate:"required,gte=3" json:"surname"`
+		Invitation       *uuid.UUID `json:"invitation"`
 	}
 
 	SignupSuccess struct {
