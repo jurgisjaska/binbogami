@@ -20,43 +20,49 @@ type Invitation struct {
 	database      *sqlx.DB
 	mail          *smtp.Client
 	configuration *internal.Config
-	repository    *database.InvitationRepository
+	invitation    *database.InvitationRepository
+	member        *database.MemberRepository
 }
 
 func (h *Invitation) initialize() *Invitation {
-	h.repository = database.CreateInvitation(h.database)
-	// h.echo.GET("/invitations/:id", h.one)
-	// h.echo.GET("/invitations", h.many)
+	h.invitation = database.CreateInvitation(h.database)
+	h.member = database.CreateMember(h.database)
+
 	h.echo.POST("/invitations", h.create)
-	// h.echo.PUT("/invitations/:id", h.update)
-	// h.echo.DELETE("/invitations/:id", h.delete)
 
 	return h
 }
 
 func (h *Invitation) create(c echo.Context) error {
-	invitation := &model.Invitation{}
-	if err := c.Bind(invitation); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect invitation request"))
+	i := &model.Invitation{}
+	if err := c.Bind(i); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation data"))
 	}
 
-	// @todo find a better way to this instead of repeating
 	claims := token.FromContext(c)
 	if claims.Id == nil {
 		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
 	}
 
-	// @todo validation should be done during .Bind (https://github.com/labstack/echo/issues/438)
-	// @todo organization validation: exists and author; right now there will be database error but that is not enough
+	allow := map[int]bool{
+		database.MemberRoleDefault: false,
+		database.MemberRoleBilling: false,
+		database.MemberRoleAdmin:   true,
+		database.MemberRoleOwner:   true,
+	}
+	cm, err := h.member.Find(i.OrganizationId, claims.Id)
+	if err != nil || !allow[cm.Role] {
+		return c.JSON(http.StatusForbidden, api.Error("only organization owners and admins can invite members"))
+	}
+
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(invitation); err != nil {
+	if err := v.Struct(i); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect invitation", err.Error()))
 	}
 
-	invitation.Author = claims.Id
-	invitations, err := h.repository.Create(invitation)
+	i.CreatedBy = claims.Id
+	invitations, err := h.invitation.Create(i)
 	if err != nil {
-		// @todo need to cleanup and make proper error handling as right now it's a mess
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 

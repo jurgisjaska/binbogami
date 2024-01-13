@@ -68,7 +68,7 @@ func (r *InvitationRepository) Find(id *uuid.UUID) (*Invitation, error) {
 
 func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, error) {
 	invitations := Invitations{}
-	for _, email := range model.Emails {
+	for _, email := range model.Email {
 		id, err := uuid.NewUUID()
 		if err != nil {
 			return nil, err
@@ -77,8 +77,8 @@ func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, err
 		invitation := &Invitation{
 			Id:             &id,
 			Email:          email,
-			CreatedBy:      model.Author,
-			OrganizationId: model.Organization,
+			CreatedBy:      model.CreatedBy,
+			OrganizationId: model.OrganizationId,
 			CreatedAt:      time.Now(),
 			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
 		}

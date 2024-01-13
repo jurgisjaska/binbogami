@@ -5,8 +5,8 @@ import (
 )
 
 type Invitation struct {
-	Organization *uuid.UUID `validate:"required" json:"organization_id"`
-	Emails       []string   `validate:"required" json:"emails"`
+	OrganizationId *uuid.UUID `validate:"required" json:"organization_id"`
+	Email          []string   `validate:"required" json:"email"`
 
-	Author *uuid.UUID
+	CreatedBy *uuid.UUID
 }

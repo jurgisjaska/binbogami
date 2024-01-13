@@ -28,8 +28,6 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
-	Members []Member
-
 	MemberRepository struct {
 		database *sqlx.DB
 	}
