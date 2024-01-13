@@ -19,6 +19,7 @@ type Member struct {
 
 func (h *Member) initialize() *Member {
 	h.repository = database.CreateMember(h.database)
+
 	h.echo.POST("/members", h.create)
 
 	return h

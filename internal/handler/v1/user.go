@@ -18,6 +18,7 @@ type User struct {
 
 func (h *User) initialize() *User {
 	h.repository = database.CreateUser(h.database)
+
 	h.echo.GET("/users/:id", h.one)
 	h.echo.GET("/users", h.many)
 
