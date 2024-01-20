@@ -3,9 +3,12 @@ package v1
 import (
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
@@ -14,15 +17,14 @@ type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *database.CategoryRepository
+	member     *database.MemberRepository
 }
 
 func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
-	h.echo.GET("/categories/:id", h.one)
-	h.echo.GET("/categories", h.many)
+	h.member = database.CreateMember(h.database)
+
 	h.echo.POST("/categories", h.create)
-	h.echo.PUT("/categories/:id", h.update)
-	h.echo.DELETE("/categories/:id", h.delete)
 
 	return h
 }
@@ -51,17 +53,33 @@ func (h *Category) many(c echo.Context) error {
 }
 
 func (h *Category) create(c echo.Context) error {
-	category := &database.Category{}
+	category := &model.Category{}
 	if err := c.Bind(category); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
 	}
 
-	err := h.repository.Create(category)
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(category); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Errors("incorrect category data", err.Error()))
+	}
+
+	claims := token.FromContext(c)
+	if claims.Id == nil {
+		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+	}
+
+	member, err := h.member.Find(category.OrganizationId, claims.Id)
+	if err != nil || member == nil {
+		return c.JSON(http.StatusForbidden, api.Error("only organization members can create categories"))
+	}
+
+	category.CreatedBy = claims.Id
+	entity, err := h.repository.Create(category)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
 func (h *Category) update(c echo.Context) error {

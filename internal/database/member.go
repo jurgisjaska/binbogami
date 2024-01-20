@@ -55,12 +55,19 @@ func (r *MemberRepository) Create(org *uuid.UUID, user *uuid.UUID, role int, cre
 }
 
 func (r *MemberRepository) Find(org *uuid.UUID, user *uuid.UUID) (*Member, error) {
+	query := `
+		SELECT members.* 
+		FROM members 
+		JOIN organizations AS o ON members.organization_id = o.id
+		JOIN users AS u ON members.user_id = u.id
+		WHERE 
+		    members.organization_id = ? AND members.user_id = ? 
+		    AND members.deleted_at IS NULL
+			AND u.deleted_at IS NULL AND o.deleted_at IS NULL
+	`
+
 	member := &Member{}
-	if err := r.database.Get(
-		member,
-		"SELECT members.* FROM members WHERE organization_id = ? AND user_id = ? AND deleted_at IS NULL",
-		org, user,
-	); err != nil {
+	if err := r.database.Get(member, query, org, user); err != nil {
 		return nil, err
 	}
 

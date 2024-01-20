@@ -5,16 +5,21 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
 )
 
 type (
 	Category struct {
 		Id          *uuid.UUID `json:"id"`
-		Name        *string    `json:"name"`
+		Name        string     `json:"name"`
 		Description *string    `json:"description"`
-		CreatedAt   time.Time  `db:"created_at" json:"created_at"`
-		UpdatedAt   *time.Time `db:"updated_at" json:"updated_at"`
-		DeletedAt   *time.Time `db:"deleted_at" json:"deleted_at"`
+
+		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
+		CreatedBy      *uuid.UUID `db:"created_by" json:"created_by"`
+
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
 	Categories []Category
@@ -44,25 +49,31 @@ func (r *CategoryRepository) FindMany() (*Categories, error) {
 	return categories, nil
 }
 
-func (r *CategoryRepository) Create(category *Category) error {
+func (r *CategoryRepository) Create(c *model.Category) (*Category, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	category.Id = &id
-	category.CreatedAt = time.Now()
+	category := &Category{
+		Id:             &id,
+		Name:           c.Name,
+		Description:    c.Description,
+		OrganizationId: c.OrganizationId,
+		CreatedBy:      c.CreatedBy,
+		CreatedAt:      time.Now(),
+	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO categories (id, name, description, created_at, updated_at, deleted_at)
-		VALUES (:id, :name, :description, :created_at, :updated_at, :deleted_at)
+		INSERT INTO categories (id, name, description, organization_id, created_by, created_at, updated_at, deleted_at)
+		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at, :updated_at, :deleted_at)
 	`, category)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return category, nil
 }
 
 func (r *CategoryRepository) Remove(category *Category) error {

@@ -47,7 +47,7 @@ func main() {
 	v1.CreateMember(g, database)
 
 	v1.CreateBook(g, database)
-	// v1.CreateCategory(g, database)
+	v1.CreateCategory(g, database)
 
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
 }
