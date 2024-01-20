@@ -35,26 +35,53 @@ CREATE TABLE IF NOT EXISTS books
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
     organization_id CHAR(36)     NOT NULL,
+    created_by      CHAR(36)     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
+    closed_at       TIMESTAMP    NULL,
+    CONSTRAINT books_organization_id_name_uindex
+        UNIQUE (organization_id, name),
     CONSTRAINT books_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id)
+        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT books_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS categories
 (
-    id          CHAR(36)     NOT NULL
+    id              CHAR(36)     NOT NULL
         PRIMARY KEY,
-    name        VARCHAR(128) NOT NULL,
-    description TEXT         NULL,
-    book_id     CHAR(36)     NOT NULL,
-    created_at  TIMESTAMP    NOT NULL,
-    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at  TIMESTAMP    NULL,
-    CONSTRAINT categories_books_id_fk
-        FOREIGN KEY (book_id) REFERENCES books (id)
-            ON DELETE CASCADE
+    name            VARCHAR(128) NOT NULL,
+    description     TEXT         NULL,
+    organization_id CHAR(36)     NULL,
+    created_by      CHAR(36)     NOT NULL,
+    created_at      TIMESTAMP    NOT NULL,
+    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at      TIMESTAMP    NULL,
+    CONSTRAINT categories_organization_id_name_uindex
+        UNIQUE (organization_id, name),
+    CONSTRAINT categories_organizations_id_fk
+        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT categories_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS books_categories
+(
+    id          INT AUTO_INCREMENT
+        PRIMARY KEY,
+    book_id     CHAR(36)  NOT NULL,
+    category_id CHAR(36)  NOT NULL,
+    created_by  CHAR(36)  NOT NULL,
+    created_at  TIMESTAMP NOT NULL,
+    deleted_at  TIMESTAMP NULL,
+    CONSTRAINT books_categories_books_id_fk
+        FOREIGN KEY (book_id) REFERENCES books (id),
+    CONSTRAINT books_categories_categories_id_fk
+        FOREIGN KEY (category_id) REFERENCES categories (id),
+    CONSTRAINT books_categories_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE INDEX IF NOT EXISTS categories_name_index
@@ -79,16 +106,38 @@ CREATE TABLE IF NOT EXISTS invitations
 
 CREATE TABLE IF NOT EXISTS locations
 (
-    id         CHAR(36)     NOT NULL
+    id              CHAR(36)     NOT NULL
         PRIMARY KEY,
-    name       VARCHAR(128) NOT NULL,
-    book_id    CHAR(36)     NOT NULL,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at TIMESTAMP    NULL,
-    CONSTRAINT locations_books_id_fk
-        FOREIGN KEY (book_id) REFERENCES books (id)
-            ON DELETE CASCADE
+    name            VARCHAR(128) NOT NULL,
+    description     TEXT         NULL,
+    organization_id CHAR(36)     NOT NULL,
+    created_by      CHAR(36)     NOT NULL,
+    created_at      TIMESTAMP    NOT NULL,
+    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at      TIMESTAMP    NULL,
+    CONSTRAINT locations_organization_id_name_uindex
+        UNIQUE (organization_id, name),
+    CONSTRAINT locations_organizations_id_fk
+        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT locations_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS books_locations
+(
+    id          INT AUTO_INCREMENT
+        PRIMARY KEY,
+    book_id     CHAR(36)  NOT NULL,
+    location_id CHAR(36)  NOT NULL,
+    created_by  CHAR(36)  NOT NULL,
+    created_at  TIMESTAMP NOT NULL,
+    deleted_at  TIMESTAMP NULL,
+    CONSTRAINT books_locations_books_id_fk
+        FOREIGN KEY (book_id) REFERENCES books (id),
+    CONSTRAINT books_locations_locations_id_fk
+        FOREIGN KEY (location_id) REFERENCES locations (id),
+    CONSTRAINT books_locations_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS entries
