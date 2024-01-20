@@ -1,5 +1,6 @@
-NAME=binbogami
 .PHONY: build run clean up down rm ps
+
+NAME=binbogami
 
 build:
 	@go build -o ./bin/${NAME} ./cmd/${NAME}
