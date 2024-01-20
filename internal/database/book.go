@@ -34,6 +34,17 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
+	BookLocation struct {
+		Id         int        `json:"id"`
+		BookId     *uuid.UUID `db:"book_id" json:"book_id"`
+		LocationId *uuid.UUID `db:"location_id" json:"location_id"`
+
+		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
+
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+	}
+
 	BookRepository struct {
 		database *sqlx.DB
 	}
@@ -77,7 +88,7 @@ func (r *BookRepository) Find(id *uuid.UUID) (*Book, error) {
 }
 
 func (r *BookRepository) AddCategory(book *Book, m *model.BookCategory) (*BookCategory, error) {
-	bc := &BookCategory{
+	e := &BookCategory{
 		BookId:     book.Id,
 		CategoryId: m.CategoryId,
 		CreatedBy:  m.CreatedBy,
@@ -87,13 +98,33 @@ func (r *BookRepository) AddCategory(book *Book, m *model.BookCategory) (*BookCa
 	_, err := r.database.NamedExec(`
 		INSERT INTO books_categories (id, book_id, category_id, created_by, created_at)
 		VALUES (NULL, :book_id, :category_id, :created_by, :created_at)
-	`, bc)
+	`, e)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return bc, nil
+	return e, nil
+}
+
+func (r *BookRepository) AddLocation(book *Book, m *model.BookLocation) (*BookLocation, error) {
+	e := &BookLocation{
+		BookId:     book.Id,
+		LocationId: m.LocationId,
+		CreatedBy:  m.CreatedBy,
+		CreatedAt:  time.Now(),
+	}
+
+	_, err := r.database.NamedExec(`
+		INSERT INTO books_locations (id, book_id, location_id, created_by, created_at)
+		VALUES (NULL, :book_id, :location_id, :created_by, :created_at)
+	`, e)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return e, nil
 }
 
 func CreateBook(d *sqlx.DB) *BookRepository {

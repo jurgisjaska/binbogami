@@ -31,6 +31,7 @@ func (h *Book) initialize() *Book {
 	// h.echo.GET("/books", h.many)
 	h.echo.POST("/books", h.create)
 	h.echo.POST("/books/:id/categories", h.addCategory)
+	h.echo.POST("/books/:id/locations", h.addLocation)
 	// h.echo.PUT("/books/:id", h.update)
 	// h.echo.DELETE("/books/:id", h.delete)
 
@@ -78,13 +79,13 @@ func (h *Book) addCategory(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("book not found"))
 	}
 
-	bc := &model.BookCategory{}
-	if err := c.Bind(bc); err != nil {
+	m := &model.BookCategory{}
+	if err := c.Bind(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(bc); err != nil {
+	if err := v.Struct(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
@@ -98,8 +99,48 @@ func (h *Book) addCategory(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error("only organization members can add categories to books"))
 	}
 
-	bc.CreatedBy = claims.Id
-	entity, err := h.repository.AddCategory(book, bc)
+	m.CreatedBy = claims.Id
+	entity, err := h.repository.AddCategory(book, m)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+func (h *Book) addLocation(c echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	book, err := h.repository.Find(&id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("book not found"))
+	}
+
+	m := &model.BookLocation{}
+	if err := c.Bind(m); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
+	}
+
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(m); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
+	}
+
+	claims := token.FromContext(c)
+	if claims.Id == nil {
+		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+	}
+
+	member, err := h.member.Find(book.OrganizationId, claims.Id)
+	if err != nil || member == nil {
+		return c.JSON(http.StatusForbidden, api.Error("only organization members can add categories to books"))
+	}
+
+	m.CreatedBy = claims.Id
+	entity, err := h.repository.AddLocation(book, m)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}

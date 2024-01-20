@@ -16,4 +16,9 @@ type (
 		CategoryId *uuid.UUID `validate:"required" json:"category_id"`
 		CreatedBy  *uuid.UUID
 	}
+
+	BookLocation struct {
+		LocationId *uuid.UUID `validate:"required" json:"location_id"`
+		CreatedBy  *uuid.UUID
+	}
 )
