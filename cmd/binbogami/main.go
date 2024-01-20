@@ -10,6 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/handler"
+	"github.com/jurgisjaska/binbogami/internal/handler/p"
 	"github.com/jurgisjaska/binbogami/internal/handler/v1"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -36,7 +37,9 @@ func main() {
 	e := echo.New()
 	e.HTTPErrorHandler = customHTTPErrorHandler
 	handler.CreateAuth(e, database, config)
-	handler.CreatePublic(e, database)
+
+	pg := e.Group("/p")
+	p.CreateInvitation(pg, database)
 
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))

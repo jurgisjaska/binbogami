@@ -1,4 +1,4 @@
-package handler
+package p
 
 import (
 	"net/http"
@@ -11,28 +11,28 @@ import (
 )
 
 type (
-	Public struct {
-		echo                 *echo.Echo
-		database             *sqlx.DB
-		invitationRepository *database.InvitationRepository
+	Invitation struct {
+		echo       *echo.Group
+		database   *sqlx.DB
+		repository *database.InvitationRepository
 	}
 )
 
-func (h *Public) initialize() *Public {
-	h.invitationRepository = database.CreateInvitation(h.database)
+func (h *Invitation) initialize() *Invitation {
+	h.repository = database.CreateInvitation(h.database)
 
-	h.echo.GET("/join/:id", h.join)
+	h.echo.GET("/invitation/:id", h.invitation)
 
 	return h
 }
 
-func (h *Public) join(c echo.Context) error {
+func (h *Invitation) invitation(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect invitation"))
 	}
 
-	invitation, err := h.invitationRepository.Open(&id)
+	invitation, err := h.repository.Open(&id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("invitation not found"))
 	}
@@ -40,6 +40,6 @@ func (h *Public) join(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitation, api.CreateRequest(c)))
 }
 
-func CreatePublic(e *echo.Echo, d *sqlx.DB) *Public {
-	return (&Public{echo: e, database: d}).initialize()
+func CreateInvitation(e *echo.Group, d *sqlx.DB) *Invitation {
+	return (&Invitation{echo: e, database: d}).initialize()
 }
