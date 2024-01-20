@@ -23,6 +23,17 @@ type (
 		ClosedAt  *time.Time `db:"closed_at" json:"closed_at"`
 	}
 
+	BookCategory struct {
+		Id         int        `json:"id"`
+		BookId     *uuid.UUID `db:"book_id" json:"book_id"`
+		CategoryId *uuid.UUID `db:"category_id" json:"category_id"`
+
+		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
+
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+	}
+
 	BookRepository struct {
 		database *sqlx.DB
 	}
@@ -53,6 +64,36 @@ func (r *BookRepository) Create(m *model.Book) (*Book, error) {
 	}
 
 	return book, nil
+}
+
+func (r *BookRepository) Find(id *uuid.UUID) (*Book, error) {
+	book := &Book{}
+	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return book, nil
+}
+
+func (r *BookRepository) AddCategory(book *Book, m *model.BookCategory) (*BookCategory, error) {
+	bc := &BookCategory{
+		BookId:     book.Id,
+		CategoryId: m.CategoryId,
+		CreatedBy:  m.CreatedBy,
+		CreatedAt:  time.Now(),
+	}
+
+	_, err := r.database.NamedExec(`
+		INSERT INTO books_categories (id, book_id, category_id, created_by, created_at)
+		VALUES (NULL, :book_id, :category_id, :created_by, :created_at)
+	`, bc)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return bc, nil
 }
 
 func CreateBook(d *sqlx.DB) *BookRepository {
