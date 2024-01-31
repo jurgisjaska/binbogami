@@ -37,6 +37,26 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	return Location, nil
 }
 
+func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error) {
+	query := `
+		SELECT locations.* 
+		FROM locations 
+		JOIN books_locations AS bl ON bl.location_id = locations.id
+		JOIN books AS b ON b.id = bl.book_id
+		WHERE 
+		    b.id = ? AND locations.id = ?
+		    AND locations.deleted_at IS NULL
+			AND bl.deleted_at IS NULL AND b.deleted_at IS NULL
+	`
+
+	location := &Location{}
+	if err := r.database.Get(location, query, book.Id, id); err != nil {
+		return nil, err
+	}
+
+	return location, nil
+}
+
 func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {

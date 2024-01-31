@@ -75,7 +75,7 @@ func (r *MemberRepository) Find(org *uuid.UUID, user *uuid.UUID) (*Member, error
 }
 
 // ByBook finds the member record using book that belongs to the organization and the user.
-func (r *MemberRepository) ByBook(book *uuid.UUID, user *uuid.UUID) (*Member, error) {
+func (r *MemberRepository) ByBook(book *Book, user *uuid.UUID) (*Member, error) {
 	query := `
 		SELECT members.* 
 		FROM members 
@@ -89,7 +89,7 @@ func (r *MemberRepository) ByBook(book *uuid.UUID, user *uuid.UUID) (*Member, er
 	`
 
 	member := &Member{}
-	if err := r.database.Get(member, query, book, user); err != nil {
+	if err := r.database.Get(member, query, book.Id, user); err != nil {
 		return nil, err
 	}
 

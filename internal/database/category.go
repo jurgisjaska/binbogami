@@ -39,6 +39,26 @@ func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 	return category, nil
 }
 
+func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error) {
+	query := `
+		SELECT categories.* 
+		FROM categories 
+		JOIN books_categories AS bc ON bc.category_id = categories.id
+		JOIN books AS b ON b.id = bc.book_id
+		WHERE 
+		    b.id = ? AND categories.id = ?
+		    AND categories.deleted_at IS NULL
+			AND bc.deleted_at IS NULL AND b.deleted_at IS NULL
+	`
+
+	category := &Category{}
+	if err := r.database.Get(category, query, book.Id, id); err != nil {
+		return nil, err
+	}
+
+	return category, nil
+}
+
 func (r *CategoryRepository) FindMany() (*Categories, error) {
 	categories := &Categories{}
 	err := r.database.Select(categories, "SELECT * FROM categories WHERE deleted_at IS NULL")
