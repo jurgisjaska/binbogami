@@ -85,7 +85,7 @@ func (r *MemberRepository) ByBook(book *uuid.UUID, user *uuid.UUID) (*Member, er
 		WHERE 
 		    b.id = ? AND members.user_id = ? 
 		    AND members.deleted_at IS NULL
-			AND u.deleted_at IS NULL AND o.deleted_at IS NULL
+			AND u.deleted_at IS NULL AND o.deleted_at IS NULL AND b.deleted_at IS NULL
 	`
 
 	member := &Member{}
