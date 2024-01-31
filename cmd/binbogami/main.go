@@ -53,6 +53,8 @@ func main() {
 	v1.CreateCategory(g, database)
 	v1.CreateLocation(g, database)
 
+	v1.CreateEntry(g, database)
+
 	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
 }
 
