@@ -3,7 +3,6 @@ package v1
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -54,8 +53,7 @@ func (h *Organization) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(organization); err != nil {
+	if err := c.Validate(organization); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect organization", err.Error()))
 	}
 

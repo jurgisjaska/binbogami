@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
@@ -35,7 +36,8 @@ func main() {
 	defer func() { _ = mail.Close() }()
 
 	e := echo.New()
-	e.HTTPErrorHandler = customHTTPErrorHandler
+	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
+	e.Validator = &api.Validator{Validator: validator.New()}
 	handler.CreateAuth(e, database, config)
 
 	pg := e.Group("/p")

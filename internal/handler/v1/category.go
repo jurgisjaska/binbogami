@@ -3,7 +3,6 @@ package v1
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -58,8 +57,7 @@ func (h *Category) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(category); err != nil {
+	if err := c.Validate(category); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect category data", err.Error()))
 	}
 

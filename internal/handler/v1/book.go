@@ -124,8 +124,7 @@ func (h *Book) addLocation(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(m); err != nil {
+	if err := c.Validate(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/smtp"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -55,8 +54,7 @@ func (h *Invitation) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error("only organization owners and admins can invite members"))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(i); err != nil {
+	if err := c.Validate(i); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect invitation", err.Error()))
 	}
 

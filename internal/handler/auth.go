@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -49,8 +48,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(sm); err != nil {
+	if err := c.Validate(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
 	}
 
@@ -84,8 +82,7 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error(signupError))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(sm); err != nil {
+	if err := c.Validate(sm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, err.Error()))
 	}
 

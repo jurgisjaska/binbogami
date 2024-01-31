@@ -3,7 +3,6 @@ package v1
 import (
 	"net/http"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
@@ -38,11 +37,10 @@ func (h *Entry) initialize() *Entry {
 func (h *Entry) create(c echo.Context) error {
 	entry := &model.Entry{}
 	if err := c.Bind(entry); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect entry data"))
+		return c.JSON(http.StatusBadRequest, api.Errors("incorrect entry data", err.Error()))
 	}
 
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(entry); err != nil {
+	if err := c.Validate(entry); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect entry data", err.Error()))
 	}
 
