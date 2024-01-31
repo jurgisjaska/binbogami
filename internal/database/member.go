@@ -74,6 +74,28 @@ func (r *MemberRepository) Find(org *uuid.UUID, user *uuid.UUID) (*Member, error
 	return member, nil
 }
 
+// ByBook finds the member record using book that belongs to the organization and the user.
+func (r *MemberRepository) ByBook(book *uuid.UUID, user *uuid.UUID) (*Member, error) {
+	query := `
+		SELECT members.* 
+		FROM members 
+		JOIN organizations AS o ON members.organization_id = o.id
+		JOIN users AS u ON members.user_id = u.id
+		JOIN books AS b ON o.id = b.organization_id
+		WHERE 
+		    b.id = ? AND members.user_id = ? 
+		    AND members.deleted_at IS NULL
+			AND u.deleted_at IS NULL AND o.deleted_at IS NULL
+	`
+
+	member := &Member{}
+	if err := r.database.Get(member, query, book, user); err != nil {
+		return nil, err
+	}
+
+	return member, nil
+}
+
 func CreateMember(d *sqlx.DB) *MemberRepository {
 	return &MemberRepository{database: d}
 }
