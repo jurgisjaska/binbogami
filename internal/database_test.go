@@ -72,6 +72,7 @@ func TestConnectDatabase(t *testing.T) {
 				tc.database.Connection.Port,
 				tc.database.Name,
 			))
+
 			if (err != nil) != tc.wantErr {
 				t.Errorf("ConnectDatabase() error = %v, wantErr %v", err, tc.wantErr)
 			}
