@@ -34,7 +34,7 @@ jobs:
     
     - name: After build
       run: |
-        ./cc-test-reporter after-build -t gocov --exit-code $?
+        ./cc-test-reporter after-build -t gocov --prefix github.com/jurgisjaska/binbogami/ --exit-code $?
       env:
         CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           
