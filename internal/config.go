@@ -8,6 +8,8 @@ import (
 )
 
 type (
+	// Config represents the configuration for the application.
+	// It contains environment variables, database configuration, and mail configuration.
 	Config struct {
 		Environment string
 		Secret      string

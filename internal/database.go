@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// ConnectDatabase connects to a database using the provided configuration.
 func ConnectDatabase(c *Database) (*sqlx.DB, error) {
 	return sqlx.Connect(
 		"mysql",

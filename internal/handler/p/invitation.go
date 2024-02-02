@@ -10,13 +10,12 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type (
-	Invitation struct {
-		echo       *echo.Group
-		database   *sqlx.DB
-		repository *database.InvitationRepository
-	}
-)
+// Invitation represents an invitation handler.
+type Invitation struct {
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *database.InvitationRepository
+}
 
 func (h *Invitation) initialize() *Invitation {
 	h.repository = database.CreateInvitation(h.database)
@@ -40,6 +39,7 @@ func (h *Invitation) invitation(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitation, api.CreateRequest(c)))
 }
 
+// CreateInvitation initializes a new Invitation object.
 func CreateInvitation(e *echo.Group, d *sqlx.DB) *Invitation {
 	return (&Invitation{echo: e, database: d}).initialize()
 }
