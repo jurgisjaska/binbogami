@@ -29,5 +29,5 @@ jobs:
         coverageCommand: go test -v -cover -coverprofile=c.out ./...
         coverageLocations: ${{github.workspace}}/c.out:gocov
         debug: true
-        prefix: ${{github.repository}}
+        prefix: github.com/jurgisjaska/binbogami/
           
