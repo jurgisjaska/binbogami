@@ -1,0 +1,8 @@
+mode: set
+github.com/jurgisjaska/binbogami/internal/config.go:47.38,48.40 1 0
+github.com/jurgisjaska/binbogami/internal/config.go:48.40,50.3 1 0
+github.com/jurgisjaska/binbogami/internal/config.go:52.2,79.8 4 0
+github.com/jurgisjaska/binbogami/internal/database.go:11.53,23.2 1 0
+github.com/jurgisjaska/binbogami/internal/mail.go:8.49,11.16 3 0
+github.com/jurgisjaska/binbogami/internal/mail.go:11.16,13.3 1 0
+github.com/jurgisjaska/binbogami/internal/mail.go:15.2,15.20 1 0

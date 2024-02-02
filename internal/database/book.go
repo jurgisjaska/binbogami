@@ -87,6 +87,7 @@ func (r *BookRepository) Find(id *uuid.UUID) (*Book, error) {
 	return book, nil
 }
 
+// @todo AddCategory and AddLocation should be merged into single method.
 func (r *BookRepository) AddCategory(book *Book, m *model.BookCategory) (*BookCategory, error) {
 	e := &BookCategory{
 		BookId:     book.Id,
