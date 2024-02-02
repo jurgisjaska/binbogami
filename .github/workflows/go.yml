@@ -22,7 +22,7 @@ jobs:
         go-version: '1.21.3'
 
     - name: Test
-      run: go test -v -cover -coverprofile=coverage.txt ./...
+      run: go test -v -cover -coverprofile=c.out ./...
 
     - name: Setup Code Climate
       run: |
