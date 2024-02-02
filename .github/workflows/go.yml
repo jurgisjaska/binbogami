@@ -32,4 +32,5 @@ jobs:
       with:
         coverageCommand: go tool cover -html=coverage.out -o coverage.html
         coverageLocations: ${{github.workspace}}/coverage.html:cover
+        debug: true
           
