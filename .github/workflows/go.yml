@@ -23,7 +23,6 @@ jobs:
 
     - name: Test
       run: go test -v -cover -coverprofile=coverage.out ./...
-    
 
     - name: Upload coverage
       uses: paambaati/codeclimate-action@v5.0.0
@@ -31,6 +30,6 @@ jobs:
         CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
       with:
         coverageCommand: go tool cover -html=coverage.out -o coverage.html
-        coverageLocations: ${{github.workspace}}/coverage.html:cover
+        coverageLocations: ${{github.workspace}}/coverage.html:gocov
         debug: true
           
