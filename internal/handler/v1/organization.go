@@ -11,6 +11,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	organizationHeader = "organization_id"
+)
+
 // Organization represents an organization handler.
 type Organization struct {
 	echo         *echo.Group

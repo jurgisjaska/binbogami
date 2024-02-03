@@ -24,11 +24,13 @@ type (
 
 	Categories []Category
 
+	// CategoryRepository is a struct that represents a repository for managing categories in the database.
 	CategoryRepository struct {
 		database *sqlx.DB
 	}
 )
 
+// Find retrieves a category by its ID.
 func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 	category := &Category{}
 	err := r.database.Get(category, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id.String())
@@ -39,6 +41,7 @@ func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 	return category, nil
 }
 
+// ByBook retrieves a category by a book and category ID.
 func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error) {
 	query := `
 		SELECT categories.* 
@@ -59,9 +62,17 @@ func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error
 	return category, nil
 }
 
-func (r *CategoryRepository) FindMany() (*Categories, error) {
+// ByOrganization retrieves all categories for a given organization.
+func (r *CategoryRepository) ByOrganization(org *uuid.UUID) (*Categories, error) {
 	categories := &Categories{}
-	err := r.database.Select(categories, "SELECT * FROM categories WHERE deleted_at IS NULL")
+	query := `
+		SELECT * 
+		FROM categories 
+		WHERE organization_id = ?
+		AND deleted_at IS NULL
+	`
+
+	err := r.database.Select(categories, query, org)
 	if err != nil {
 		return nil, err
 	}

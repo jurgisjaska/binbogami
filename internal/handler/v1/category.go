@@ -24,6 +24,7 @@ func (h *Category) initialize() *Category {
 	h.member = database.CreateMember(h.database)
 
 	h.echo.POST("/categories", h.create)
+	h.echo.GET("/categories", h.many)
 
 	return h
 }
@@ -43,9 +44,24 @@ func (h *Category) one(c echo.Context) error {
 }
 
 func (h *Category) many(c echo.Context) error {
-	categories, err := h.repository.FindMany()
+	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
 	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no categories found"))
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
+	}
+
+	claims := token.FromContext(c)
+	if claims.Id == nil {
+		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+	}
+
+	member, err := h.member.Find(&org, claims.Id)
+	if err != nil || member == nil {
+		return c.JSON(http.StatusForbidden, api.Error("only organization members can access categories"))
+	}
+
+	categories, err := h.repository.ByOrganization(&org)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
