@@ -9,6 +9,9 @@ run:
 	@$(MAKE) build
 	@bin/${NAME}
 
+test:
+	@go test -v -cover ./...
+
 clean:
 	@rm -f bin/${NAME}
 
