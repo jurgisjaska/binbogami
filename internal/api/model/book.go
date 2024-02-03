@@ -1,6 +1,8 @@
 package model
 
 import (
+	"strings"
+
 	"github.com/google/uuid"
 )
 
@@ -10,6 +12,10 @@ type (
 		CreatedBy      *uuid.UUID
 		Name           string  `validate:"required,gte=3" json:"name"`
 		Description    *string `json:"description"`
+	}
+
+	BookObject interface {
+		SetCreatedBy(id *uuid.UUID)
 	}
 
 	BookCategory struct {
@@ -22,3 +28,21 @@ type (
 		CreatedBy  *uuid.UUID
 	}
 )
+
+func (b *BookCategory) SetCreatedBy(id *uuid.UUID) {
+	b.CreatedBy = id
+	return
+}
+
+func (b *BookLocation) SetCreatedBy(id *uuid.UUID) {
+	b.CreatedBy = id
+	return
+}
+
+func DetermineBookObject(u string) BookObject {
+	if strings.Contains(u, "categories") {
+		return &BookCategory{}
+	}
+
+	return &BookLocation{}
+}

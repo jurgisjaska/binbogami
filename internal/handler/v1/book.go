@@ -30,8 +30,8 @@ func (h *Book) initialize() *Book {
 	// h.echo.GET("/books/:id", h.one)
 	// h.echo.GET("/books", h.many)
 	h.echo.POST("/books", h.create)
-	h.echo.POST("/books/:id/categories", h.addCategory)
-	h.echo.POST("/books/:id/locations", h.addLocation)
+	h.echo.POST("/books/:id/categories", h.add)
+	h.echo.POST("/books/:id/locations", h.add)
 	// h.echo.PUT("/books/:id", h.update)
 	// h.echo.DELETE("/books/:id", h.delete)
 
@@ -68,7 +68,7 @@ func (h *Book) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Book) addCategory(c echo.Context) error {
+func (h *Book) add(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -79,47 +79,7 @@ func (h *Book) addCategory(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("book not found"))
 	}
 
-	m := &model.BookCategory{}
-	if err := c.Bind(m); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
-	}
-
-	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(m); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
-	}
-
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
-	}
-
-	member, err := h.member.Find(book.OrganizationId, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can add categories to books"))
-	}
-
-	m.CreatedBy = claims.Id
-	entity, err := h.repository.AddCategory(book, m)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
-}
-
-func (h *Book) addLocation(c echo.Context) error {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
-	}
-
-	book, err := h.repository.Find(&id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("book not found"))
-	}
-
-	m := &model.BookLocation{}
+	m := model.DetermineBookObject(c.Request().URL.String())
 	if err := c.Bind(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
@@ -130,16 +90,16 @@ func (h *Book) addLocation(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
 	}
 
 	member, err := h.member.Find(book.OrganizationId, claims.Id)
 	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can add categories to books"))
+		return c.JSON(http.StatusForbidden, api.Error(errorMember))
 	}
 
-	m.CreatedBy = claims.Id
-	entity, err := h.repository.AddLocation(book, m)
+	m.SetCreatedBy(claims.Id)
+	entity, err := h.repository.AddObject(book, m)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}

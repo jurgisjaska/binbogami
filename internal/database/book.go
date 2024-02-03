@@ -1,6 +1,7 @@
 package database
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,6 +22,11 @@ type (
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 		ClosedAt  *time.Time `db:"closed_at" json:"closed_at"`
+	}
+
+	BookObject interface {
+		Table() string
+		Field() string
 	}
 
 	BookCategory struct {
@@ -87,45 +93,56 @@ func (r *BookRepository) Find(id *uuid.UUID) (*Book, error) {
 	return book, nil
 }
 
-// @todo AddCategory and AddLocation should be merged into single method.
-func (r *BookRepository) AddCategory(book *Book, m *model.BookCategory) (*BookCategory, error) {
-	e := &BookCategory{
-		BookId:     book.Id,
-		CategoryId: m.CategoryId,
-		CreatedBy:  m.CreatedBy,
-		CreatedAt:  time.Now(),
-	}
+func (r *BookRepository) AddObject(book *Book, m model.BookObject) (*BookObject, error) {
+	e := buildObject(book, m)
+	query := fmt.Sprintf(`
+		INSERT INTO %s (id, book_id, %s, created_by, created_at)
+		VALUES (NULL, :book_id, :%s, :created_by, :created_at)
+	`, e.Table(), e.Field(), e.Field())
 
-	_, err := r.database.NamedExec(`
-		INSERT INTO books_categories (id, book_id, category_id, created_by, created_at)
-		VALUES (NULL, :book_id, :category_id, :created_by, :created_at)
-	`, e)
+	_, err := r.database.NamedExec(query, e)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return e, nil
+	return &e, nil
 }
 
-func (r *BookRepository) AddLocation(book *Book, m *model.BookLocation) (*BookLocation, error) {
-	e := &BookLocation{
-		BookId:     book.Id,
-		LocationId: m.LocationId,
-		CreatedBy:  m.CreatedBy,
-		CreatedAt:  time.Now(),
+func buildObject(book *Book, m model.BookObject) BookObject {
+	if obj, ok := m.(*model.BookCategory); ok {
+		return BookCategory{
+			BookId:     book.Id,
+			CategoryId: obj.CategoryId,
+			CreatedBy:  obj.CreatedBy,
+			CreatedAt:  time.Now(),
+		}
+	} else if obj, ok := m.(*model.BookLocation); ok {
+		return BookLocation{
+			BookId:     book.Id,
+			LocationId: obj.LocationId,
+			CreatedBy:  obj.CreatedBy,
+			CreatedAt:  time.Now(),
+		}
 	}
 
-	_, err := r.database.NamedExec(`
-		INSERT INTO books_locations (id, book_id, location_id, created_by, created_at)
-		VALUES (NULL, :book_id, :location_id, :created_by, :created_at)
-	`, e)
+	return nil
+}
 
-	if err != nil {
-		return nil, err
-	}
+func (b BookCategory) Table() string {
+	return "books_categories"
+}
 
-	return e, nil
+func (b BookLocation) Table() string {
+	return "books_locations"
+}
+
+func (b BookCategory) Field() string {
+	return "category_id"
+}
+
+func (b BookLocation) Field() string {
+	return "location_id"
 }
 
 func CreateBook(d *sqlx.DB) *BookRepository {
