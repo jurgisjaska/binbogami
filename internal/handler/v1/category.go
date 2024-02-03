@@ -44,22 +44,12 @@ func (h *Category) one(c echo.Context) error {
 }
 
 func (h *Category) many(c echo.Context) error {
-	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
+	org, err, status := organization(h.member, c)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
+		return c.JSON(status, api.Error(err.Error()))
 	}
 
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
-	}
-
-	member, err := h.member.Find(&org, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can access categories"))
-	}
-
-	categories, err := h.repository.ByOrganization(&org)
+	categories, err := h.repository.ByOrganization(org)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
 	}
@@ -79,12 +69,12 @@ func (h *Category) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
 	}
 
 	member, err := h.member.Find(category.OrganizationId, claims.Id)
 	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can create categories"))
+		return c.JSON(http.StatusForbidden, api.Error(errorMember))
 	}
 
 	category.CreatedBy = claims.Id
