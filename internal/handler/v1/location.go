@@ -24,6 +24,7 @@ func (h *Location) initialize() *Location {
 	h.member = database.CreateMember(h.database)
 
 	h.echo.POST("/locations", h.create)
+	h.echo.GET("/locations", h.many)
 
 	return h
 }
@@ -40,6 +41,20 @@ func (h *Location) one(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
+}
+
+func (h *Location) many(c echo.Context) error {
+	org, err, status := organization(h.member, c)
+	if err != nil {
+		return c.JSON(status, api.Error(err.Error()))
+	}
+
+	locations, err := h.repository.ByOrganization(org)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no locations found in the organization"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(locations, api.CreateRequest(c)))
 }
 
 func (h *Location) create(c echo.Context) error {

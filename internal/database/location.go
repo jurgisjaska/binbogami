@@ -22,6 +22,8 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
+	Locations []Location
+
 	LocationRepository struct {
 		database *sqlx.DB
 	}
@@ -37,6 +39,7 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	return Location, nil
 }
 
+// @todo need better naming
 func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error) {
 	query := `
 		SELECT locations.* 
@@ -55,6 +58,24 @@ func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error
 	}
 
 	return location, nil
+}
+
+// ByOrganization retrieves all locations for a given organization.
+func (r *LocationRepository) ByOrganization(org *uuid.UUID) (*Locations, error) {
+	locations := &Locations{}
+	query := `
+		SELECT * 
+		FROM locations 
+		WHERE organization_id = ?
+		AND deleted_at IS NULL
+	`
+
+	err := r.database.Select(locations, query, org)
+	if err != nil {
+		return nil, err
+	}
+
+	return locations, nil
 }
 
 func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
