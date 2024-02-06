@@ -26,6 +26,11 @@ func (h *Category) initialize() *Category {
 	h.echo.POST("/categories", h.create)
 	h.echo.GET("/categories", h.many)
 
+	// @todo think is this is a good idea
+	// h.echo.GET("/books/:book/categories", h.many)
+	// h.echo.GET("/categories?book=:id", h.many)
+	//
+
 	return h
 }
 
@@ -44,9 +49,9 @@ func (h *Category) one(c echo.Context) error {
 }
 
 func (h *Category) many(c echo.Context) error {
-	org, err, status := organization(h.member, c)
+	org, err := organization(h.member, c)
 	if err != nil {
-		return c.JSON(status, api.Error(err.Error()))
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
 	categories, err := h.repository.ByOrganization(org)

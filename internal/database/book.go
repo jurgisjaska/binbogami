@@ -10,6 +10,7 @@ import (
 )
 
 type (
+	// @todo cleanup a mess - separate into smaller files
 	Book struct {
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`

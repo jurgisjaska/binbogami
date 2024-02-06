@@ -44,9 +44,9 @@ func (h *Location) one(c echo.Context) error {
 }
 
 func (h *Location) many(c echo.Context) error {
-	org, err, status := organization(h.member, c)
+	org, err := organization(h.member, c)
 	if err != nil {
-		return c.JSON(status, api.Error(err.Error()))
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
 	locations, err := h.repository.ByOrganization(org)
