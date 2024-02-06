@@ -62,8 +62,30 @@ func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error
 	return category, nil
 }
 
-// ByOrganization retrieves all categories for a given organization.
-func (r *CategoryRepository) ByOrganization(org *uuid.UUID) (*Categories, error) {
+// ManyByBook retrieves categories associated with a book.
+func (r *CategoryRepository) ManyByBook(book *Book) (*Categories, error) {
+	categories := &Categories{}
+	query := `
+		SELECT categories.* 
+		FROM categories 
+		JOIN books_categories AS bc ON bc.category_id = categories.id
+		JOIN books AS b ON b.id = bc.book_id
+		WHERE 
+		    b.id = ?
+		    AND categories.deleted_at IS NULL
+			AND bc.deleted_at IS NULL AND b.deleted_at IS NULL
+	`
+
+	err := r.database.Select(categories, query, book.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return categories, nil
+}
+
+// ManyByOrganization retrieves all categories for a given organization.
+func (r *CategoryRepository) ManyByOrganization(org *uuid.UUID) (*Categories, error) {
 	categories := &Categories{}
 	query := `
 		SELECT * 

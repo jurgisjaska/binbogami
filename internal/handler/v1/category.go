@@ -17,19 +17,17 @@ type Category struct {
 	database   *sqlx.DB
 	repository *database.CategoryRepository
 	member     *database.MemberRepository
+	book       *database.BookRepository
 }
 
 func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
 	h.member = database.CreateMember(h.database)
+	h.book = database.CreateBook(h.database)
 
 	h.echo.POST("/categories", h.create)
-	h.echo.GET("/categories", h.many)
-
-	// @todo think is this is a good idea
-	// h.echo.GET("/books/:book/categories", h.many)
-	// h.echo.GET("/categories?book=:id", h.many)
-	//
+	h.echo.GET("/categories", h.byOrganization)
+	h.echo.GET("/books/:id/categories", h.byBook)
 
 	return h
 }
@@ -48,15 +46,39 @@ func (h *Category) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
 }
 
-func (h *Category) many(c echo.Context) error {
+func (h *Category) byOrganization(c echo.Context) error {
 	org, err := organization(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	categories, err := h.repository.ByOrganization(org)
+	categories, err := h.repository.ManyByOrganization(org)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
+}
+
+func (h *Category) byBook(c echo.Context) error {
+	_, err := organization(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	book, err := h.book.Find(&id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("book not found"))
+	}
+
+	categories, err := h.repository.ManyByBook(book)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no categories found"))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
