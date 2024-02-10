@@ -9,6 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,13 +17,13 @@ import (
 type Book struct {
 	echo         *echo.Group
 	database     *sqlx.DB
-	repository   *database.BookRepository
+	repository   *book.Repository
 	organization *database.OrganizationRepository
 	member       *database.MemberRepository
 }
 
 func (h *Book) initialize() *Book {
-	h.repository = database.CreateBook(h.database)
+	h.repository = book.CreateBook(h.database)
 	h.organization = database.CreateOrganization(h.database)
 	h.member = database.CreateMember(h.database)
 

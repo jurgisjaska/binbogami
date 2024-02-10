@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
 
 const (
@@ -75,7 +76,7 @@ func (r *MemberRepository) Find(org *uuid.UUID, user *uuid.UUID) (*Member, error
 }
 
 // ByBook finds the member record using book that belongs to the organization and the user.
-func (r *MemberRepository) ByBook(book *Book, user *uuid.UUID) (*Member, error) {
+func (r *MemberRepository) ByBook(book *book.Book, user *uuid.UUID) (*Member, error) {
 	query := `
 		SELECT members.* 
 		FROM members 

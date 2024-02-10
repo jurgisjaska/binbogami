@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
 
 type (
@@ -41,7 +42,7 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 }
 
 // ByBook retrieves a Location from the repository by the given Book and Location IDs.
-func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error) {
+func (r *LocationRepository) ByBook(book *book.Book, id *uuid.UUID) (*Location, error) {
 	query := `
 		SELECT locations.* 
 		FROM locations 
@@ -80,7 +81,7 @@ func (r *LocationRepository) ManyByOrganization(org *uuid.UUID) (*Locations, err
 }
 
 // ManyByBook retrieves locations associated with a book.
-func (r *LocationRepository) ManyByBook(book *Book) (*Locations, error) {
+func (r *LocationRepository) ManyByBook(book *book.Book) (*Locations, error) {
 	locations := &Locations{}
 	query := `
 		SELECT locations.* 

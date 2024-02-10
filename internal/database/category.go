@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
 
 type (
@@ -42,7 +43,7 @@ func (r *CategoryRepository) Find(id uuid.UUID) (*Category, error) {
 }
 
 // ByBook retrieves a category by a book and category ID.
-func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error) {
+func (r *CategoryRepository) ByBook(book *book.Book, id *uuid.UUID) (*Category, error) {
 	query := `
 		SELECT categories.* 
 		FROM categories 
@@ -63,7 +64,7 @@ func (r *CategoryRepository) ByBook(book *Book, id *uuid.UUID) (*Category, error
 }
 
 // ManyByBook retrieves categories associated with a book.
-func (r *CategoryRepository) ManyByBook(book *Book) (*Categories, error) {
+func (r *CategoryRepository) ManyByBook(book *book.Book) (*Categories, error) {
 	categories := &Categories{}
 	query := `
 		SELECT categories.* 
