@@ -18,17 +18,18 @@ const (
 
 // Organization represents an organization handler.
 type Organization struct {
-	echo         *echo.Group
-	database     *sqlx.DB
-	organization *database.OrganizationRepository
-	member       *database.MemberRepository
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *database.OrganizationRepository
+	member     *database.MemberRepository
 }
 
 func (h *Organization) initialize() *Organization {
-	h.organization = database.CreateOrganization(h.database)
+	h.repository = database.CreateOrganization(h.database)
 	h.member = database.CreateMember(h.database)
 
 	h.echo.GET("/organizations/:id", h.one)
+	h.echo.GET("/organizations", h.byMember)
 	h.echo.POST("/organizations", h.create)
 
 	return h
@@ -37,12 +38,17 @@ func (h *Organization) initialize() *Organization {
 func (h *Organization) one(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
+		return c.JSON(http.StatusBadRequest, api.Error(errorOrganization))
 	}
 
-	organization, err := h.organization.Find(id)
+	claims := token.FromContext(c)
+	if claims.Id == nil {
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+	}
+
+	organization, err := h.repository.Find(&id, claims.Id)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
+		return c.JSON(http.StatusNotFound, api.Error("no organizations found"))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(organization, api.CreateRequest(c)))
@@ -64,7 +70,7 @@ func (h *Organization) create(c echo.Context) error {
 	}
 	organization.CreatedBy = claims.Id // @todo find out why this does not work!
 
-	entity, err := h.organization.Create(organization)
+	entity, err := h.repository.Create(organization)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
@@ -73,6 +79,22 @@ func (h *Organization) create(c echo.Context) error {
 	_, _ = h.member.Create(entity.Id, claims.Id, database.MemberRoleOwner, claims.Id)
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+// byMember handles the GET request to retrieve organizations where the user is a member.
+func (h *Organization) byMember(c echo.Context) error {
+	claims := token.FromContext(c)
+	if claims.Id == nil {
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+	}
+
+	organizations, err := h.repository.ByMember(claims.Id)
+
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no organizations found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(organizations, api.CreateRequest(c)))
 }
 
 // CreateOrganization initializes and returns an instance of Organization handler.

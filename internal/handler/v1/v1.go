@@ -10,9 +10,10 @@ import (
 )
 
 const (
-	errorToken  string = "invalid authentication token"
-	errorHeader string = "invalid organization header"
-	errorMember string = "only organization members can access this resource"
+	errorToken        string = "invalid authentication token"
+	errorHeader       string = "invalid organization header"
+	errorMember       string = "only organization members can access this resource"
+	errorOrganization string = "invalid organization"
 )
 
 // membership checks the membership of a user in an organization by validating the organization header and token claims.

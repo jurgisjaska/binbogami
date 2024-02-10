@@ -34,7 +34,7 @@ func (h *Member) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
 	}
 
 	allow := map[int]bool{
