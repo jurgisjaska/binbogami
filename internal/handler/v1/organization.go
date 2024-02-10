@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
@@ -28,10 +29,7 @@ func (h *Organization) initialize() *Organization {
 	h.member = database.CreateMember(h.database)
 
 	h.echo.GET("/organizations/:id", h.one)
-	// h.echo.GET("/organizations", h.many)
 	h.echo.POST("/organizations", h.create)
-	// h.echo.PUT("/organizations/:id", h.update)
-	// h.echo.DELETE("/organizations/:id", h.delete)
 
 	return h
 }
@@ -51,8 +49,7 @@ func (h *Organization) one(c echo.Context) error {
 }
 
 func (h *Organization) create(c echo.Context) error {
-	// @todo this should be a api model
-	organization := &database.Organization{}
+	organization := &model.Organization{}
 	if err := c.Bind(organization); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
 	}
@@ -63,19 +60,19 @@ func (h *Organization) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
+		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
 	}
-	organization.CreatedBy = claims.Id
+	organization.CreatedBy = claims.Id // @todo find out why this does not work!
 
-	err := h.organization.Create(organization)
+	entity, err := h.organization.Create(organization)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
 	// @todo create a failure recovery process
-	_, _ = h.member.Create(organization.Id, claims.Id, database.MemberRoleOwner, nil)
+	_, _ = h.member.Create(entity.Id, claims.Id, database.MemberRoleOwner, claims.Id)
 
-	return c.JSON(http.StatusOK, api.Success(organization, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
 // CreateOrganization initializes and returns an instance of Organization handler.

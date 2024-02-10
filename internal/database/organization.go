@@ -5,21 +5,20 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
 )
 
 type (
 	Organization struct {
 		Id          *uuid.UUID `json:"id"`
-		Name        *string    `validate:"required,gte=3,lt=64" json:"name"`
-		Description *string    `validate:"required,gte=8" json:"description"`
+		Name        string     `json:"name"`
+		Description *string    `json:"description"`
 		CreatedBy   *uuid.UUID `db:"created_by" json:"created_by"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
-
-	Organizations []Organization
 
 	OrganizationRepository struct {
 		database *sqlx.DB
@@ -39,27 +38,29 @@ func (r *OrganizationRepository) Find(id uuid.UUID) (*Organization, error) {
 	return organization, nil
 }
 
-func (r *OrganizationRepository) Create(org *Organization) error {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return err
+func (r *OrganizationRepository) Create(o *model.Organization) (*Organization, error) {
+	id := uuid.New()
+	organization := &Organization{
+		Id:          &id,
+		Name:        o.Name,
+		Description: o.Description,
+		CreatedBy:   o.CreatedBy,
+		CreatedAt:   time.Now(),
 	}
 
-	org.Id = &id
-	org.CreatedAt = time.Now()
-
-	_, err = r.database.NamedExec(`
+	_, err := r.database.NamedExec(`
 		INSERT INTO organizations (id, name, description, created_by, created_at)
 		VALUES (:id, :name, :description, :created_by, :created_at)
-	`, org)
+	`, organization)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return organization, nil
 }
 
+// CreateOrganization creates a new instance of the OrganizationRepository
 func CreateOrganization(d *sqlx.DB) *OrganizationRepository {
 	return &OrganizationRepository{database: d}
 }
