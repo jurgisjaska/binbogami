@@ -8,10 +8,11 @@ import (
 
 type (
 	Book struct {
-		OrganizationId *uuid.UUID `validate:"required" json:"organization_id"`
+		Name        string  `validate:"required,gte=3" json:"name"`
+		Description *string `json:"description"`
+
 		CreatedBy      *uuid.UUID
-		Name           string  `validate:"required,gte=3" json:"name"`
-		Description    *string `json:"description"`
+		OrganizationId *uuid.UUID
 	}
 
 	BookObject interface {

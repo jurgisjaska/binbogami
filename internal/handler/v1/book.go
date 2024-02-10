@@ -8,7 +8,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
-	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
@@ -39,6 +38,11 @@ func (h *Book) initialize() *Book {
 }
 
 func (h *Book) create(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
 	book := &model.Book{}
 	if err := c.Bind(book); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
@@ -49,17 +53,8 @@ func (h *Book) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
-	}
-
-	member, err := h.member.Find(book.OrganizationId, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can create books"))
-	}
-
-	book.CreatedBy = claims.Id
+	book.CreatedBy = member.UserId
+	book.OrganizationId = member.OrganizationId
 	entity, err := h.repository.Create(book)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
@@ -69,6 +64,11 @@ func (h *Book) create(c echo.Context) error {
 }
 
 func (h *Book) add(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -88,17 +88,7 @@ func (h *Book) add(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
-	}
-
-	member, err := h.member.Find(book.OrganizationId, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error(errorMember))
-	}
-
-	m.SetCreatedBy(claims.Id)
+	m.SetCreatedBy(member.UserId)
 	entity, err := h.repository.AddObject(book, m)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
