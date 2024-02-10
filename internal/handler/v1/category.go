@@ -7,7 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
-	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
@@ -47,12 +46,12 @@ func (h *Category) one(c echo.Context) error {
 }
 
 func (h *Category) byOrganization(c echo.Context) error {
-	org, err := organization(h.member, c)
+	member, err := membership(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	categories, err := h.repository.ManyByOrganization(org)
+	categories, err := h.repository.ManyByOrganization(member.OrganizationId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
 	}
@@ -61,7 +60,7 @@ func (h *Category) byOrganization(c echo.Context) error {
 }
 
 func (h *Category) byBook(c echo.Context) error {
-	_, err := organization(h.member, c)
+	_, err := membership(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
@@ -85,6 +84,11 @@ func (h *Category) byBook(c echo.Context) error {
 }
 
 func (h *Category) create(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
 	category := &model.Category{}
 	if err := c.Bind(category); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
@@ -94,17 +98,8 @@ func (h *Category) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect category data", err.Error()))
 	}
 
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
-	}
-
-	member, err := h.member.Find(category.OrganizationId, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error(errorMember))
-	}
-
-	category.CreatedBy = claims.Id
+	category.CreatedBy = member.UserId
+	category.OrganizationId = member.OrganizationId
 	entity, err := h.repository.Create(category)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
@@ -113,6 +108,7 @@ func (h *Category) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Category) update(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -127,6 +123,7 @@ func (h *Category) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Category) delete(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {

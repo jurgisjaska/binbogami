@@ -15,10 +15,7 @@ const (
 	errorMember string = "only organization members can access this resource"
 )
 
-// organization retrieves the organization ID from the request header
-// and performs authorization checks based on the given member repository.
-// @todo update all endpoints related with the organization tu use the same header
-func organization(m *database.MemberRepository, c echo.Context) (*uuid.UUID, error) {
+func membership(m *database.MemberRepository, c echo.Context) (*database.Member, error) {
 	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
 	if err != nil {
 		return nil, fmt.Errorf(errorHeader)
@@ -30,9 +27,9 @@ func organization(m *database.MemberRepository, c echo.Context) (*uuid.UUID, err
 	}
 
 	member, err := m.Find(&org, claims.Id)
-	if err != nil || member == nil {
+	if err != nil {
 		return nil, fmt.Errorf(errorMember)
 	}
 
-	return &org, nil
+	return member, nil
 }

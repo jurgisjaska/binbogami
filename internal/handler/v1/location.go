@@ -7,7 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
-	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
@@ -47,12 +46,12 @@ func (h *Location) one(c echo.Context) error {
 }
 
 func (h *Location) byOrganization(c echo.Context) error {
-	org, err := organization(h.member, c)
+	member, err := membership(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	locations, err := h.repository.ByOrganization(org)
+	locations, err := h.repository.ByOrganization(member.OrganizationId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no locations found in the organization"))
 	}
@@ -61,6 +60,11 @@ func (h *Location) byOrganization(c echo.Context) error {
 }
 
 func (h *Location) create(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
 	location := &model.Location{}
 	if err := c.Bind(location); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect location data"))
@@ -70,17 +74,8 @@ func (h *Location) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect location data", err.Error()))
 	}
 
-	claims := token.FromContext(c)
-	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid authentication token"))
-	}
-
-	member, err := h.member.Find(location.OrganizationId, claims.Id)
-	if err != nil || member == nil {
-		return c.JSON(http.StatusForbidden, api.Error("only organization members can create locations"))
-	}
-
-	location.CreatedBy = claims.Id
+	location.CreatedBy = member.UserId
+	location.OrganizationId = member.OrganizationId
 	entity, err := h.repository.Create(location)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
@@ -90,7 +85,7 @@ func (h *Location) create(c echo.Context) error {
 }
 
 func (h *Location) byBook(c echo.Context) error {
-	_, err := organization(h.member, c)
+	_, err := membership(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
