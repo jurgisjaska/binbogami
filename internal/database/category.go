@@ -117,10 +117,9 @@ func (r *CategoryRepository) Create(c *model.Category) (*Category, error) {
 		CreatedAt:      time.Now(),
 	}
 
-	// @todo remove updated at and deleted at they are unnecessary as it will never be deleted on creation
 	_, err = r.database.NamedExec(`
-		INSERT INTO categories (id, name, description, organization_id, created_by, created_at, updated_at, deleted_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at, :updated_at, :deleted_at)
+		INSERT INTO categories (id, name, description, organization_id, created_by, created_at)
+		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
 	`, category)
 
 	if err != nil {
@@ -145,6 +144,7 @@ func (r *CategoryRepository) Remove(category *Category) error {
 	return nil
 }
 
+// CreateCategory creates a new instance of CategoryRepository with the specified database connection.
 func CreateCategory(d *sqlx.DB) *CategoryRepository {
 	return &CategoryRepository{database: d}
 }

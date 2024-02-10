@@ -29,6 +29,7 @@ type (
 	}
 )
 
+// Find retrieves a Location from the repository by its ID.
 func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	Location := &Location{}
 	err := r.database.Get(Location, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id.String())
@@ -39,7 +40,7 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	return Location, nil
 }
 
-// @todo need better naming
+// ByBook retrieves a Location from the repository by the given Book and Location IDs.
 func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error) {
 	query := `
 		SELECT locations.* 
@@ -61,7 +62,7 @@ func (r *LocationRepository) ByBook(book *Book, id *uuid.UUID) (*Location, error
 }
 
 // ByOrganization retrieves all locations for a given organization.
-func (r *LocationRepository) ByOrganization(org *uuid.UUID) (*Locations, error) {
+func (r *LocationRepository) ManyByOrganization(org *uuid.UUID) (*Locations, error) {
 	locations := &Locations{}
 	query := `
 		SELECT * 
@@ -116,8 +117,8 @@ func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
 	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO locations (id, name, description, organization_id, created_by, created_at, updated_at, deleted_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at, :updated_at, :deleted_at)
+		INSERT INTO locations (id, name, description, organization_id, created_by, created_at)
+		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
 	`, Location)
 
 	if err != nil {
@@ -127,6 +128,7 @@ func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
 	return Location, nil
 }
 
+// CreateLocation creates a new instance of LocationRepository with the specified database connection.
 func CreateLocation(d *sqlx.DB) *LocationRepository {
 	return &LocationRepository{database: d}
 }

@@ -15,6 +15,7 @@ const (
 	errorMember string = "only organization members can access this resource"
 )
 
+// membership checks the membership of a user in an organization by validating the organization header and token claims.
 func membership(m *database.MemberRepository, c echo.Context) (*database.Member, error) {
 	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
 	if err != nil {

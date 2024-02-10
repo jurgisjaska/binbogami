@@ -51,7 +51,7 @@ func (h *Location) byOrganization(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	locations, err := h.repository.ByOrganization(member.OrganizationId)
+	locations, err := h.repository.ManyByOrganization(member.OrganizationId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no locations found in the organization"))
 	}
