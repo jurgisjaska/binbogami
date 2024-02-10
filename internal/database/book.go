@@ -25,6 +25,8 @@ type (
 		ClosedAt  *time.Time `db:"closed_at" json:"closed_at"`
 	}
 
+	Books []Book
+
 	BookObject interface {
 		Table() string
 		Field() string
@@ -144,6 +146,23 @@ func (b BookCategory) Field() string {
 
 func (b BookLocation) Field() string {
 	return "location_id"
+}
+
+func (r *BookRepository) ManyByOrganization(org *uuid.UUID) (*Books, error) {
+	books := &Books{}
+	query := `
+		SELECT * 
+		FROM books 
+		WHERE organization_id = ?
+		AND deleted_at IS NULL
+	`
+
+	err := r.database.Select(books, query, org)
+	if err != nil {
+		return nil, err
+	}
+
+	return books, nil
 }
 
 func CreateBook(d *sqlx.DB) *BookRepository {

@@ -26,13 +26,10 @@ func (h *Book) initialize() *Book {
 	h.organization = database.CreateOrganization(h.database)
 	h.member = database.CreateMember(h.database)
 
-	// h.echo.GET("/books/:id", h.one)
-	// h.echo.GET("/books", h.many)
 	h.echo.POST("/books", h.create)
+	h.echo.GET("/books", h.byOrganization)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
-	// h.echo.PUT("/books/:id", h.update)
-	// h.echo.DELETE("/books/:id", h.delete)
 
 	return h
 }
@@ -95,6 +92,20 @@ func (h *Book) add(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+func (h *Book) byOrganization(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	categories, err := h.repository.ManyByOrganization(member.OrganizationId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no books found in the organization"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
 }
 
 // CreateBook creates a new instance of Book handler.
