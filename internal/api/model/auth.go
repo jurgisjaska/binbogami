@@ -17,11 +17,11 @@ type (
 	}
 
 	Signup struct {
-		Email            *string    `validate:"required,email" json:"email"`
+		Email            *string    `validate:"required,email,lt=128" json:"email"`
 		Password         string     `validate:"required,gte=8" json:"password"`
 		RepeatedPassword string     `validate:"required,gte=8,eqfield=Password" json:"repeated_password"`
-		Name             *string    `validate:"required,gte=3" json:"name"`
-		Surname          *string    `validate:"required,gte=3" json:"surname"`
+		Name             *string    `validate:"required,gte=3,lt=64" json:"name"`
+		Surname          *string    `validate:"required,gte=3,lt=64" json:"surname"`
 		InvitationId     *uuid.UUID `json:"invitation_id"`
 	}
 
