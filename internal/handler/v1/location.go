@@ -17,14 +17,17 @@ type Location struct {
 	database   *sqlx.DB
 	repository *database.LocationRepository
 	member     *database.MemberRepository
+	book       *database.BookRepository
 }
 
 func (h *Location) initialize() *Location {
 	h.repository = database.CreateLocation(h.database)
 	h.member = database.CreateMember(h.database)
+	h.book = database.CreateBook(h.database)
 
 	h.echo.POST("/locations", h.create)
-	h.echo.GET("/locations", h.many)
+	h.echo.GET("/locations", h.byOrganization)
+	h.echo.GET("/books/:id/locations", h.byBook)
 
 	return h
 }
@@ -43,7 +46,7 @@ func (h *Location) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
 }
 
-func (h *Location) many(c echo.Context) error {
+func (h *Location) byOrganization(c echo.Context) error {
 	org, err := organization(h.member, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
@@ -84,6 +87,30 @@ func (h *Location) create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+func (h *Location) byBook(c echo.Context) error {
+	_, err := organization(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	book, err := h.book.Find(&id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("book not found"))
+	}
+
+	locations, err := h.repository.ManyByBook(book)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no locations found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(locations, api.CreateRequest(c)))
 }
 
 func CreateLocation(g *echo.Group, d *sqlx.DB) *Location {

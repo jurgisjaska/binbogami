@@ -78,6 +78,28 @@ func (r *LocationRepository) ByOrganization(org *uuid.UUID) (*Locations, error) 
 	return locations, nil
 }
 
+// ManyByBook retrieves locations associated with a book.
+func (r *LocationRepository) ManyByBook(book *Book) (*Locations, error) {
+	locations := &Locations{}
+	query := `
+		SELECT locations.* 
+		FROM locations 
+		JOIN books_locations AS bl ON bl.location_id = locations.id
+		JOIN books AS b ON b.id = bl.book_id
+		WHERE 
+		    b.id = ?
+		    AND locations.deleted_at IS NULL
+			AND bl.deleted_at IS NULL AND b.deleted_at IS NULL
+	`
+
+	err := r.database.Select(locations, query, book.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return locations, nil
+}
+
 func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
