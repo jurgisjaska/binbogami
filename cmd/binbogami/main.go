@@ -15,6 +15,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/handler/v1"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 func main() {
@@ -36,6 +37,11 @@ func main() {
 	defer func() { _ = mail.Close() }()
 
 	e := echo.New()
+	// @todo if this ever goes to production it needs to have proper values!
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowHeaders: []string{"*"},
+	}))
 	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
 	handler.CreateAuth(e, database, config)
