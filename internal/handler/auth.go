@@ -16,7 +16,8 @@ import (
 )
 
 const (
-	signupError string = "incorrect signup information"
+	signupError     string = "incorrect signup information"
+	credentialError string = "incorrect credentials"
 )
 
 type (
@@ -45,16 +46,16 @@ func (h *Auth) initialize() *Auth {
 func (h *Auth) signin(c echo.Context) error {
 	sm := &model.Signin{}
 	if err := c.Bind(sm); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect credentials"))
+		return c.JSON(http.StatusBadRequest, api.Error(credentialError))
 	}
 
 	if err := c.Validate(sm); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
+		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
 	}
 
 	user, err := h.user.FindBy("email", sm.Email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("incorrect credentials", err.Error()))
+		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
 	}
 
 	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Secret)
