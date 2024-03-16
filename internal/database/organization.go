@@ -42,6 +42,23 @@ func (r *OrganizationRepository) ById(id *uuid.UUID) (*Organization, error) {
 	return organization, nil
 }
 
+func (r *OrganizationRepository) ByMemberAndName(member *uuid.UUID, name string) (*Organization, error) {
+	query := `
+		SELECT o.* FROM organizations AS o
+		JOIN members AS m ON m.organization_id = o.id
+		WHERE 
+		    m.user_id = ? AND o.name = ?
+		    AND m.deleted_at IS NULL AND o.deleted_at IS NULL
+	`
+
+	organization := &Organization{}
+	if err := r.database.Get(organization, query, member, name); err != nil {
+		return nil, err
+	}
+
+	return organization, nil
+}
+
 // @todo rename this method to something better
 func (r *OrganizationRepository) Find(id *uuid.UUID, member *uuid.UUID) (*Organization, error) {
 	query := `

@@ -68,7 +68,12 @@ func (h *Organization) create(c echo.Context) error {
 	if claims.Id == nil {
 		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
 	}
-	organization.CreatedBy = claims.Id // @todo find out why this does not work!
+	organization.CreatedBy = claims.Id
+
+	_, err := h.repository.ByMemberAndName(claims.Id, organization.Name)
+	if err == nil {
+		return c.JSON(http.StatusBadRequest, api.Error("organization with the same name already exists"))
+	}
 
 	entity, err := h.repository.Create(organization)
 	if err != nil {
