@@ -119,17 +119,26 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
+	member := &database.Member{}
 	if sm.InvitationId != nil {
 		invitation, err := h.invitation.Find(sm.InvitationId)
 		if err == nil {
-			_, err := h.member.Create(invitation.OrganizationId, u.Id, database.MemberRoleDefault, invitation.CreatedBy)
+			member, err = h.member.Create(invitation.OrganizationId, u.Id, database.MemberRoleDefault, invitation.CreatedBy)
 			if err == nil {
 				_ = h.invitation.Delete(invitation)
 			}
 		}
 	}
 
-	return c.JSON(http.StatusOK, api.Success(model.SignupSuccess{u, t}, api.CreateRequest(c)))
+	isMember := false
+	if member.Id != 0 {
+		isMember = true
+	}
+
+	return c.JSON(
+		http.StatusOK,
+		api.Success(model.SignupSuccess{User: u, Token: t, IsMember: isMember}, api.CreateRequest(c)),
+	)
 }
 
 // hashPassword creates new password hash using bcrypt.

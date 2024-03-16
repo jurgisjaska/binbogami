@@ -14,6 +14,7 @@ type (
 	// SigninSuccess struct represents the successful sign-in response.
 	SigninSuccess struct {
 		Token string `json:"token"`
+		// @todo need to indicate if has an organization
 	}
 
 	Signup struct {
@@ -26,7 +27,8 @@ type (
 	}
 
 	SignupSuccess struct {
-		User  interface{} `json:"user"`
-		Token string      `json:"token"`
+		User     interface{} `json:"user"`
+		Token    string      `json:"token"`
+		IsMember bool        `json:"isMember"`
 	}
 )
