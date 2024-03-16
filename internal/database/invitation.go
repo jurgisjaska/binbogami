@@ -66,7 +66,7 @@ func (r *InvitationRepository) Find(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-func (r *InvitationRepository) Create(model *model.Invitation) (Invitations, error) {
+func (r *InvitationRepository) Create(model *model.InvitationRequest) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Email {
 		id, err := uuid.NewUUID()

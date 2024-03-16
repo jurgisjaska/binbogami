@@ -4,9 +4,16 @@ import (
 	"github.com/google/uuid"
 )
 
-type Invitation struct {
-	OrganizationId *uuid.UUID `validate:"required" json:"organization_id"`
-	Email          []string   `validate:"required" json:"email"`
+type (
+	InvitationRequest struct {
+		OrganizationId *uuid.UUID `validate:"required" json:"organization_id"`
+		Email          []string   `validate:"required" json:"email"`
 
-	CreatedBy *uuid.UUID
-}
+		CreatedBy *uuid.UUID
+	}
+
+	InvitationResponse struct {
+		Invitation   interface{} `json:"invitation"`
+		Organization interface{} `json:"organization"`
+	}
+)

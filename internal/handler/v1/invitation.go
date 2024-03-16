@@ -33,7 +33,7 @@ func (h *Invitation) initialize() *Invitation {
 }
 
 func (h *Invitation) create(c echo.Context) error {
-	i := &model.Invitation{}
+	i := &model.InvitationRequest{}
 	if err := c.Bind(i); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation data"))
 	}

@@ -13,7 +13,7 @@ type (
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
-		CreatedBy   *uuid.UUID `db:"created_by" json:"created_by"`
+		CreatedBy   *uuid.UUID `db:"created_by" json:"created_by"` // @todo think is this should be camelCase
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
@@ -27,6 +27,22 @@ type (
 	}
 )
 
+func (r *OrganizationRepository) ById(id *uuid.UUID) (*Organization, error) {
+	query := `
+		SELECT o.* FROM organizations AS o
+		WHERE o.id = ? AND o.deleted_at IS NULL
+		LIMIT 1
+	`
+
+	organization := &Organization{}
+	if err := r.database.Get(organization, query, id); err != nil {
+		return nil, err
+	}
+
+	return organization, nil
+}
+
+// @todo rename this method to something better
 func (r *OrganizationRepository) Find(id *uuid.UUID, member *uuid.UUID) (*Organization, error) {
 	query := `
 		SELECT o.* FROM organizations AS o

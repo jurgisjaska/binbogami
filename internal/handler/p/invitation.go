@@ -6,19 +6,22 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/labstack/echo/v4"
 )
 
 // Invitation represents an invitation handler.
 type Invitation struct {
-	echo       *echo.Group
-	database   *sqlx.DB
-	repository *database.InvitationRepository
+	echo         *echo.Group
+	database     *sqlx.DB
+	repository   *database.InvitationRepository
+	organization *database.OrganizationRepository
 }
 
 func (h *Invitation) initialize() *Invitation {
 	h.repository = database.CreateInvitation(h.database)
+	h.organization = database.CreateOrganization(h.database)
 
 	h.echo.GET("/invitation/:id", h.invitation)
 
@@ -36,7 +39,13 @@ func (h *Invitation) invitation(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("invitation not found"))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(invitation, api.CreateRequest(c)))
+	organization, err := h.organization.ById(invitation.OrganizationId)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
+	}
+
+	response := &model.InvitationResponse{invitation, organization}
+	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
 
 // CreateInvitation initializes a new Invitation object.
