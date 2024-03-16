@@ -119,6 +119,8 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
+	// @todo should invitation and user email match when using invitation link?
+
 	member := &database.Member{}
 	if sm.InvitationId != nil {
 		invitation, err := h.invitation.Find(sm.InvitationId)
