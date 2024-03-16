@@ -109,6 +109,10 @@ func Error(m string) *Response {
 }
 
 func Errors(m string, e interface{}) *Response {
+	// @todo better validation error responses
+	// verify that errors are from validation
+	// range trough them and build better response
+
 	return &Response{
 		Status:  statusError,
 		Message: strings.ToLower(m),

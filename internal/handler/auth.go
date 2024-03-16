@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	signupError     string = "incorrect signup information"
-	credentialError string = "incorrect credentials"
+	signupError       string = "incorrect signup information"
+	credentialError   string = "incorrect credentials"
+	signupFailedError string = "signup failed"
 )
 
 type (
@@ -105,12 +106,12 @@ func (h *Auth) signup(c echo.Context) error {
 
 	u.Password, err = h.hashPassword(sm.Password, u.Salt)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(signupFailedError, err.Error()))
 	}
 
 	err = h.user.Create(u)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors("signup failed", err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(signupFailedError, err.Error()))
 	}
 
 	t, err := token.CreateToken(u, h.configuration.Secret)
