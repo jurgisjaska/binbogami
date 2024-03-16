@@ -13,11 +13,11 @@ type (
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
-		CreatedBy   *uuid.UUID `db:"created_by" json:"created_by"` // @todo think is this should be camelCase
+		CreatedBy   *uuid.UUID `db:"created_by" json:"createdBy"`
 
-		CreatedAt time.Time  `db:"created_at" json:"created_at"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
 	}
 
 	Organizations []Organization

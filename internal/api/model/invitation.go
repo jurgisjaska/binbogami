@@ -6,7 +6,8 @@ import (
 
 type (
 	InvitationRequest struct {
-		OrganizationId *uuid.UUID `validate:"required" json:"organization_id"`
+		// @todo organization should come from header
+		OrganizationId *uuid.UUID `validate:"required" json:"organizationId"`
 		Email          []string   `validate:"required" json:"email"`
 
 		CreatedBy *uuid.UUID
