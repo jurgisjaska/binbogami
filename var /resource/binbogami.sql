@@ -142,17 +142,17 @@ CREATE TABLE IF NOT EXISTS books_locations
 
 CREATE TABLE IF NOT EXISTS entries
 (
-    id                 CHAR(36)  NOT NULL
+    id          CHAR(36)  NOT NULL
         PRIMARY KEY,
-    amount             FLOAT     NOT NULL,
-    description        TEXT      NULL,
-    book_id            CHAR(36)  NOT NULL,
-    category_id        CHAR(36)  NOT NULL,
-    location_id        CHAR(36)  NOT NULL,
-    created_by_user_id CHAR(36)  NOT NULL,
-    created_at         TIMESTAMP NOT NULL,
-    updated_at         TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at         TIMESTAMP NULL,
+    amount      FLOAT     NOT NULL,
+    description TEXT      NULL,
+    book_id     CHAR(36)  NOT NULL,
+    category_id CHAR(36)  NOT NULL,
+    location_id CHAR(36)  NOT NULL,
+    created_by  CHAR(36)  NOT NULL,
+    created_at  TIMESTAMP NOT NULL,
+    updated_at  TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP NULL,
     CONSTRAINT entries_books_id_fk
         FOREIGN KEY (book_id) REFERENCES books (id)
             ON DELETE CASCADE,
@@ -161,7 +161,7 @@ CREATE TABLE IF NOT EXISTS entries
     CONSTRAINT entries_locations_id_fk
         FOREIGN KEY (location_id) REFERENCES locations (id),
     CONSTRAINT entries_users_id_fk
-        FOREIGN KEY (created_by_user_id) REFERENCES users (id)
+        FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS members
@@ -181,5 +181,21 @@ CREATE TABLE IF NOT EXISTS members
         FOREIGN KEY (organization_id) REFERENCES organizations (id),
     CONSTRAINT members_users_id_fk
         FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS user_configuration
+(
+    id            CHAR(36)  NOT NULL
+        PRIMARY KEY,
+    configuration INT       NOT NULL,
+    value         TEXT      NULL,
+    created_by    CHAR(36)  NOT NULL,
+    created_at    TIMESTAMP NOT NULL,
+    updated_at    TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at    TIMESTAMP NOT NULL,
+    CONSTRAINT user_configuration_configuration_created_by_deleted_at_uindex
+        UNIQUE (configuration, created_by, deleted_at),
+    CONSTRAINT user_configuration_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
