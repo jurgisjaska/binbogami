@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
 	"golang.org/x/crypto/bcrypt"
@@ -23,19 +25,23 @@ const (
 
 type (
 	Auth struct {
-		echo          *echo.Echo
-		database      *sqlx.DB
-		user          *database.UserRepository
-		invitation    *database.InvitationRepository
-		member        *database.MemberRepository
-		configuration *internal.Config
+		echo              *echo.Echo
+		database          *sqlx.DB
+		user              *user.Repository
+		userConfiguration *user.ConfigurationRepository
+		invitation        *database.InvitationRepository
+		member            *database.MemberRepository
+		organization      *database.OrganizationRepository
+		configuration     *internal.Config
 	}
 )
 
 func (h *Auth) initialize() *Auth {
-	h.user = database.CreateUser(h.database)
+	h.user = user.CreateUser(h.database)
 	h.invitation = database.CreateInvitation(h.database)
 	h.member = database.CreateMember(h.database)
+	h.userConfiguration = user.CreateConfiguration(h.database)
+	h.organization = database.CreateOrganization(h.database)
 
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
@@ -45,35 +51,63 @@ func (h *Auth) initialize() *Auth {
 
 // signin in creates new JWT token for the user if credentials are correct
 func (h *Auth) signin(c echo.Context) error {
-	sm := &model.Signin{}
-	if err := c.Bind(sm); err != nil {
+	request := &model.Signin{}
+	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(credentialError))
 	}
 
-	if err := c.Validate(sm); err != nil {
+	if err := c.Validate(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
 	}
 
-	user, err := h.user.FindBy("email", sm.Email)
+	u, err := h.user.By("email", request.Email)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
 	}
 
-	password := fmt.Sprintf("%s%s%s", sm.Password, user.Salt, h.configuration.Secret)
+	password := fmt.Sprintf("%s%s%s", request.Password, u.Salt, h.configuration.Secret)
 	if len(password) > 71 {
 		password = password[:71]
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	t, err := token.CreateToken(user, h.configuration.Secret)
+	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(model.SigninSuccess{t}, api.CreateRequest(c)))
+	m, o := h.membership(u)
+	response := model.SigninSuccess{Token: t, User: u, Member: m, Organization: o}
+
+	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
+}
+
+// membership determine if a user is a member of any organization and return the organization information if true
+// if member has multiple organization but no default he will be marked as member but will not have default organization
+func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
+	m := false
+	var organization *uuid.UUID
+
+	members, err := h.member.ManyByUser(u)
+	if err == nil && len(*members) != 0 {
+		m = true
+
+		if len(*members) > 1 {
+			defaultConfiguration, err := h.userConfiguration.DefaultOrganization(u)
+			if err != nil {
+				defaultId, _ := uuid.Parse(defaultConfiguration.Value)
+				organization = &defaultId
+			}
+		} else {
+			organization = (*members)[0].OrganizationId
+		}
+	}
+
+	o, _ := h.organization.ById(organization)
+	return m, o
 }
 
 // signup validates signup form data and creates new user
@@ -92,12 +126,12 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.user.FindBy("email", *sm.Email)
+	existingUser, err := h.user.By("email", *sm.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
 	}
 
-	u := &database.User{
+	u := &user.User{
 		Email:   sm.Email,
 		Name:    sm.Name,
 		Surname: sm.Surname,

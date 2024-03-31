@@ -6,7 +6,7 @@ import (
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -23,7 +23,7 @@ type Claims struct {
 }
 
 // CreateToken creates a JWT token string for a given user.
-func CreateToken(u *database.User, key string) (string, error) {
+func CreateToken(u *user.User, key string) (string, error) {
 	expire := jwt.NewNumericDate(time.Now().Add(time.Hour * expire))
 	claim := &Claims{
 		Id:    u.Id,

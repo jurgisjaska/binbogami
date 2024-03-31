@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 )
 
 const (
@@ -28,6 +29,8 @@ type (
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
+
+	Members []Member
 
 	MemberRepository struct {
 		database *sqlx.DB
@@ -95,6 +98,25 @@ func (r *MemberRepository) ByBook(book *book.Book, user *uuid.UUID) (*Member, er
 	}
 
 	return member, nil
+}
+
+func (r *MemberRepository) ManyByUser(user *user.User) (*Members, error) {
+	members := &Members{}
+	query := `
+		SELECT members.* 
+		FROM members 
+		JOIN organizations AS o ON members.organization_id = o.id
+		JOIN users AS u ON members.user_id = u.id
+		WHERE members.user_id = ? 
+		  AND members.deleted_at IS NULL AND u.deleted_at IS NULL AND o.deleted_at IS NULL
+	`
+
+	err := r.database.Select(members, query, user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return members, nil
 }
 
 func CreateMember(d *sqlx.DB) *MemberRepository {

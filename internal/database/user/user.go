@@ -1,4 +1,4 @@
-package database
+package user
 
 import (
 	"fmt"
@@ -23,12 +23,13 @@ type (
 
 	Users []User
 
-	UserRepository struct {
+	// Repository struct represents a repository for managing user data in a database.
+	Repository struct {
 		database *sqlx.DB
 	}
 )
 
-func (r *UserRepository) FindBy(column string, value interface{}) (*User, error) {
+func (r *Repository) By(column string, value interface{}) (*User, error) {
 	user := &User{}
 	sql := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
 	err := r.database.Get(user, sql, value)
@@ -39,7 +40,7 @@ func (r *UserRepository) FindBy(column string, value interface{}) (*User, error)
 	return user, nil
 }
 
-func (r *UserRepository) FindMany(filter string) (*Users, error) {
+func (r *Repository) FindMany(filter string) (*Users, error) {
 	users := &Users{}
 
 	if len(filter) == 0 {
@@ -67,7 +68,7 @@ func (r *UserRepository) FindMany(filter string) (*Users, error) {
 	return users, nil
 }
 
-func (r *UserRepository) Create(user *User) error {
+func (r *Repository) Create(user *User) error {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return err
@@ -88,6 +89,7 @@ func (r *UserRepository) Create(user *User) error {
 	return nil
 }
 
-func CreateUser(d *sqlx.DB) *UserRepository {
-	return &UserRepository{database: d}
+// CreateUser creates a new instance of the Repository with the specified SQL database connection.
+func CreateUser(d *sqlx.DB) *Repository {
+	return &Repository{database: d}
 }

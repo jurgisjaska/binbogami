@@ -13,8 +13,10 @@ type (
 
 	// SigninSuccess struct represents the successful sign-in response.
 	SigninSuccess struct {
-		Token string `json:"token"`
-		// @todo need to indicate if has an organization
+		Token        string      `json:"token"`
+		User         interface{} `json:"user"`
+		Organization interface{} `json:"organization"`
+		Member       bool        `json:"member"`
 	}
 
 	Signup struct {
@@ -30,5 +32,6 @@ type (
 		User     interface{} `json:"user"`
 		Token    string      `json:"token"`
 		IsMember bool        `json:"isMember"`
+		// @todo add organization if joined with the invitation
 	}
 )
