@@ -97,7 +97,7 @@ func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
 
 		if len(*members) > 1 {
 			defaultConfiguration, err := h.userConfiguration.DefaultOrganization(u)
-			if err != nil {
+			if err == nil && defaultConfiguration != nil {
 				defaultId, _ := uuid.Parse(defaultConfiguration.Value)
 				organization = &defaultId
 			}

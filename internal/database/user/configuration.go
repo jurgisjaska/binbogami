@@ -32,7 +32,16 @@ type (
 )
 
 func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuration, error) {
-	return nil, nil
+	configuration := &Configuration{}
+	err := r.database.Get(configuration, `
+		SELECT * FROM user_configurations 
+		         WHERE configuration = ? AND created_by = ? AND deleted_at IS NULL
+	`, defaultOrganization, user.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return configuration, nil
 }
 
 func (r *ConfigurationRepository) Create(model *um.SetConfiguration) (*Configuration, error) {
