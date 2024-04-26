@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	um "github.com/jurgisjaska/binbogami/internal/api/model/user"
 )
 
 const (
@@ -17,7 +18,7 @@ type (
 		Configuration int        `json:"configuration"`
 		Value         string     `json:"value"`
 
-		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
@@ -32,6 +33,28 @@ type (
 
 func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuration, error) {
 	return nil, nil
+}
+
+func (r *ConfigurationRepository) Create(model *um.SetConfiguration) (*Configuration, error) {
+	id := uuid.New()
+	configuration := &Configuration{
+		Id:            &id,
+		Configuration: model.Configuration,
+		Value:         model.Value,
+		CreatedBy:     model.CreatedBy,
+		CreatedAt:     time.Now(),
+	}
+
+	_, err := r.database.NamedExec(`
+		INSERT INTO user_configurations (id, configuration, value, created_by, created_at)
+		VALUES (:id, :configuration, :value, :created_by, :created_at)
+	`, configuration)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return configuration, nil
 }
 
 // CreateConfiguration creates a new instance of ConfigurationRepository with the specified SQL database connection.

@@ -10,27 +10,27 @@ import (
 )
 
 const (
-	errorToken        string = "invalid authentication token"
-	errorHeader       string = "invalid organization header"
-	errorMember       string = "only organization members can access this resource"
-	errorOrganization string = "invalid organization"
+	ErrorToken        string = "invalid authentication token"
+	ErrorHeader       string = "invalid organization header"
+	ErrorMember       string = "only organization members can access this resource"
+	ErrorOrganization string = "invalid organization"
 )
 
 // membership checks the membership of a user in an organization by validating the organization header and token claims.
 func membership(m *database.MemberRepository, c echo.Context) (*database.Member, error) {
 	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
 	if err != nil {
-		return nil, fmt.Errorf(errorHeader)
+		return nil, fmt.Errorf(ErrorHeader)
 	}
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return nil, fmt.Errorf(errorToken)
+		return nil, fmt.Errorf(ErrorToken)
 	}
 
 	member, err := m.Find(&org, claims.Id)
 	if err != nil {
-		return nil, fmt.Errorf(errorMember)
+		return nil, fmt.Errorf(ErrorMember)
 	}
 
 	return member, nil

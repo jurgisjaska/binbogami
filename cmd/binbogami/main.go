@@ -13,6 +13,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/handler"
 	"github.com/jurgisjaska/binbogami/internal/handler/p"
 	"github.com/jurgisjaska/binbogami/internal/handler/v1"
+	"github.com/jurgisjaska/binbogami/internal/handler/v1/user"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -53,7 +54,8 @@ func main() {
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
 	v1.CreateOrganization(g, database)
-	v1.CreateUser(g, database)
+	user.CreateUser(g, database)
+	user.CreateConfiguration(g, database)
 	v1.CreateInvitation(g, database, mail, config)
 	v1.CreateMember(g, database)
 

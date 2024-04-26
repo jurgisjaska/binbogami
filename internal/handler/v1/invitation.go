@@ -40,7 +40,7 @@ func (h *Invitation) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+		return c.JSON(http.StatusBadRequest, api.Error(ErrorToken))
 	}
 
 	allow := map[int]bool{

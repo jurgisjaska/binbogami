@@ -38,12 +38,12 @@ func (h *Organization) initialize() *Organization {
 func (h *Organization) one(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorOrganization))
+		return c.JSON(http.StatusBadRequest, api.Error(ErrorOrganization))
 	}
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+		return c.JSON(http.StatusBadRequest, api.Error(ErrorToken))
 	}
 
 	organization, err := h.repository.Find(&id, claims.Id)
@@ -66,7 +66,7 @@ func (h *Organization) create(c echo.Context) error {
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+		return c.JSON(http.StatusBadRequest, api.Error(ErrorToken))
 	}
 	organization.CreatedBy = claims.Id
 
@@ -90,7 +90,7 @@ func (h *Organization) create(c echo.Context) error {
 func (h *Organization) byMember(c echo.Context) error {
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(errorToken))
+		return c.JSON(http.StatusBadRequest, api.Error(ErrorToken))
 	}
 
 	organizations, err := h.repository.ByMember(claims.Id)
