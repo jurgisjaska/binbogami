@@ -44,7 +44,7 @@ func (h *Configuration) set(c echo.Context) error {
 	if claims.Id == nil {
 		return c.JSON(http.StatusBadRequest, api.Error(v1.ErrorToken))
 	}
-	request.CreatedBy = claims.Id
+	request.UserId = claims.Id
 
 	organization := uuid.MustParse(request.Value)
 	_, err := h.member.Find(&organization, claims.Id)
@@ -52,7 +52,7 @@ func (h *Configuration) set(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	entity, err := h.repository.Create(request)
+	entity, err := h.repository.Upsert(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}

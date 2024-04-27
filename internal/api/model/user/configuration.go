@@ -9,6 +9,6 @@ type (
 		Configuration int    `validate:"required" json:"configuration"`
 		Value         string `validate:"required" json:"value"`
 
-		CreatedBy *uuid.UUID
+		UserId *uuid.UUID
 	}
 )

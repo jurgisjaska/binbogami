@@ -18,11 +18,10 @@ type (
 		Configuration int        `json:"configuration"`
 		Value         string     `json:"value"`
 
-		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
+		UserId *uuid.UUID `db:"user_id" json:"user_id"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
 	}
 
 	// ConfigurationRepository represents a repository for storing user configuration data.
@@ -31,11 +30,12 @@ type (
 	}
 )
 
+// DefaultOrganization retrieves the default organization configuration for a user.
 func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuration, error) {
 	configuration := &Configuration{}
 	err := r.database.Get(configuration, `
 		SELECT * FROM user_configurations 
-		         WHERE configuration = ? AND created_by = ? AND deleted_at IS NULL
+		         WHERE configuration = ? AND user_id = ?
 	`, defaultOrganization, user.Id)
 	if err != nil {
 		return nil, err
@@ -44,19 +44,21 @@ func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuratio
 	return configuration, nil
 }
 
-func (r *ConfigurationRepository) Create(model *um.SetConfiguration) (*Configuration, error) {
+// Upsert inserts a new configuration record into the database if it does not exist, or updates an existing record if it does.
+func (r *ConfigurationRepository) Upsert(model *um.SetConfiguration) (*Configuration, error) {
 	id := uuid.New()
 	configuration := &Configuration{
 		Id:            &id,
 		Configuration: model.Configuration,
 		Value:         model.Value,
-		CreatedBy:     model.CreatedBy,
+		UserId:        model.UserId,
 		CreatedAt:     time.Now(),
 	}
 
 	_, err := r.database.NamedExec(`
-		INSERT INTO user_configurations (id, configuration, value, created_by, created_at)
-		VALUES (:id, :configuration, :value, :created_by, :created_at)
+		INSERT INTO user_configurations (id, configuration, value, user_id, created_at)
+		VALUES (:id, :configuration, :value, :user_id, :created_at)
+		ON DUPLICATE KEY UPDATE value = :value
 	`, configuration)
 
 	if err != nil {

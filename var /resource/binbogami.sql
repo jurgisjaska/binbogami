@@ -183,19 +183,18 @@ CREATE TABLE IF NOT EXISTS members
         FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS user_configuration
+CREATE TABLE IF NOT EXISTS user_configurations
 (
     id            CHAR(36)  NOT NULL
         PRIMARY KEY,
     configuration INT       NOT NULL,
     value         TEXT      NULL,
-    created_by    CHAR(36)  NOT NULL,
+    user_id       CHAR(36)  NOT NULL,
     created_at    TIMESTAMP NOT NULL,
     updated_at    TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at    TIMESTAMP NOT NULL,
-    CONSTRAINT user_configuration_configuration_created_by_deleted_at_uindex
-        UNIQUE (configuration, created_by, deleted_at),
+    CONSTRAINT user_configurations_user_id_configuration_uindex
+        UNIQUE (user_id, configuration),
     CONSTRAINT user_configuration_users_id_fk
-        FOREIGN KEY (created_by) REFERENCES users (id)
+        FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
