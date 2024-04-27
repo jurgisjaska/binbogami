@@ -11,8 +11,8 @@ type (
 		Password string `validate:"required" json:"password"`
 	}
 
-	// SigninSuccess struct represents the successful sign-in response.
-	SigninSuccess struct {
+	// SigninResponse struct represents the successful sign-in response.
+	SigninResponse struct {
 		Token        string      `json:"token"`
 		User         interface{} `json:"user"`
 		Organization interface{} `json:"organization"`
@@ -28,10 +28,10 @@ type (
 		InvitationId     *uuid.UUID `json:"invitationId"`
 	}
 
-	SignupSuccess struct {
-		User     interface{} `json:"user"`
-		Token    string      `json:"token"`
-		IsMember bool        `json:"isMember"`
-		// @todo add organization if joined with the invitation
+	SignupResponse struct {
+		User         interface{} `json:"user"`
+		Token        string      `json:"token"`
+		Member       bool        `json:"member"`
+		Organization interface{} `json:"organization"`
 	}
 )

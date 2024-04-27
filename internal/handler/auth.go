@@ -80,7 +80,7 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	m, o := h.membership(u)
-	response := model.SigninSuccess{Token: t, User: u, Member: m, Organization: o}
+	response := model.SigninResponse{Token: t, User: u, Member: m, Organization: o}
 
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
@@ -156,6 +156,7 @@ func (h *Auth) signup(c echo.Context) error {
 	// @todo should invitation and user email match when using invitation link?
 
 	member := &database.Member{}
+	organization := &database.Organization{}
 	if sm.InvitationId != nil {
 		invitation, err := h.invitation.Find(sm.InvitationId)
 		if err == nil {
@@ -163,17 +164,21 @@ func (h *Auth) signup(c echo.Context) error {
 			if err == nil {
 				_ = h.invitation.Delete(invitation)
 			}
+			organization, err = h.organization.FindById(invitation.OrganizationId)
+			if err != nil {
+				return c.JSON(http.StatusNotFound, api.Error("organization not found"))
+			}
 		}
 	}
 
-	isMember := false
+	m := false
 	if member.Id != 0 {
-		isMember = true
+		m = true
 	}
 
 	return c.JSON(
 		http.StatusOK,
-		api.Success(model.SignupSuccess{User: u, Token: t, IsMember: isMember}, api.CreateRequest(c)),
+		api.Success(model.SignupResponse{User: u, Token: t, Member: m, Organization: organization}, api.CreateRequest(c)),
 	)
 }
 
