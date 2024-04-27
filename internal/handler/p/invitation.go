@@ -39,7 +39,7 @@ func (h *Invitation) invitation(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("invitation not found"))
 	}
 
-	organization, err := h.organization.ById(invitation.OrganizationId)
+	organization, err := h.organization.FindById(invitation.OrganizationId)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
 	}

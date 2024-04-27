@@ -11,4 +11,9 @@ type (
 
 		UserId *uuid.UUID
 	}
+
+	ConfigurationResponse struct {
+		Configuration interface{} `json:"configuration"`
+		Organization  interface{} `json:"organization"`
+	}
 )

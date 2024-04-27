@@ -15,15 +15,17 @@ import (
 )
 
 type Configuration struct {
-	echo       *echo.Group
-	database   *sqlx.DB
-	member     *database.MemberRepository
-	repository *ud.ConfigurationRepository
+	echo         *echo.Group
+	database     *sqlx.DB
+	member       *database.MemberRepository
+	organization *database.OrganizationRepository
+	repository   *ud.ConfigurationRepository
 }
 
 func (h *Configuration) initialize() *Configuration {
 	h.repository = ud.CreateConfiguration(h.database)
 	h.member = database.CreateMember(h.database)
+	h.organization = database.CreateOrganization(h.database)
 
 	h.echo.PUT("/users/configurations", h.set)
 
@@ -57,7 +59,13 @@ func (h *Configuration) set(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+	o, err := h.organization.FindById(&organization)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
+	}
+
+	response := &um.ConfigurationResponse{entity, o}
+	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
 
 func CreateConfiguration(g *echo.Group, d *sqlx.DB) *Configuration {

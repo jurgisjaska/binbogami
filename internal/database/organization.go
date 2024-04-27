@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func (r *OrganizationRepository) ById(id *uuid.UUID) (*Organization, error) {
+func (r *OrganizationRepository) FindById(id *uuid.UUID) (*Organization, error) {
 	query := `
 		SELECT o.* FROM organizations AS o
 		WHERE o.id = ? AND o.deleted_at IS NULL

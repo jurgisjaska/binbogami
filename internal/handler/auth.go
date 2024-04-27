@@ -106,7 +106,7 @@ func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
 		}
 	}
 
-	o, _ := h.organization.ById(organization)
+	o, _ := h.organization.FindById(organization)
 	return m, o
 }
 
