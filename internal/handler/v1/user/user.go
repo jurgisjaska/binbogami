@@ -31,7 +31,7 @@ func (h *User) one(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect user"))
 	}
 
-	user, err := h.repository.By("id", id)
+	user, err := h.repository.FindByColumn("id", id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("user not found"))
 	}

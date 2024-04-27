@@ -29,7 +29,7 @@ type (
 	}
 )
 
-func (r *Repository) By(column string, value interface{}) (*User, error) {
+func (r *Repository) FindByColumn(column string, value interface{}) (*User, error) {
 	user := &User{}
 	sql := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
 	err := r.database.Get(user, sql, value)

@@ -53,16 +53,16 @@ func (h *Auth) initialize() *Auth {
 func (h *Auth) signin(c echo.Context) error {
 	request := &model.Signin{}
 	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(credentialError))
+		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
 	}
 
 	if err := c.Validate(request); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
+		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
-	u, err := h.user.By("email", request.Email)
+	u, err := h.user.FindByColumn("email", request.Email)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
+		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
 	password := fmt.Sprintf("%s%s%s", request.Password, u.Salt, h.configuration.Secret)
@@ -71,12 +71,12 @@ func (h *Auth) signin(c echo.Context) error {
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return c.JSON(http.StatusUnauthorized, api.Error(err.Error()))
 	}
 
 	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+		return c.JSON(http.StatusUnauthorized, api.Error(err.Error()))
 	}
 
 	m, o := h.membership(u)
@@ -126,7 +126,7 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.user.By("email", *sm.Email)
+	existingUser, err := h.user.FindByColumn("email", *sm.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
 	}
