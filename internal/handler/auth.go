@@ -164,16 +164,24 @@ func (h *Auth) signup(c echo.Context) error {
 			if err == nil {
 				_ = h.invitation.Delete(invitation)
 			}
-			organization, err = h.organization.FindById(invitation.OrganizationId)
-			if err != nil {
-				return c.JSON(http.StatusNotFound, api.Error("organization not found"))
-			}
+
+			// error does not matter in this case
+			// organization either is there or no
+			// SQL not found can be ignored
+			organization, _ = h.organization.FindById(invitation.OrganizationId)
 		}
 	}
 
+	// membership status
 	m := false
 	if member.Id != 0 {
 		m = true
+	}
+
+	// reset organization to nil
+	// to keep consistency between sign in and sign up methods
+	if organization.Id == nil {
+		organization = nil
 	}
 
 	return c.JSON(
