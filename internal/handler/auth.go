@@ -47,6 +47,9 @@ func (h *Auth) initialize() *Auth {
 	h.echo.PUT("/auth", h.signin)
 	h.echo.POST("/auth", h.signup)
 
+	h.echo.POST("/auth/forgot-password", h.forgot)
+	h.echo.POST("/auth/reset-password", h.reset)
+
 	return h
 }
 
@@ -213,6 +216,44 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 	}
 
 	return string(hashedPassword), nil
+}
+
+func (h *Auth) forgot(c echo.Context) error {
+	request := &model.ForgotPasswordRequest{}
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
+	}
+
+	if err := c.Validate(request); err != nil {
+		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+	}
+
+	user, err := h.user.FindByColumn("email", request.Email)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+	}
+
+	// create reset token
+	// send an email to user
+
+	return nil
+}
+
+func (h *Auth) reset(c echo.Context) error {
+	request := &model.ResetPasswordRequest{}
+	if err := c.Bind(request); err != nil {
+		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
+	}
+
+	if err := c.Validate(request); err != nil {
+		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+	}
+
+	// unique reset token is needed to reset password
+	// it can be used once
+	// expires after 24 hours
+
+	return nil
 }
 
 // CreateAuth creates instance of the auth handler

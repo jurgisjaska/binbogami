@@ -34,4 +34,14 @@ type (
 		Member       bool        `json:"member"`
 		Organization interface{} `json:"organization"`
 	}
+
+	// ForgotPasswordRequest struct is a data structure representing the request for forgot password feature,
+	ForgotPasswordRequest struct {
+		Email string `validate:"required,email" json:"email"`
+	}
+
+	ResetPasswordRequest struct {
+		Password         string `validate:"required,gte=8" json:"password"`
+		RepeatedPassword string `validate:"required,gte=8,eqfield=Password" json:"repeatedPassword"`
+	}
 )
