@@ -6,11 +6,10 @@ import (
 
 type (
 	InvitationRequest struct {
-		// @todo organization should come from header
-		OrganizationId *uuid.UUID `validate:"required" json:"organizationId"`
-		Email          []string   `validate:"required" json:"email"`
+		Email []string `validate:"required" json:"email"`
 
-		CreatedBy *uuid.UUID
+		OrganizationId *uuid.UUID
+		CreatedBy      *uuid.UUID
 	}
 
 	InvitationResponse struct {

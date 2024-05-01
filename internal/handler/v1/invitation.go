@@ -49,8 +49,9 @@ func (h *Invitation) create(c echo.Context) error {
 		database.MemberRoleAdmin:   true,
 		database.MemberRoleOwner:   true,
 	}
-	cm, err := h.member.Find(i.OrganizationId, claims.Id)
-	if err != nil || !allow[cm.Role] {
+
+	member, err := membership(h.member, c)
+	if err != nil || !allow[member.Role] {
 		return c.JSON(http.StatusForbidden, api.Error("only organization owners and admins can invite members"))
 	}
 
@@ -59,6 +60,7 @@ func (h *Invitation) create(c echo.Context) error {
 	}
 
 	i.CreatedBy = claims.Id
+	i.OrganizationId = member.OrganizationId
 	invitations, err := h.invitation.Create(i)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))

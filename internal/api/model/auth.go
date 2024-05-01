@@ -19,7 +19,7 @@ type (
 		Member       bool        `json:"member"`
 	}
 
-	Signup struct {
+	SignupRequest struct {
 		Email            *string    `validate:"required,email,lt=128" json:"email"`
 		Password         string     `validate:"required,gte=8" json:"password"`
 		RepeatedPassword string     `validate:"required,gte=8,eqfield=Password" json:"repeatedPassword"`

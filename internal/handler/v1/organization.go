@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	organizationHeader = "organization_id"
+	organizationHeader = "organization"
 )
 
 // Organization represents an organization handler.

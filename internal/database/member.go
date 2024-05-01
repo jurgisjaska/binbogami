@@ -20,14 +20,14 @@ type (
 	Member struct {
 		Id             int        `json:"id"`
 		Role           int        `json:"role"`
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
-		UserId         *uuid.UUID `db:"user_id" json:"user_id"`
+		OrganizationId *uuid.UUID `db:"organization_id" json:"organizationId"`
+		UserId         *uuid.UUID `db:"user_id" json:"userId"`
 
-		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
 
-		CreatedAt time.Time  `db:"created_at" json:"created_at"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
 	}
 
 	Members []Member
@@ -55,7 +55,7 @@ func (r *MemberRepository) Create(org *uuid.UUID, user *uuid.UUID, role int, cre
 		return nil, err
 	}
 
-	return member, nil
+	return r.Find(member.OrganizationId, member.UserId)
 }
 
 func (r *MemberRepository) Find(org *uuid.UUID, user *uuid.UUID) (*Member, error) {

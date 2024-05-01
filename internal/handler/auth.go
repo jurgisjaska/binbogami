@@ -13,6 +13,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/gommon/log"
 	"github.com/labstack/gommon/random"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -113,32 +114,32 @@ func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
 // signup validates signup form data and creates new user
 // if the invitation UUID is present adds the new user to the organization
 func (h *Auth) signup(c echo.Context) error {
-	sm := &model.Signup{}
-	if err := c.Bind(sm); err != nil {
+	request := &model.SignupRequest{}
+	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(signupError))
 	}
 
-	if err := c.Validate(sm); err != nil {
+	if err := c.Validate(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, err.Error()))
 	}
 
-	if sm.Password != sm.RepeatedPassword {
+	if request.Password != request.RepeatedPassword {
 		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.user.FindByColumn("email", *sm.Email)
+	existingUser, err := h.user.FindByColumn("email", *request.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
 	}
 
 	u := &user.User{
-		Email:   sm.Email,
-		Name:    sm.Name,
-		Surname: sm.Surname,
+		Email:   request.Email,
+		Name:    request.Name,
+		Surname: request.Surname,
 		Salt:    random.String(16),
 	}
 
-	u.Password, err = h.hashPassword(sm.Password, u.Salt)
+	u.Password, err = h.hashPassword(request.Password, u.Salt)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors(signupFailedError, err.Error()))
 	}
@@ -157,8 +158,11 @@ func (h *Auth) signup(c echo.Context) error {
 
 	member := &database.Member{}
 	organization := &database.Organization{}
-	if sm.InvitationId != nil {
-		invitation, err := h.invitation.Find(sm.InvitationId)
+	log.Infof("%+v", request)
+	if request.InvitationId != nil {
+		invitation, err := h.invitation.Find(request.InvitationId)
+		log.Infof("%+v", invitation)
+		log.Error(err)
 		if err == nil {
 			member, err = h.member.Create(invitation.OrganizationId, u.Id, database.MemberRoleDefault, invitation.CreatedBy)
 			if err == nil {
@@ -171,6 +175,8 @@ func (h *Auth) signup(c echo.Context) error {
 			organization, _ = h.organization.FindById(invitation.OrganizationId)
 		}
 	}
+
+	log.Infof("%+v", member)
 
 	// membership status
 	m := false
@@ -186,7 +192,10 @@ func (h *Auth) signup(c echo.Context) error {
 
 	return c.JSON(
 		http.StatusOK,
-		api.Success(model.SignupResponse{User: u, Token: t, Member: m, Organization: organization}, api.CreateRequest(c)),
+		api.Success(
+			model.SignupResponse{User: u, Token: t, Member: m, Organization: organization},
+			api.CreateRequest(c),
+		),
 	)
 }
 
