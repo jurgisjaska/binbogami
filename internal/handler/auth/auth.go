@@ -16,6 +16,8 @@ const (
 	signupError       string = "incorrect signup information"
 	credentialError   string = "incorrect credentials"
 	signupFailedError string = "signup failed"
+	validationError   string = "validation failed"
+	requestError      string = "bad request"
 )
 
 type (
@@ -24,6 +26,7 @@ type (
 		database          *sqlx.DB
 		user              *user.Repository
 		userConfiguration *user.ConfigurationRepository
+		userPasswordReset *user.PasswordResetRepository
 		invitation        *database.InvitationRepository
 		member            *database.MemberRepository
 		organization      *database.OrganizationRepository
@@ -36,6 +39,7 @@ func (h *Auth) initialize() *Auth {
 	h.invitation = database.CreateInvitation(h.database)
 	h.member = database.CreateMember(h.database)
 	h.userConfiguration = user.CreateConfiguration(h.database)
+	h.userPasswordReset = user.CreatePasswordReset(h.database)
 	h.organization = database.CreateOrganization(h.database)
 
 	h.echo.PUT("/auth/signin", h.signin)
