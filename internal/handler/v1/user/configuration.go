@@ -33,7 +33,7 @@ func (h *Configuration) initialize() *Configuration {
 }
 
 func (h *Configuration) set(c echo.Context) error {
-	request := &um.SetConfiguration{}
+	request := &um.SetConfigurationRequest{}
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect user configuration data", err.Error()))
 	}

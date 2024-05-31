@@ -10,7 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/handler"
+	"github.com/jurgisjaska/binbogami/internal/handler/auth"
 	"github.com/jurgisjaska/binbogami/internal/handler/p"
 	"github.com/jurgisjaska/binbogami/internal/handler/v1"
 	"github.com/jurgisjaska/binbogami/internal/handler/v1/user"
@@ -45,7 +45,7 @@ func main() {
 	}))
 	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
-	handler.CreateAuth(e, database, config)
+	auth.CreateAuth(e, database, config)
 
 	pg := e.Group("/p")
 	p.CreateInvitation(pg, database)

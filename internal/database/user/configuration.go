@@ -45,7 +45,7 @@ func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuratio
 }
 
 // Upsert inserts a new configuration record into the database if it does not exist, or updates an existing record if it does.
-func (r *ConfigurationRepository) Upsert(model *um.SetConfiguration) (*Configuration, error) {
+func (r *ConfigurationRepository) Upsert(model *um.SetConfigurationRequest) (*Configuration, error) {
 	id := uuid.New()
 	configuration := &Configuration{
 		Id:            &id,

@@ -5,7 +5,7 @@ import (
 )
 
 type (
-	SetConfiguration struct {
+	SetConfigurationRequest struct {
 		Configuration int    `validate:"required" json:"configuration"`
 		Value         string `validate:"required" json:"value"`
 
