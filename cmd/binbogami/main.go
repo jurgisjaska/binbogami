@@ -31,11 +31,15 @@ func main() {
 	}
 	defer func() { _ = database.Close() }()
 
+	// @deprecated use dialer and mail services
 	mail, err := internal.ConnectMail(config.Mail)
 	if err != nil {
 		log.Fatalln("mail failure")
 	}
 	defer func() { _ = mail.Close() }()
+
+	// create mail dialer
+	dialer := internal.CreateDialer(config.Mail)
 
 	e := echo.New()
 	// @todo if this ever goes to production it needs to have proper values!
@@ -45,7 +49,7 @@ func main() {
 	}))
 	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
-	auth.CreateAuth(e, database, config)
+	auth.CreateAuth(e, database, config, dialer)
 
 	pg := e.Group("/p")
 	p.CreateInvitation(pg, database)

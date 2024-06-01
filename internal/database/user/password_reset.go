@@ -17,12 +17,12 @@ type (
 		Id     *uuid.UUID `json:"id"`
 		UserId *uuid.UUID `db:"user_id" json:"userId"`
 
-		Ip        string `db:"ip"`
-		UserAgent string `db:"user_agent"`
+		Ip        string `db:"ip" json:"-"`
+		UserAgent string `db:"user_agent" json:"-"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		OpenedAt  *time.Time `db:"updated_at"`
-		ExpireAt  time.Time  `db:"expire_at"`
+		OpenedAt  *time.Time `db:"opened_at" json:"-"`
+		ExpireAt  time.Time  `db:"expire_at" json:"-"`
 	}
 
 	PasswordResets []PasswordReset
@@ -45,7 +45,7 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 	}
 
 	_, err := r.database.NamedExec(`
-		INSERT INTO user_password_resets (id, user_id, ip, user_agent created_at, expire_at)
+		INSERT INTO user_password_resets (id, user_id, ip, user_agent, created_at, expire_at)
 		VALUES (:id, :user_id, :ip, :user_agent, :created_at, :expire_at)
 	`, reset)
 
@@ -59,11 +59,9 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 func (r *PasswordResetRepository) FindManyByUser(u *User) (*PasswordResets, error) {
 	resets := &PasswordResets{}
 	query := `
-		SELECT upr.* 
-		FROM user_password_resets AS upr 
-		WHERE 
-		    upr.user_id = ?
-		    AND upr.expire_at < NOW()
+		SELECT user_password_resets.* 
+		FROM user_password_resets 
+		WHERE user_password_resets.user_id = ? AND user_password_resets.expire_at > NOW()
 	`
 
 	err := r.database.Select(resets, query, u.Id)

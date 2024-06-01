@@ -29,13 +29,10 @@ func (h *Auth) forgot(c echo.Context) error {
 	}
 
 	// find other password resets for the user
-	resets, err := h.userPasswordReset.FindManyByUser(user)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Error("failed to retrieve reset requests"))
-	}
+	resets, _ := h.userPasswordReset.FindManyByUser(user)
 
 	// verify that user do not have much of them
-	if len(*resets) >= passwordResetLimit {
+	if resets != nil && len(*resets) >= passwordResetLimit {
 		return c.JSON(http.StatusUnauthorized, api.Error("too many reset requests"))
 	}
 
@@ -48,6 +45,12 @@ func (h *Auth) forgot(c echo.Context) error {
 	entity, err := h.userPasswordReset.Save(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	// send email with reset password link
+	err = h.mailer.resetPassword.Send(user, entity)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))

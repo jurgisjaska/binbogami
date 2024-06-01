@@ -8,8 +8,10 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/gomail.v2"
 )
 
 const (
@@ -20,17 +22,24 @@ const (
 	requestError      string = "bad request"
 )
 
-type Auth struct {
-	echo              *echo.Echo
-	database          *sqlx.DB
-	user              *user.Repository
-	userConfiguration *user.ConfigurationRepository
-	userPasswordReset *user.PasswordResetRepository
-	invitation        *database.InvitationRepository
-	member            *database.MemberRepository
-	organization      *database.OrganizationRepository
-	configuration     *internal.Config
-}
+type (
+	Auth struct {
+		echo              *echo.Echo
+		database          *sqlx.DB
+		user              *user.Repository
+		userConfiguration *user.ConfigurationRepository
+		userPasswordReset *user.PasswordResetRepository
+		invitation        *database.InvitationRepository
+		member            *database.MemberRepository
+		organization      *database.OrganizationRepository
+		configuration     *internal.Config
+		mailer            *mailer
+	}
+
+	mailer struct {
+		resetPassword *mail.ResetPassword
+	}
+)
 
 func (h *Auth) initialize() *Auth {
 	h.user = user.CreateUser(h.database)
@@ -91,6 +100,13 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 }
 
 // CreateAuth creates instance of the auth handler
-func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config) *Auth {
-	return (&Auth{echo: e, database: d, configuration: c}).initialize()
+func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Auth {
+	return (&Auth{
+		echo:          e,
+		database:      d,
+		configuration: c,
+		mailer: &mailer{
+			resetPassword: mail.CreateResetPassword(md, c),
+		},
+	}).initialize()
 }
