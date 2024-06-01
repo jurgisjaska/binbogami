@@ -8,11 +8,11 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model/auth"
 )
 
-const (
-	defaultPasswordResetDuration = 2
-)
+// defaultPasswordResetDuration is a constant representing the password reset duration in hours
+const defaultPasswordResetDuration = 2
 
 type (
+	// PasswordReset represents a data structure for storing information about a password reset.
 	PasswordReset struct {
 		Id     *uuid.UUID `json:"id"`
 		UserId *uuid.UUID `db:"user_id" json:"userId"`
@@ -45,8 +45,8 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 	}
 
 	_, err := r.database.NamedExec(`
-		INSERT INTO user_password_resets (id, user_id, created_at, expire_at)
-		VALUES (:id, :user_id, :created_at, :expire_at)
+		INSERT INTO user_password_resets (id, user_id, ip, user_agent created_at, expire_at)
+		VALUES (:id, :user_id, :ip, :user_agent, :created_at, :expire_at)
 	`, reset)
 
 	if err != nil {

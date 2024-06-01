@@ -20,19 +20,17 @@ const (
 	requestError      string = "bad request"
 )
 
-type (
-	Auth struct {
-		echo              *echo.Echo
-		database          *sqlx.DB
-		user              *user.Repository
-		userConfiguration *user.ConfigurationRepository
-		userPasswordReset *user.PasswordResetRepository
-		invitation        *database.InvitationRepository
-		member            *database.MemberRepository
-		organization      *database.OrganizationRepository
-		configuration     *internal.Config
-	}
-)
+type Auth struct {
+	echo              *echo.Echo
+	database          *sqlx.DB
+	user              *user.Repository
+	userConfiguration *user.ConfigurationRepository
+	userPasswordReset *user.PasswordResetRepository
+	invitation        *database.InvitationRepository
+	member            *database.MemberRepository
+	organization      *database.OrganizationRepository
+	configuration     *internal.Config
+}
 
 func (h *Auth) initialize() *Auth {
 	h.user = user.CreateUser(h.database)

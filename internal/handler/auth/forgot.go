@@ -28,18 +28,23 @@ func (h *Auth) forgot(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, api.Errors("no user associated with this email", err.Error()))
 	}
 
+	// find other password resets for the user
 	resets, err := h.userPasswordReset.FindManyByUser(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error("failed to retrieve reset requests"))
 	}
 
+	// verify that user do not have much of them
 	if len(*resets) >= passwordResetLimit {
 		return c.JSON(http.StatusUnauthorized, api.Error("too many reset requests"))
 	}
 
+	// collect additional information
 	request.Ip = c.RealIP()
 	request.UserAgent = c.Request().UserAgent()
 	request.User = user
+
+	// save new password reset
 	entity, err := h.userPasswordReset.Save(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
