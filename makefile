@@ -10,7 +10,7 @@ run:
 	@bin/${NAME}
 
 test:
-	@go test -v -cover ./...
+	@go test -v -cover -coverprofile=coverage.out ./...
 
 clean:
 	@rm -f bin/${NAME}
