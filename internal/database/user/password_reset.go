@@ -33,6 +33,21 @@ type (
 	}
 )
 
+func (r *PasswordResetRepository) FindById(id *uuid.UUID) (*PasswordReset, error) {
+	query := `
+		SELECT pr.* FROM user_password_resets AS pr
+		WHERE pr.id = ? AND pr.expire_at > NOW()
+		LIMIT 1
+	`
+
+	reset := &PasswordReset{}
+	if err := r.database.Get(reset, query, id); err != nil {
+		return nil, err
+	}
+
+	return reset, nil
+}
+
 func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, error) {
 	id := uuid.New()
 	reset := &PasswordReset{

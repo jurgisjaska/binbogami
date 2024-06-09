@@ -51,9 +51,13 @@ func main() {
 	e.Validator = &api.Validator{Validator: validator.New()}
 	auth.CreateAuth(e, database, config, dialer)
 
+	// public resources that are not related with auth
+	// mus be accessible without authentication
 	pg := e.Group("/p")
 	p.CreateInvitation(pg, database)
+	p.CreateReset(pg, database)
 
+	// main API
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
@@ -69,7 +73,7 @@ func main() {
 
 	v1.CreateEntry(g, database)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.App.Port)))
 }
 
 // customHTTPErrorHandler handles HTTP errors and provides custom error responses.
