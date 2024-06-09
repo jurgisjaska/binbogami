@@ -14,18 +14,18 @@ func (h *Auth) forgot(c echo.Context) error {
 	request := &auth.ForgotRequest{}
 	if err := c.Bind(request); err != nil {
 		// request cannot be bind to model
-		return c.JSON(http.StatusUnauthorized, api.Error(requestError))
+		return c.JSON(http.StatusBadRequest, api.Error(requestError))
 	}
 
 	if err := c.Validate(request); err != nil {
 		// request does not pass validation
-		return c.JSON(http.StatusUnauthorized, api.Errors(validationError, err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
 	}
 
 	// attempt to locate used by email
 	user, err := h.user.FindByColumn("email", request.Email)
 	if err != nil {
-		return c.JSON(http.StatusUnauthorized, api.Errors("no user associated with this email", err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no user associated with this email", err.Error()))
 	}
 
 	// find other password resets for the user
@@ -33,7 +33,7 @@ func (h *Auth) forgot(c echo.Context) error {
 
 	// verify that user do not have much of them
 	if resets != nil && len(*resets) >= passwordResetLimit {
-		return c.JSON(http.StatusUnauthorized, api.Error("too many reset requests"))
+		return c.JSON(http.StatusUnprocessableEntity, api.Error("too many reset requests"))
 	}
 
 	// collect additional information
@@ -44,7 +44,7 @@ func (h *Auth) forgot(c echo.Context) error {
 	// save new password reset
 	entity, err := h.userPasswordReset.Save(request)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
 	// send email with reset password link
