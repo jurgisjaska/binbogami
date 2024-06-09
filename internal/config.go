@@ -13,11 +13,10 @@ type (
 	Config struct {
 		Environment string
 		Secret      string
-		Hostname    string
-		Port        int
-
-		Database *Database
-		Mail     *Mail
+		App         *Authority
+		Web         *Authority
+		Database    *Database
+		Mail        *Mail
 	}
 
 	// Database represents the database configuration.
@@ -41,6 +40,13 @@ type (
 		Username string
 		Password string
 	}
+
+	// Authority represents an authority configuration.
+	// It contains the hostname and port information.
+	Authority struct {
+		Hostname string
+		Port     int
+	}
 )
 
 // CreateConfig loads the configuration from the environment and creates an instance of config.
@@ -53,11 +59,19 @@ func CreateConfig() (*Config, error) {
 	ap, _ := strconv.Atoi(os.Getenv("APP_PORT"))
 	mp, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
 
+	wp, _ := strconv.Atoi(os.Getenv("WEB_APP_PORT"))
+
 	return &Config{
 		Environment: os.Getenv("APP_ENVIRONMENT"),
 		Secret:      os.Getenv("APP_SECRET"),
-		Hostname:    os.Getenv("APP_HOSTNAME"),
-		Port:        ap,
+		App: &Authority{
+			Hostname: os.Getenv("APP_HOSTNAME"),
+			Port:     ap,
+		},
+		Web: &Authority{
+			Hostname: os.Getenv("WEB_APP_HOSTNAME"),
+			Port:     wp,
+		},
 		Database: &Database{
 			Name: os.Getenv("DATABASE_NAME"),
 			Connection: &Connection{

@@ -13,6 +13,7 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+// ResetPassword represents a mail service for sending password reset emails.
 type ResetPassword struct {
 	d *gomail.Dialer
 	c *internal.Config
@@ -43,7 +44,9 @@ func (m *ResetPassword) createMessage(u string, id *uuid.UUID) (string, error) {
 		return "", err
 	}
 
-	url := fmt.Sprintf("http://%s:%d/reset-password/%s", m.c.Hostname, m.c.Port, id.String())
+	// password must be sent to the client apps
+	// in this case send it to the web application
+	url := fmt.Sprintf("http://%s:%d/reset-password/%s", m.c.Web.Hostname, m.c.Web.Port, id.String())
 	content := struct {
 		Name string
 		URL  string

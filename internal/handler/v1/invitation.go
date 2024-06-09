@@ -91,7 +91,7 @@ func (h *Invitation) send(invitation *database.Invitation) error {
 		return err
 	}
 
-	url := fmt.Sprintf("http://%s:%d/join/%s", h.configuration.Hostname, h.configuration.Port, invitation.Id)
+	url := fmt.Sprintf("http://%s:%d/join/%s", h.configuration.Web.Hostname, h.configuration.Web.Port, invitation.Id)
 	_, err = fmt.Fprintf(writer, "Hello,\nJoin organization using the link %s", url)
 	if err != nil {
 		return err
