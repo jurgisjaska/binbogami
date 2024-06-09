@@ -19,20 +19,20 @@ import (
 func (h *Auth) signup(c echo.Context) error {
 	request := &auth.SignupRequest{}
 	if err := c.Bind(request); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error(signupError))
+		return c.JSON(http.StatusBadRequest, api.Error(requestError))
 	}
 
 	if err := c.Validate(request); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors(signupError, err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(formError, err.Error()))
 	}
 
 	if request.Password != request.RepeatedPassword {
-		return c.JSON(http.StatusBadRequest, api.Errors(signupError, fmt.Errorf("passwords does not match")))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(passwordsMatchError, fmt.Errorf("passwords does not match")))
 	}
 
 	existingUser, err := h.user.FindByColumn("email", *request.Email)
 	if existingUser != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("email address already in use"))
+		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
 
 	u := &user.User{
@@ -78,8 +78,6 @@ func (h *Auth) signup(c echo.Context) error {
 			organization, _ = h.organization.FindById(invitation.OrganizationId)
 		}
 	}
-
-	log.Infof("%+v", member)
 
 	// membership status
 	m := false

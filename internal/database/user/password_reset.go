@@ -71,6 +71,35 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 	return reset, nil
 }
 
+// @todo use this insead of find by ID
+func (r *PasswordResetRepository) UpdateOpenedAt(id *uuid.UUID) (*PasswordReset, error) {
+	// update opened_at and return password reset token entity
+	return nil, nil
+}
+
+// UpdateExpireAt updates all future user password resets with expiration date of this moment
+// invalidate all password resets for the user
+func (r *PasswordResetRepository) UpdateExpireAt(u *User) error {
+	query := `
+		UPDATE user_password_resets
+		SET user_password_resets.expire_at = :expire_at
+		WHERE user_password_resets.user_id = :user_id AND user_password_resets.expire_at > NOW()
+	`
+
+	_, err := r.database.NamedExec(
+		query,
+		map[string]interface{}{
+			"expire_at": time.Now(),
+			"user_id":   u.Id,
+		})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *PasswordResetRepository) FindManyByUser(u *User) (*PasswordResets, error) {
 	resets := &PasswordResets{}
 	query := `

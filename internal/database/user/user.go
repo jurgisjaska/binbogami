@@ -89,6 +89,18 @@ func (r *Repository) Create(user *User) error {
 	return nil
 }
 
+func (r *Repository) UpdatePassword(u *User) error {
+	_, err := r.database.NamedExec(`
+		UPDATE users SET password = :password WHERE id = :id 
+	`, u)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // CreateUser creates a new instance of the Repository with the specified SQL database connection.
 func CreateUser(d *sqlx.DB) *Repository {
 	return &Repository{database: d}

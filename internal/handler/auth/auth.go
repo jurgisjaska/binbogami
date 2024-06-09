@@ -15,11 +15,13 @@ import (
 )
 
 const (
-	signupError       string = "incorrect signup information"
-	credentialError   string = "incorrect credentials"
-	signupFailedError string = "signup failed"
-	validationError   string = "validation failed"
-	requestError      string = "bad request"
+	signupError         string = "incorrect signup information"
+	credentialError     string = "incorrect credentials"
+	signupFailedError   string = "signup failed"
+	validationError     string = "validation failed"
+	requestError        string = "bad request"
+	passwordsMatchError string = "passwords do not match"
+	formError           string = "submitted form filled incorrectly"
 )
 
 type (
