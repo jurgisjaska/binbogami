@@ -20,7 +20,7 @@ type Reset struct {
 func (h *Reset) initialize() *Reset {
 	h.repository = user.CreatePasswordReset(h.database)
 
-	h.echo.GET("/password-reset/:id", h.passwordReset)
+	h.echo.GET("/reset-password/:id", h.passwordReset)
 
 	return h
 }
