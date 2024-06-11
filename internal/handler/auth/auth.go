@@ -34,6 +34,7 @@ type (
 		userRepository *userRepository
 	}
 
+	// @todo go level up on a tree if there will not be any other mailers
 	mailer struct {
 		resetPassword *mail.ResetPassword
 	}
@@ -106,7 +107,7 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-// CreateAuth creates instance of the auth handler
+// CreateAuth creates a new instance of the Auth handler and initializes it.
 func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Auth {
 	return (&Auth{
 		echo:          e,

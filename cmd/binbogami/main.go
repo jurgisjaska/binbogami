@@ -31,13 +31,6 @@ func main() {
 	}
 	defer func() { _ = database.Close() }()
 
-	// @deprecated use dialer and mail services
-	mail, err := internal.ConnectMail(config.Mail)
-	if err != nil {
-		log.Fatalln("mail failure")
-	}
-	defer func() { _ = mail.Close() }()
-
 	// create mail dialer
 	dialer := internal.CreateDialer(config.Mail)
 
@@ -54,8 +47,7 @@ func main() {
 	// public resources that are not related with auth
 	// mus be accessible without authentication
 	pg := e.Group("/p")
-	p.CreateInvitation(pg, database)
-	p.CreateReset(pg, database)
+	p.CreatePublic(pg, database)
 
 	// main API
 	g := e.Group("/v1")
@@ -64,7 +56,7 @@ func main() {
 	v1.CreateOrganization(g, database)
 	user.CreateUser(g, database)
 	user.CreateConfiguration(g, database)
-	v1.CreateInvitation(g, database, mail, config)
+	v1.CreateInvitation(g, database, config, dialer)
 	v1.CreateMember(g, database)
 
 	v1.CreateBook(g, database)

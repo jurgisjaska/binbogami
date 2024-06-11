@@ -37,7 +37,7 @@ type (
 
 // Open retrieves the invitation entity from the database by its UUID and marks invitation as opened.
 func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
-	invitation, err := r.Find(id)
+	invitation, err := r.FindById(id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,14 +52,14 @@ func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-// Find retrieves the invitation entity form the database by its UUID.
-func (r *InvitationRepository) Find(id *uuid.UUID) (*Invitation, error) {
+// FindById retrieves the invitation entity form the database by its UUID.
+func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
+	query := `
+		SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()
+	`
+
 	invitation := &Invitation{}
-	if err := r.database.Get(
-		invitation,
-		"SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()",
-		id,
-	); err != nil {
+	if err := r.database.Get(invitation, query, id); err != nil {
 		return nil, err
 	}
 
@@ -83,7 +83,7 @@ func (r *InvitationRepository) Create(model *model.InvitationRequest) (Invitatio
 			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
 		}
 
-		if err := r.flush(invitation); err != nil {
+		if err = r.flush(invitation); err != nil {
 			return nil, err
 		}
 
@@ -101,12 +101,12 @@ func (r *InvitationRepository) Delete(invitation *Invitation) error {
 }
 
 func (r *InvitationRepository) flush(invitation *Invitation) error {
-	_, err := r.database.NamedExec(`
-			INSERT INTO invitations (id, email, created_by, organization_id, created_at, opened_at, expired_at, deleted_at)
-			VALUES (:id, :email, :created_by, :organization_id, :created_at, :opened_at, :expired_at, :deleted_at)
-			ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at
-		`, invitation)
-
+	query := `
+		INSERT INTO invitations (id, email, created_by, organization_id, created_at, opened_at, expired_at, deleted_at)
+		VALUES (:id, :email, :created_by, :organization_id, :created_at, :opened_at, :expired_at, :deleted_at)
+		ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at
+	`
+	_, err := r.database.NamedExec(query, invitation)
 	if err != nil {
 		return err
 	}

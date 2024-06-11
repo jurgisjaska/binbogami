@@ -1,9 +1,7 @@
 package v1
 
 import (
-	"fmt"
 	"net/http"
-	"net/smtp"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
@@ -11,21 +9,28 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
+	"gopkg.in/gomail.v2"
 )
 
 type Invitation struct {
 	echo          *echo.Group
 	database      *sqlx.DB
-	mail          *smtp.Client
+	mailer        *mail.Invitation
 	configuration *internal.Config
 	invitation    *database.InvitationRepository
 	member        *database.MemberRepository
+	organization  *database.OrganizationRepository
+	user          *user.Repository
 }
 
 func (h *Invitation) initialize() *Invitation {
 	h.invitation = database.CreateInvitation(h.database)
 	h.member = database.CreateMember(h.database)
+	h.organization = database.CreateOrganization(h.database)
+	h.user = user.CreateUser(h.database)
 
 	h.echo.POST("/invitations", h.create)
 
@@ -35,12 +40,12 @@ func (h *Invitation) initialize() *Invitation {
 func (h *Invitation) create(c echo.Context) error {
 	i := &model.InvitationRequest{}
 	if err := c.Bind(i); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation data"))
+		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation"))
 	}
 
 	claims := token.FromContext(c)
 	if claims.Id == nil {
-		return c.JSON(http.StatusBadRequest, api.Error(ErrorToken))
+		return c.JSON(http.StatusUnauthorized, api.Error(ErrorToken))
 	}
 
 	allow := map[int]bool{
@@ -55,8 +60,8 @@ func (h *Invitation) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error("only organization owners and admins can invite members"))
 	}
 
-	if err := c.Validate(i); err != nil {
-		return c.JSON(http.StatusBadRequest, api.Errors("incorrect invitation", err.Error()))
+	if err = c.Validate(i); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors("incorrect invitation", err.Error()))
 	}
 
 	i.CreatedBy = claims.Id
@@ -66,8 +71,18 @@ func (h *Invitation) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
+	organization, err := h.organization.FindById(i.OrganizationId)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+	}
+
+	sender, err := h.user.FindByColumn("id", i.CreatedBy)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+	}
+
 	for _, invitation := range invitations {
-		err = h.send(invitation)
+		err = h.mailer.Send(sender, organization, invitation)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 		}
@@ -76,30 +91,12 @@ func (h *Invitation) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
 }
 
-// @todo move to separate service, the handler should not be responsible for the emails
-func (h *Invitation) send(invitation *database.Invitation) error {
-	if err := h.mail.Mail(h.configuration.Mail.Sender); err != nil {
-		return err
-	}
-	if err := h.mail.Rcpt(invitation.Email); err != nil {
-		return err
-	}
-
-	writer, err := h.mail.Data()
-	defer func() { _ = writer.Close() }()
-	if err != nil {
-		return err
-	}
-
-	url := fmt.Sprintf("http://%s:%d/join/%s", h.configuration.Web.Hostname, h.configuration.Web.Port, invitation.Id)
-	_, err = fmt.Fprintf(writer, "Hello,\nJoin organization using the link %s", url)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func CreateInvitation(g *echo.Group, d *sqlx.DB, m *smtp.Client, c *internal.Config) *Invitation {
-	return (&Invitation{echo: g, database: d, mail: m, configuration: c}).initialize()
+// CreateInvitation creates a new Invitation handler and initializes it.
+func CreateInvitation(g *echo.Group, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Invitation {
+	return (&Invitation{
+		echo:          g,
+		database:      d,
+		configuration: c,
+		mailer:        mail.CreateInvitation(md, c),
+	}).initialize()
 }

@@ -63,7 +63,7 @@ func (h *Auth) signup(c echo.Context) error {
 	organization := &database.Organization{}
 	log.Infof("%+v", request)
 	if request.InvitationId != nil {
-		invitation, err := h.invitation.Find(request.InvitationId)
+		invitation, err := h.invitation.FindById(request.InvitationId)
 		log.Infof("%+v", invitation)
 		log.Error(err)
 		if err == nil {
