@@ -23,14 +23,14 @@ func (h *Auth) signup(c echo.Context) error {
 	}
 
 	if err := c.Validate(request); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, api.Errors(formError, err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
 	}
 
 	if request.Password != request.RepeatedPassword {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(passwordsMatchError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.user.FindByColumn("email", *request.Email)
+	existingUser, err := h.userRepository.user.FindByColumn("email", *request.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
@@ -44,12 +44,12 @@ func (h *Auth) signup(c echo.Context) error {
 
 	u.Password, err = h.hashPassword(request.Password, u.Salt)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors(signupFailedError, err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.user.Create(u)
+	err = h.userRepository.user.Create(u)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors(signupFailedError, err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
 	t, err := token.CreateToken(u, h.configuration.Secret)

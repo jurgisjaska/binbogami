@@ -15,41 +15,46 @@ import (
 )
 
 const (
-	signupError         string = "incorrect signup information"
 	credentialError     string = "incorrect credentials"
-	signupFailedError   string = "signup failed"
-	validationError     string = "validation failed"
+	validationError     string = "error encountered during data validation"
 	requestError        string = "bad request"
 	passwordsMatchError string = "passwords do not match"
-	formError           string = "submitted form filled incorrectly"
+	internalError       string = "internal server error"
 )
 
 type (
 	Auth struct {
-		echo              *echo.Echo
-		database          *sqlx.DB
-		user              *user.Repository
-		userConfiguration *user.ConfigurationRepository
-		userPasswordReset *user.PasswordResetRepository
-		invitation        *database.InvitationRepository
-		member            *database.MemberRepository
-		organization      *database.OrganizationRepository
-		configuration     *internal.Config
-		mailer            *mailer
+		echo           *echo.Echo
+		database       *sqlx.DB
+		invitation     *database.InvitationRepository
+		member         *database.MemberRepository
+		organization   *database.OrganizationRepository
+		configuration  *internal.Config
+		mailer         *mailer
+		userRepository *userRepository
 	}
 
 	mailer struct {
 		resetPassword *mail.ResetPassword
 	}
+
+	userRepository struct {
+		user          *user.Repository
+		configuration *user.ConfigurationRepository
+		passwordReset *user.PasswordResetRepository
+	}
 )
 
 func (h *Auth) initialize() *Auth {
-	h.user = user.CreateUser(h.database)
 	h.invitation = database.CreateInvitation(h.database)
 	h.member = database.CreateMember(h.database)
-	h.userConfiguration = user.CreateConfiguration(h.database)
-	h.userPasswordReset = user.CreatePasswordReset(h.database)
 	h.organization = database.CreateOrganization(h.database)
+
+	h.userRepository = &userRepository{
+		user:          user.CreateUser(h.database),
+		configuration: user.CreateConfiguration(h.database),
+		passwordReset: user.CreatePasswordReset(h.database),
+	}
 
 	h.echo.PUT("/auth/signin", h.signin)
 	h.echo.POST("/auth/signup", h.signup)
@@ -71,7 +76,7 @@ func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
 		m = true
 
 		if len(*members) > 1 {
-			defaultConfiguration, err := h.userConfiguration.DefaultOrganization(u)
+			defaultConfiguration, err := h.userRepository.configuration.FindDefaultOrganization(u)
 			if err == nil && defaultConfiguration != nil {
 				defaultId, _ := uuid.Parse(defaultConfiguration.Value)
 				organization = &defaultId

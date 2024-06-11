@@ -5,7 +5,6 @@ import (
 )
 
 type (
-
 	// SignupRequest represents the data structure for the signup form.
 	SignupRequest struct {
 		Email            *string    `validate:"required,email,lt=128" json:"email"`

@@ -16,7 +16,7 @@ func (h *Auth) reset(c echo.Context) error {
 	}
 
 	if err := c.Validate(request); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, api.Errors(formError, err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
 	}
 
 	// are the passwords matching?
@@ -25,30 +25,30 @@ func (h *Auth) reset(c echo.Context) error {
 	}
 
 	// retrieve the password reset token
-	entity, err := h.userPasswordReset.FindById(request.Token)
+	entity, err := h.userRepository.passwordReset.FindById(request.Token)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
 	}
 
 	// retrieve the user that's attempting to reset password
-	user, err := h.user.FindByColumn("id", entity.UserId)
+	user, err := h.userRepository.user.FindByColumn("id", entity.UserId)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
 	user.Password, err = h.hashPassword(request.Password, user.Salt)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors("internal server error", err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.user.UpdatePassword(user)
+	err = h.userRepository.user.UpdatePassword(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors("internal server error", err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.userPasswordReset.UpdateExpireAt(user)
+	err = h.userRepository.passwordReset.UpdateExpireAt(user)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, api.Errors("internal server error", err.Error()))
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))

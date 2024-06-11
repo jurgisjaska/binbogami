@@ -5,12 +5,10 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	um "github.com/jurgisjaska/binbogami/internal/api/model/user"
+	model "github.com/jurgisjaska/binbogami/internal/api/model/user"
 )
 
-const (
-	defaultOrganization int = iota + 1
-)
+const defaultOrganization int = iota + 1
 
 type (
 	Configuration struct {
@@ -30,13 +28,14 @@ type (
 	}
 )
 
-// DefaultOrganization retrieves the default organization configuration for a user.
-func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuration, error) {
-	configuration := &Configuration{}
-	err := r.database.Get(configuration, `
+// FindDefaultOrganization retrieves the default organization configuration for a user.
+func (r *ConfigurationRepository) FindDefaultOrganization(u *User) (*Configuration, error) {
+	query := `
 		SELECT * FROM user_configurations 
-		         WHERE configuration = ? AND user_id = ?
-	`, defaultOrganization, user.Id)
+		WHERE configuration = ? AND user_id = ?
+	`
+	configuration := &Configuration{}
+	err := r.database.Get(configuration, query, defaultOrganization, u.Id)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +44,7 @@ func (r *ConfigurationRepository) DefaultOrganization(user *User) (*Configuratio
 }
 
 // Upsert inserts a new configuration record into the database if it does not exist, or updates an existing record if it does.
-func (r *ConfigurationRepository) Upsert(model *um.SetConfigurationRequest) (*Configuration, error) {
+func (r *ConfigurationRepository) Upsert(model *model.SetConfigurationRequest) (*Configuration, error) {
 	id := uuid.New()
 	configuration := &Configuration{
 		Id:            &id,
@@ -68,7 +67,7 @@ func (r *ConfigurationRepository) Upsert(model *um.SetConfigurationRequest) (*Co
 	return configuration, nil
 }
 
-// CreateConfiguration creates a new instance of ConfigurationRepository with the specified SQL database connection.
+// CreateConfiguration creates a new instance of ConfigurationRepository.
 func CreateConfiguration(d *sqlx.DB) *ConfigurationRepository {
 	return &ConfigurationRepository{database: d}
 }

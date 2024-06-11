@@ -23,13 +23,13 @@ func (h *Auth) forgot(c echo.Context) error {
 	}
 
 	// attempt to locate used by email
-	user, err := h.user.FindByColumn("email", request.Email)
+	user, err := h.userRepository.user.FindByColumn("email", request.Email)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no user associated with this email", err.Error()))
 	}
 
 	// find other password resets for the user
-	resets, _ := h.userPasswordReset.FindManyByUser(user)
+	resets, _ := h.userRepository.passwordReset.FindManyByUser(user)
 
 	// verify that user do not have much of them
 	if resets != nil && len(*resets) >= passwordResetLimit {
@@ -42,7 +42,7 @@ func (h *Auth) forgot(c echo.Context) error {
 	request.User = user
 
 	// save new password reset
-	entity, err := h.userPasswordReset.Save(request)
+	entity, err := h.userRepository.passwordReset.Save(request)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}

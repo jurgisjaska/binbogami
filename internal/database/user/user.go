@@ -30,9 +30,10 @@ type (
 )
 
 func (r *Repository) FindByColumn(column string, value interface{}) (*User, error) {
+	query := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
+
 	user := &User{}
-	sql := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
-	err := r.database.Get(user, sql, value)
+	err := r.database.Get(user, query, value)
 	if err != nil {
 		return nil, err
 	}
@@ -68,20 +69,17 @@ func (r *Repository) FindMany(filter string) (*Users, error) {
 	return users, nil
 }
 
-func (r *Repository) Create(user *User) error {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		return err
-	}
+func (r *Repository) Create(u *User) error {
+	id := uuid.New()
+	u.Id = &id
+	u.CreatedAt = time.Now()
 
-	user.Id = &id
-	user.CreatedAt = time.Now()
-
-	_, err = r.database.NamedExec(`
+	query := `
 		INSERT INTO users (id, email, name, surname, salt, password, created_at)
 		VALUES (:id, :email, :name, :surname, :salt, :password, :created_at) 
-	`, user)
+	`
 
+	_, err := r.database.NamedExec(query, u)
 	if err != nil {
 		return err
 	}
@@ -90,10 +88,7 @@ func (r *Repository) Create(user *User) error {
 }
 
 func (r *Repository) UpdatePassword(u *User) error {
-	_, err := r.database.NamedExec(`
-		UPDATE users SET password = :password WHERE id = :id 
-	`, u)
-
+	_, err := r.database.NamedExec(`UPDATE users SET password = :password WHERE id = :id`, u)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api/model/auth"
+	model "github.com/jurgisjaska/binbogami/internal/api/model/auth"
 )
 
 // defaultPasswordResetDuration is a constant representing the password reset duration in hours
@@ -33,22 +33,8 @@ type (
 	}
 )
 
-func (r *PasswordResetRepository) FindById(id *uuid.UUID) (*PasswordReset, error) {
-	query := `
-		SELECT pr.* FROM user_password_resets AS pr
-		WHERE pr.id = ? AND pr.expire_at > NOW()
-		LIMIT 1
-	`
-
-	reset := &PasswordReset{}
-	if err := r.database.Get(reset, query, id); err != nil {
-		return nil, err
-	}
-
-	return reset, nil
-}
-
-func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, error) {
+// Save saves a new password reset request to the database.
+func (r *PasswordResetRepository) Save(m *model.ForgotRequest) (*PasswordReset, error) {
 	id := uuid.New()
 	reset := &PasswordReset{
 		Id:        &id,
@@ -59,11 +45,12 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 		ExpireAt:  (time.Now()).Add(defaultPasswordResetDuration * time.Hour),
 	}
 
-	_, err := r.database.NamedExec(`
+	query := `
 		INSERT INTO user_password_resets (id, user_id, ip, user_agent, created_at, expire_at)
 		VALUES (:id, :user_id, :ip, :user_agent, :created_at, :expire_at)
-	`, reset)
+	`
 
+	_, err := r.database.NamedExec(query, reset)
 	if err != nil {
 		return nil, err
 	}
@@ -86,13 +73,7 @@ func (r *PasswordResetRepository) UpdateExpireAt(u *User) error {
 		WHERE user_password_resets.user_id = :user_id AND user_password_resets.expire_at > NOW()
 	`
 
-	_, err := r.database.NamedExec(
-		query,
-		map[string]interface{}{
-			"expire_at": time.Now(),
-			"user_id":   u.Id,
-		})
-
+	_, err := r.database.NamedExec(query, map[string]interface{}{"expire_at": time.Now(), "user_id": u.Id})
 	if err != nil {
 		return err
 	}
@@ -100,14 +81,31 @@ func (r *PasswordResetRepository) UpdateExpireAt(u *User) error {
 	return nil
 }
 
+// FindById retrieves a password reset entity with a specific id.
+func (r *PasswordResetRepository) FindById(id *uuid.UUID) (*PasswordReset, error) {
+	query := `
+		SELECT pr.* FROM user_password_resets AS pr
+		WHERE pr.id = ? AND pr.expire_at > NOW()
+		LIMIT 1
+	`
+
+	reset := &PasswordReset{}
+	if err := r.database.Get(reset, query, id); err != nil {
+		return nil, err
+	}
+
+	return reset, nil
+}
+
+// FindManyByUser retrieves a list of password reset entities associated with a specific user.
 func (r *PasswordResetRepository) FindManyByUser(u *User) (*PasswordResets, error) {
-	resets := &PasswordResets{}
 	query := `
 		SELECT user_password_resets.* 
 		FROM user_password_resets 
 		WHERE user_password_resets.user_id = ? AND user_password_resets.expire_at > NOW()
 	`
 
+	resets := &PasswordResets{}
 	err := r.database.Select(resets, query, u.Id)
 	if err != nil {
 		return nil, err
@@ -116,7 +114,7 @@ func (r *PasswordResetRepository) FindManyByUser(u *User) (*PasswordResets, erro
 	return resets, nil
 }
 
-// CreatePasswordReset creates a new instance of PasswordResetRepository with the specified SQL database connection.
+// CreatePasswordReset creates a new instance of PasswordResetRepository.
 func CreatePasswordReset(d *sqlx.DB) *PasswordResetRepository {
 	return &PasswordResetRepository{database: d}
 }
