@@ -33,8 +33,23 @@ func (h *Invitation) initialize() *Invitation {
 	h.user = user.CreateUser(h.database)
 
 	h.echo.POST("/invitations", h.create)
+	h.echo.GET("/invitations", h.byOrganizationMember)
 
 	return h
+}
+
+func (h *Invitation) byOrganizationMember(c echo.Context) error {
+	member, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	invitations, err := h.invitation.FindByMember(member)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no invitations found for current organization"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
 }
 
 func (h *Invitation) create(c echo.Context) error {

@@ -66,6 +66,23 @@ func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
+func (r *InvitationRepository) FindByMember(m *Member) (*Invitations, error) {
+	invitations := &Invitations{}
+	query := `
+		SELECT * 
+		FROM invitations 
+		WHERE organization_id = ? AND created_by = ?
+		AND deleted_at IS NULL
+	`
+
+	err := r.database.Select(invitations, query, m.OrganizationId, m.UserId)
+	if err != nil {
+		return nil, err
+	}
+
+	return invitations, nil
+}
+
 func (r *InvitationRepository) Create(model *model.InvitationRequest) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Email {
