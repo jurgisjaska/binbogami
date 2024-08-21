@@ -53,8 +53,8 @@ func (h *Invitation) byOrganizationMember(c echo.Context) error {
 }
 
 func (h *Invitation) create(c echo.Context) error {
-	i := &model.InvitationRequest{}
-	if err := c.Bind(i); err != nil {
+	invitation := &model.InvitationRequest{}
+	if err := c.Bind(invitation); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation"))
 	}
 
@@ -75,29 +75,29 @@ func (h *Invitation) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error("only organization owners and admins can invite members"))
 	}
 
-	if err = c.Validate(i); err != nil {
+	if err = c.Validate(invitation); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors("incorrect invitation", err.Error()))
 	}
 
-	i.CreatedBy = claims.Id
-	i.OrganizationId = member.OrganizationId
-	invitations, err := h.invitation.Create(i)
+	invitation.CreatedBy = claims.Id
+	invitation.OrganizationId = member.OrganizationId
+	invitations, err := h.invitation.Create(invitation)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	organization, err := h.organization.FindById(i.OrganizationId)
+	organization, err := h.organization.FindById(invitation.OrganizationId)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	sender, err := h.user.FindByColumn("id", i.CreatedBy)
+	sender, err := h.user.FindByColumn("id", invitation.CreatedBy)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	for _, invitation := range invitations {
-		err = h.mailer.Send(sender, organization, invitation)
+	for _, i := range invitations {
+		err = h.mailer.Send(sender, organization, i)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 		}
