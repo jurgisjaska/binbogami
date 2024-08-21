@@ -68,7 +68,7 @@ func CreateRequest(c echo.Context) *Request {
 }
 
 func Success(d interface{}, r *Request) *Response {
-	total, pages := tp(d, r)
+	total, pages := totalPages(d, r)
 
 	return &Response{
 		Status: statusSuccess,
@@ -82,9 +82,9 @@ func Success(d interface{}, r *Request) *Response {
 	}
 }
 
-func tp(d interface{}, r *Request) (int, float64) {
+func totalPages(data interface{}, req *Request) (int, float64) {
 	total := 1
-	dv := reflect.ValueOf(d)
+	dv := reflect.ValueOf(data)
 	if dv.Kind() == reflect.Pointer {
 		dv = dv.Elem()
 	}
@@ -93,7 +93,7 @@ func tp(d interface{}, r *Request) (int, float64) {
 		total = dv.Len()
 	}
 
-	pages := math.Ceil(float64(total / r.Limit))
+	pages := math.Ceil(float64(total) / float64(req.Limit))
 	if pages == 0 {
 		pages = 1
 	}

@@ -52,9 +52,6 @@ func (h *Invitation) byOrganizationMember(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
 }
 
-// if request data are strings
-// failure happens only with mailer
-// this results in bunch of incorrect data in database
 func (h *Invitation) create(c echo.Context) error {
 	invitation := &model.InvitationRequest{}
 	if err := c.Bind(invitation); err != nil {
