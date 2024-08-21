@@ -68,6 +68,7 @@ func (h *Auth) initialize() *Auth {
 
 // membership determine if a user is a member of any organization and return the organization information if true
 // if member has multiple organization but no default he will be marked as member but will not have default organization
+// relates to internal/handler/v1/v1.go
 func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
 	m := false
 	var organization *uuid.UUID

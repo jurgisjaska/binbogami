@@ -67,6 +67,7 @@ func CreateRequest(c echo.Context) *Request {
 	return &Request{page, limit, orderBy, order}
 }
 
+// @todo all list pages MUST be updated with correct total!
 func Success(data interface{}, req *Request, t ...int) *Response {
 	total, pages := totalPages(data, req, t)
 

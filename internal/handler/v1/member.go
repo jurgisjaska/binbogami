@@ -20,9 +20,19 @@ type Member struct {
 func (h *Member) initialize() *Member {
 	h.repository = database.CreateMember(h.database)
 
+	h.echo.GET("/members", h.one)
 	h.echo.POST("/members", h.create)
 
 	return h
+}
+
+func (h *Member) one(c echo.Context) error {
+	member, err := membership(h.repository, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(member, api.CreateRequest(c)))
 }
 
 // create adds new member to the organization
