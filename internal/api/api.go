@@ -67,30 +67,36 @@ func CreateRequest(c echo.Context) *Request {
 	return &Request{page, limit, orderBy, order}
 }
 
-func Success(d interface{}, r *Request) *Response {
-	total, pages := totalPages(d, r)
+func Success(data interface{}, req *Request, t ...int) *Response {
+	total, pages := totalPages(data, req, t)
 
 	return &Response{
 		Status: statusSuccess,
-		Data:   d,
+		Data:   data,
 		Metadata: ResponseMetadata{
 			Total: total,
-			Limit: r.Limit,
-			Page:  r.Page,
+			Limit: req.Limit,
+			Page:  req.Page,
 			Pages: pages,
 		},
 	}
 }
 
-func totalPages(data interface{}, req *Request) (int, float64) {
+func totalPages(data interface{}, req *Request, t []int) (int, float64) {
 	total := 1
-	dv := reflect.ValueOf(data)
-	if dv.Kind() == reflect.Pointer {
-		dv = dv.Elem()
-	}
+	if len(t) > 0 && t[0] > 0 {
+		// total is calculated during database operations
+		total = t[0]
+	} else {
+		// total is calculated by response data
+		dv := reflect.ValueOf(data)
+		if dv.Kind() == reflect.Pointer {
+			dv = dv.Elem()
+		}
 
-	if dv.Kind() == reflect.Slice || dv.Kind() == reflect.Array {
-		total = dv.Len()
+		if dv.Kind() == reflect.Slice || dv.Kind() == reflect.Array {
+			total = dv.Len()
+		}
 	}
 
 	pages := math.Ceil(float64(total) / float64(req.Limit))

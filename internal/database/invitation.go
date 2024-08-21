@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 )
 
@@ -66,21 +67,33 @@ func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-func (r *InvitationRepository) FindByMember(m *Member) (*Invitations, error) {
+func (r *InvitationRepository) FindByMember(m *Member, req *api.Request) (*Invitations, int, error) {
 	invitations := &Invitations{}
+
 	query := `
 		SELECT * 
 		FROM invitations 
-		WHERE organization_id = ? AND created_by = ?
-		AND deleted_at IS NULL
+		WHERE organization_id = ? AND created_by = ? AND deleted_at IS NULL
+		LIMIT ? OFFSET ?
 	`
 
-	err := r.database.Select(invitations, query, m.OrganizationId, m.UserId)
+	offset := (req.Page - 1) * req.Limit
+	err := r.database.Select(invitations, query, m.OrganizationId, m.UserId, req.Limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return invitations, nil
+	query = `
+		SELECT COUNT(*) FROM invitations 
+		WHERE organization_id = ? AND created_by = ? AND deleted_at IS NULL
+	`
+	var count int
+	err = r.database.Get(&count, query, m.OrganizationId, m.UserId)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return invitations, count, nil
 }
 
 func (r *InvitationRepository) Create(model *model.InvitationRequest) (Invitations, error) {

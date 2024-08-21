@@ -44,12 +44,13 @@ func (h *Invitation) byOrganizationMember(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	invitations, err := h.invitation.FindByMember(member)
+	request := api.CreateRequest(c)
+	invitations, total, err := h.invitation.FindByMember(member, request)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no invitations found for current organization"))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(invitations, request, total))
 }
 
 func (h *Invitation) create(c echo.Context) error {
