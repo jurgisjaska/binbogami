@@ -6,7 +6,7 @@ import (
 
 type (
 	InvitationRequest struct {
-		Email []string `validate:"required" json:"email"`
+		Email []string `validate:"dive,required,email" json:"email"`
 
 		OrganizationId *uuid.UUID
 		CreatedBy      *uuid.UUID
