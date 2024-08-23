@@ -16,13 +16,13 @@ type (
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
 
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
-		CreatedBy      *uuid.UUID `db:"created_by" json:"created_by"`
+		OrganizationId *uuid.UUID `db:"organization_id" json:"organizationId"`
+		CreatedBy      *uuid.UUID `db:"created_by" json:"createdBy"`
 
-		CreatedAt time.Time  `db:"created_at" json:"created_at"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
-		ClosedAt  *time.Time `db:"closed_at" json:"closed_at"`
+		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
+		ClosedAt  *time.Time `db:"closed_at" json:"closedAt"`
 	}
 
 	Books []Book
