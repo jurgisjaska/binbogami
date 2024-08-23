@@ -96,7 +96,7 @@ func (r *Repository) FindManyByOrganization(org *uuid.UUID, req *api.Request) (*
 	}
 
 	query = `
-		SELECT * FROM books 
+		SELECT COUNT(*) FROM books 
 		WHERE organization_id = ? AND deleted_at IS NULL
 	`
 	var count int
