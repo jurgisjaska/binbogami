@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 )
 
@@ -80,21 +81,31 @@ func (r *Repository) AddObject(book *Book, m model.BookObject) (*object, error) 
 	return &e, nil
 }
 
-func (r *Repository) ManyByOrganization(org *uuid.UUID) (*Books, error) {
+func (r *Repository) FindManyByOrganization(org *uuid.UUID, req *api.Request) (*Books, int, error) {
 	books := &Books{}
 	query := `
-		SELECT * 
-		FROM books 
-		WHERE organization_id = ?
-		AND deleted_at IS NULL
+		SELECT * FROM books 
+		WHERE organization_id = ? AND deleted_at IS NULL
+		LIMIT ? OFFSET ?
 	`
 
-	err := r.database.Select(books, query, org)
+	offset := (req.Page - 1) * req.Limit
+	err := r.database.Select(books, query, org, req.Limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return books, nil
+	query = `
+		SELECT * FROM books 
+		WHERE organization_id = ? AND deleted_at IS NULL
+	`
+	var count int
+	err = r.database.Get(&count, query, org)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return books, count, nil
 }
 
 func CreateBook(d *sqlx.DB) *Repository {

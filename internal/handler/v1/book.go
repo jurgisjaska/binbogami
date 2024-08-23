@@ -101,12 +101,13 @@ func (h *Book) byOrganization(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	categories, err := h.repository.ManyByOrganization(member.OrganizationId)
+	request := api.CreateRequest(c)
+	books, total, err := h.repository.FindManyByOrganization(member.OrganizationId, request)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no books found in the organization"))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(books, request, total))
 }
 
 // CreateBook creates a new instance of Book handler.
