@@ -55,6 +55,7 @@ func (r *Repository) Create(m *model.Book) (*Book, error) {
 	return book, nil
 }
 
+// Find retrieves a book by its ID from the database if it exists and hasn't been marked as deleted.
 func (r *Repository) Find(id *uuid.UUID) (*Book, error) {
 	book := &Book{}
 	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)

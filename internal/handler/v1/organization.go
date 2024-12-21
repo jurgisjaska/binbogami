@@ -28,14 +28,14 @@ func (h *Organization) initialize() *Organization {
 	h.repository = database.CreateOrganization(h.database)
 	h.member = database.CreateMember(h.database)
 
-	h.echo.GET("/organizations/:id", h.one)
+	h.echo.GET("/organizations/:id", h.show)
 	h.echo.GET("/organizations", h.byMember)
 	h.echo.POST("/organizations", h.create)
 
 	return h
 }
 
-func (h *Organization) one(c echo.Context) error {
+func (h *Organization) show(c echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(ErrorOrganization))

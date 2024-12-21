@@ -29,6 +29,7 @@ func (h *Book) initialize() *Book {
 
 	h.echo.POST("/books", h.create)
 	h.echo.GET("/books", h.byOrganization)
+	h.echo.GET("/books/:id", h.show)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
 
@@ -108,6 +109,20 @@ func (h *Book) byOrganization(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(books, request, total))
+}
+
+func (h *Book) show(c echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	entity, err := h.repository.Find(&id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no books found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
 // CreateBook creates a new instance of Book handler.
