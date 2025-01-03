@@ -24,12 +24,18 @@ func membership(m *database.MemberRepository, c echo.Context) (*database.Member,
 		return nil, fmt.Errorf(ErrorHeader)
 	}
 
+	return verifyMembership(m, c, &org)
+}
+
+// verifyMembership validates if a user is a member of the organization based on token claims and repository data.
+// It returns the member if valid or an error for invalid token or membership issues.
+func verifyMembership(m *database.MemberRepository, c echo.Context, o *uuid.UUID) (*database.Member, error) {
 	claims := token.FromContext(c)
 	if claims.Id == nil {
 		return nil, fmt.Errorf(ErrorToken)
 	}
 
-	member, err := m.Find(&org, claims.Id)
+	member, err := m.Find(o, claims.Id)
 	if err != nil {
 		return nil, fmt.Errorf(ErrorMember)
 	}

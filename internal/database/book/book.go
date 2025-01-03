@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func (r *Repository) Create(m *model.Book) (*Book, error) {
+func (r *Repository) Create(m *model.CreateBook) (*Book, error) {
 	id := uuid.New()
 	book := &Book{
 		Id:             &id,
@@ -53,6 +53,24 @@ func (r *Repository) Create(m *model.Book) (*Book, error) {
 	}
 
 	return book, nil
+}
+
+func (r *Repository) Update(e *Book, m *model.UpdateBook) (*Book, error) {
+	e.Name = m.Name
+	e.Description = m.Description
+	e.OrganizationId = m.OrganizationId
+
+	_, err := r.database.NamedExec(`
+		UPDATE books
+		SET name = :name, description = :description, organization_id = :organization_id 
+		WHERE id = :id AND deleted_at IS NULL
+	`, e)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return e, nil
 }
 
 // Find retrieves a book by its ID from the database if it exists and hasn't been marked as deleted.

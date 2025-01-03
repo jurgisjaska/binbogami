@@ -41,7 +41,7 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	return Location, nil
 }
 
-// ByBook retrieves a Location from the repository by the given Book and Location IDs.
+// ByBook retrieves a Location from the repository by the given CreateBook and Location IDs.
 func (r *LocationRepository) ByBook(book *book.Book, id *uuid.UUID) (*Location, error) {
 	query := `
 		SELECT locations.* 

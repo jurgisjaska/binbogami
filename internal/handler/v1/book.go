@@ -28,6 +28,7 @@ func (h *Book) initialize() *Book {
 	h.member = database.CreateMember(h.database)
 
 	h.echo.POST("/books", h.create)
+	h.echo.PUT("/books", h.update)
 	h.echo.GET("/books", h.byOrganization)
 	h.echo.GET("/books/:id", h.show)
 	h.echo.POST("/books/:id/categories", h.add)
@@ -42,19 +43,56 @@ func (h *Book) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	book := &model.Book{}
-	if err := c.Bind(book); err != nil {
+	bm := &model.CreateBook{}
+	bm.CreatedBy = member.UserId
+	bm.OrganizationId = member.OrganizationId
+
+	if err := c.Bind(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(book); err != nil {
+	if err := v.Struct(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	book.CreatedBy = member.UserId
-	book.OrganizationId = member.OrganizationId
-	entity, err := h.repository.Create(book)
+	entity, err := h.repository.Create(bm)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+func (h *Book) update(c echo.Context) error {
+	_, err := membership(h.member, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	bm := &model.UpdateBook{}
+	if err := c.Bind(bm); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
+	}
+
+	// user performing the change must be a member of the new organization
+	// @todo this may not work if in the future there is an administrator dashboard
+	_, err = verifyMembership(h.member, c, bm.OrganizationId)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error("not a member of new organization"))
+	}
+
+	v := validator.New(validator.WithRequiredStructEnabled())
+	if err := v.Struct(bm); err != nil {
+		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
+	}
+
+	b, err := h.repository.Find(bm.Id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
+	}
+
+	entity, err := h.repository.Update(b, bm)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
