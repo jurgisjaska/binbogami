@@ -34,7 +34,7 @@ Build the application and start web server
 make run
 ```
 
-After the web server is up and running the API can be reached by going to [localhost:8101](http://localhost:8101/) 
+After the web server is up and running the API can be reached by going to [localhost:8101](http://localhost:8101/)
 
 ### Setup
 
@@ -47,3 +47,34 @@ make setup
 Which performs all the steps needed for the first time use.
 After it's execution continue with the starting of the Docker containers
 
+### Code Style and Naming Conventions
+
+#### Handler Methods
+
+* GET /resources -> index
+* GET /resources/id -> show
+* POST /resources -> create
+* PUT /resources -> update
+* DELETE /resources/id -> destroy
+
+#### JSON API
+
+Service communicates using JSON API where JSON is formated to follow `camelCase` naming.
+
+```json
+{
+  "description": "description",
+  "organizationId": "3f89f6b5-3760-4d85-8b2e-31cca32e4913"
+}
+```
+
+## Repository methods
+
+|                        |                                            |
+|------------------------|--------------------------------------------|
+| FindBy<*something>     | Find single entity by something            |
+| FindManyBy<*something> | Find many entities by somethinf            |
+| Save                   | Persist entity (create or update)          |
+| Create                 | Persist **new** entity in the database     |
+| Update                 | Persist **existing** entityto the database |
+| Find(id *uuid.UUID)    | Find single entity by ID                   |
