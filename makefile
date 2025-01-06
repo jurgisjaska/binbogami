@@ -1,4 +1,4 @@
-.PHONY: build run clean up down rm ps setup
+.PHONY: build run clean up down rm ps network setup
 
 NAME=binbogami
 
@@ -27,6 +27,9 @@ rm:
 
 ps:
 	@docker-compose ps -a
+
+network:
+	@docker network create binbogami
 
 setup:
 	@cp .env.example .env
