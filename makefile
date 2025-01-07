@@ -1,4 +1,5 @@
-.PHONY: build run clean up down rm ps network setup
+.PHONY: build run clean up down kill rm ps network setup
+.PHONY: db-create-schema dbs db-reset-fixtures db-reset-fixture dbf
 
 NAME=binbogami
 
@@ -18,6 +19,7 @@ clean:
 up:
 	@docker-compose up -d
 
+kill: down
 down:
 	@docker-compose kill
 
@@ -29,9 +31,27 @@ ps:
 	@docker-compose ps -a
 
 network:
-	@docker network create binbogami
+	@if ! docker network ls | grep -q "binbogami"; then \
+		@docker network create binbogami; \
+	fi
 
 setup:
-	@cp .env.example .env
+	@cp -f .env.example .env
 	@go get ./...
-	@docker network create binbogami
+	@sudo -v
+	@if ! grep -q "binbogami" /etc/hosts; then \
+		sudo -- sh -c "echo '127.0.0.1	binbogami' >> /etc/hosts"; \
+		sudo -- sh -c "echo '127.0.0.1	mariadb' >> /etc/hosts"; \
+		sudo -- sh -c "echo '127.0.0.1	mailcatcher' >> /etc/hosts"; \
+	fi
+	@if ! docker network ls | grep -q "binbogami"; then \
+  		@docker network create binbogami; \
+  	fi
+
+dbs: db-create-schema
+db-create-schema:
+	@mysql -u binbogami -plsktdngqcgnz3svj -h mariadb -P 3306 binbogami < var/resource/binbogami.sql
+
+db-reset-fixture dbf: db-reset-fixtures
+db-reset-fixtures:
+	@mysql -u binbogami -plsktdngqcgnz3svj -h mariadb -P 3306 binbogami < var/resource/fixture.sql
