@@ -1,35 +1,19 @@
-package user
+package configuration
 
 import (
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	model "github.com/jurgisjaska/binbogami/internal/api/models/user"
 )
 
-const defaultOrganization int = iota + 1
-
-type (
-	Configuration struct {
-		Id            *uuid.UUID `json:"id"`
-		Configuration int        `json:"configuration"`
-		Value         string     `json:"value"`
-
-		UserId *uuid.UUID `db:"user_id" json:"userId"`
-
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
-	}
-
-	// ConfigurationRepository represents a repository for storing user configuration data.
-	ConfigurationRepository struct {
-		database *sqlx.DB
-	}
-)
+// ConfigurationRepository represents a repository for storing user configuration data.
+type ConfigurationRepository struct {
+	database *sqlx.DB
+}
 
 // FindDefaultOrganization retrieves the default organization configuration for a user.
-func (r *ConfigurationRepository) FindDefaultOrganization(u *User) (*Configuration, error) {
+func (r *ConfigurationRepository) FindDefaultOrganization(u *user.User) (*Configuration, error) {
 	query := `
 		SELECT * FROM user_configurations 
 		WHERE configuration = ? AND user_id = ?

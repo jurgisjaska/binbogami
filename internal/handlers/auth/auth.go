@@ -6,10 +6,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user/configuration"
+	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
+	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
 	"golang.org/x/crypto/bcrypt"
@@ -28,7 +30,7 @@ type (
 	Auth struct {
 		echo           *echo.Echo
 		database       *sqlx.DB
-		invitation     *database.InvitationRepository
+		invitation     *invitation.InvitationRepository
 		member         *member.MemberRepository
 		organization   *organization.Repository
 		configuration  *internal.Config
@@ -43,20 +45,20 @@ type (
 
 	userRepository struct {
 		user          *organization.Repository
-		configuration *user.ConfigurationRepository
-		passwordReset *user.PasswordResetRepository
+		configuration *configuration.ConfigurationRepository
+		passwordReset *password.PasswordResetRepository
 	}
 )
 
 func (h *Auth) initialize() *Auth {
-	h.invitation = database.CreateInvitation(h.database)
+	h.invitation = invitation.CreateInvitation(h.database)
 	h.member = member.CreateMember(h.database)
 	h.organization = organization.CreateOrganization(h.database)
 
 	h.userRepository = &userRepository{
 		user:          user.CreateUser(h.database),
-		configuration: user.CreateConfiguration(h.database),
-		passwordReset: user.CreatePasswordReset(h.database),
+		configuration: configuration.CreateConfiguration(h.database),
+		passwordReset: password.CreatePasswordReset(h.database),
 	}
 
 	h.echo.PUT("/auth/signin", h.signin)

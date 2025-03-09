@@ -10,7 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
-	ud "github.com/jurgisjaska/binbogami/internal/database/user"
+	ud "github.com/jurgisjaska/binbogami/internal/database/user/configuration"
 	v1 "github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/labstack/echo/v4"
 )

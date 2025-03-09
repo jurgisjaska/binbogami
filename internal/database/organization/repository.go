@@ -107,7 +107,3 @@ func (r *Repository) ByMember(member *uuid.UUID) (*Organizations, error) {
 func CreateOrganization(d *sqlx.DB) *Repository {
 	return &Repository{database: d}
 }
-
-type Repository struct {
-	database *sqlx.DB
-}

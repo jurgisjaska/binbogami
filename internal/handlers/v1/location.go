@@ -7,8 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/location"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
@@ -16,13 +16,13 @@ import (
 type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *database.LocationRepository
+	repository *location.LocationRepository
 	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Location) initialize() *Location {
-	h.repository = database.CreateLocation(h.database)
+	h.repository = location.CreateLocation(h.database)
 	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 

@@ -10,6 +10,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"gopkg.in/gomail.v2"
 )
 
@@ -19,7 +20,7 @@ type ResetPassword struct {
 	c *internal.Config
 }
 
-func (m *ResetPassword) Send(u *user.User, pr *user.PasswordReset) error {
+func (m *ResetPassword) Send(u *user.User, pr *password.PasswordReset) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", m.c.Mail.Sender)
 	message.SetHeader("To", *u.Email)

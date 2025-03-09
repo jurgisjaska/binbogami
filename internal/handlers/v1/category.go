@@ -7,8 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/category"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
@@ -16,13 +16,13 @@ import (
 type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *database.CategoryRepository
+	repository *category.CategoryRepository
 	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Category) initialize() *Category {
-	h.repository = database.CreateCategory(h.database)
+	h.repository = category.CreateCategory(h.database)
 	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 

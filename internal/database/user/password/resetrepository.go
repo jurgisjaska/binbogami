@@ -1,44 +1,23 @@
-package user
+package password
 
 import (
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	model "github.com/jurgisjaska/binbogami/internal/api/models/auth"
 )
 
-// defaultPasswordResetDuration is a constant representing the password reset duration in hours
-const defaultPasswordResetDuration = 2
-
-type (
-	// PasswordReset represents a data structure for storing information about a password reset.
-	PasswordReset struct {
-		Id     *uuid.UUID `json:"id"`
-		UserId *uuid.UUID `db:"user_id" json:"userId"`
-
-		Ip        string `db:"ip" json:"-"`
-		UserAgent string `db:"user_agent" json:"-"`
-
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		OpenedAt  *time.Time `db:"opened_at" json:"-"`
-		ExpireAt  time.Time  `db:"expire_at" json:"-"`
-	}
-
-	PasswordResets []PasswordReset
-
-	// PasswordResetRepository represents a repository for storing user PasswordReset data.
-	PasswordResetRepository struct {
-		database *sqlx.DB
-	}
-)
+// PasswordResetRepository represents a repository for storing user PasswordReset data.
+type PasswordResetRepository struct {
+	database *sqlx.DB
+}
 
 // Save saves a new password reset request to the database.
 func (r *PasswordResetRepository) Save(m *model.ForgotRequest) (*PasswordReset, error) {
 	id := uuid.New()
 	reset := &PasswordReset{
 		Id:        &id,
-		UserId:    m.User.(*User).Id,
+		UserId:    m.User.(*user.User).Id,
 		Ip:        m.Ip,
 		UserAgent: m.UserAgent,
 		CreatedAt: time.Now(),
@@ -66,7 +45,7 @@ func (r *PasswordResetRepository) UpdateOpenedAt(id *uuid.UUID) (*PasswordReset,
 
 // UpdateExpireAt updates all future user password resets with expiration date of this moment
 // invalidate all password resets for the user
-func (r *PasswordResetRepository) UpdateExpireAt(u *User) error {
+func (r *PasswordResetRepository) UpdateExpireAt(u *user.User) error {
 	query := `
 		UPDATE user_password_resets
 		SET user_password_resets.expire_at = :expire_at
@@ -98,7 +77,7 @@ func (r *PasswordResetRepository) FindById(id *uuid.UUID) (*PasswordReset, error
 }
 
 // FindManyByUser retrieves a list of password reset entities associated with a specific user.
-func (r *PasswordResetRepository) FindManyByUser(u *User) (*PasswordResets, error) {
+func (r *PasswordResetRepository) FindManyByUser(u *user.User) (*PasswordResets, error) {
 	query := `
 		SELECT user_password_resets.* 
 		FROM user_password_resets 

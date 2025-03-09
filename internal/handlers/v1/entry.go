@@ -6,8 +6,10 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/category"
+	"github.com/jurgisjaska/binbogami/internal/database/entry"
+	"github.com/jurgisjaska/binbogami/internal/database/location"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
@@ -15,20 +17,20 @@ import (
 type Entry struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *database.EntryRepository
+	repository *entry.EntryRepository
 
 	member   *member.MemberRepository
 	book     *book.Repository
-	category *database.CategoryRepository
-	location *database.LocationRepository
+	category *category.CategoryRepository
+	location *location.LocationRepository
 }
 
 func (h *Entry) initialize() *Entry {
-	h.repository = database.CreateEntry(h.database)
+	h.repository = entry.CreateEntry(h.database)
 	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
-	h.category = database.CreateCategory(h.database)
-	h.location = database.CreateLocation(h.database)
+	h.category = category.CreateCategory(h.database)
+	h.location = location.CreateLocation(h.database)
 
 	h.echo.POST("/entries", h.create)
 

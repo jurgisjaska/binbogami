@@ -8,10 +8,10 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
 	"gopkg.in/gomail.v2"
@@ -22,14 +22,14 @@ type Invitation struct {
 	database      *sqlx.DB
 	mailer        *mail.Invitation
 	configuration *internal.Config
-	invitation    *database.InvitationRepository
+	invitation    *invitation.InvitationRepository
 	member        *member.MemberRepository
 	organization  *organization.Repository
 	user          *organization.Repository
 }
 
 func (h *Invitation) initialize() *Invitation {
-	h.invitation = database.CreateInvitation(h.database)
+	h.invitation = invitation.CreateInvitation(h.database)
 	h.member = member.CreateMember(h.database)
 	h.organization = organization.CreateOrganization(h.database)
 	h.user = user.CreateUser(h.database)

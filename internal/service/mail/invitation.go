@@ -8,9 +8,9 @@ import (
 	"runtime"
 
 	"github.com/jurgisjaska/binbogami/internal"
-	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"gopkg.in/gomail.v2"
 )
 
@@ -27,7 +27,7 @@ type (
 	}
 )
 
-func (m *Invitation) Send(sender *user.User, o *organization.Organization, i *database.Invitation) error {
+func (m *Invitation) Send(sender *user.User, o *organization.Organization, i *invitation.Invitation) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", m.c.Mail.Sender)
 	message.SetHeader("To", i.Email)
@@ -43,7 +43,7 @@ func (m *Invitation) Send(sender *user.User, o *organization.Organization, i *da
 	return m.d.DialAndSend(message)
 }
 
-func (m *Invitation) createMessage(sender *user.User, o *organization.Organization, i *database.Invitation) (string, error) {
+func (m *Invitation) createMessage(sender *user.User, o *organization.Organization, i *invitation.Invitation) (string, error) {
 	_, f, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(f)
 
