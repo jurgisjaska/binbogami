@@ -44,4 +44,4 @@ schema:
 	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/schema.sql
 
 fixtures:
-	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < var/resource/fixture.sql
+	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/fixtures.sql

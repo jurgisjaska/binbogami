@@ -1,12 +1,17 @@
 SET FOREIGN_KEY_CHECKS = 0;
+
+SET SESSION group_concat_max_len = 1000000;
+
 SET @tables = NULL;
 SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables
 FROM information_schema.tables
 WHERE table_schema = 'binbogami';
-SET @query = CONCAT('DROP TABLE IF EXISTS ', @tables);
+
+SET @query = IF(@tables IS NOT NULL, CONCAT('DROP TABLE IF EXISTS ', @tables), 'SELECT 1');
 PREPARE stmt FROM @query;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
+
 SET FOREIGN_KEY_CHECKS = 1;
 
 CREATE TABLE IF NOT EXISTS users
