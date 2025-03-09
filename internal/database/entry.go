@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
 type (
@@ -29,7 +29,7 @@ type (
 	}
 )
 
-func (r *EntryRepository) Create(e *model.Entry) (*Entry, error) {
+func (r *EntryRepository) Create(e *models.Entry) (*Entry, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err

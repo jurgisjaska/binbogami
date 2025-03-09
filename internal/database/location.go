@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
 
@@ -102,7 +102,7 @@ func (r *LocationRepository) ManyByBook(book *book.Book) (*Locations, error) {
 	return locations, nil
 }
 
-func (r *LocationRepository) Create(c *model.Location) (*Location, error) {
+func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err

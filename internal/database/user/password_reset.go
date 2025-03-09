@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	model "github.com/jurgisjaska/binbogami/internal/api/model/auth"
+	model "github.com/jurgisjaska/binbogami/internal/api/models/auth"
 )
 
 // defaultPasswordResetDuration is a constant representing the password reset duration in hours

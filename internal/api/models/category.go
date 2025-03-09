@@ -1,10 +1,10 @@
-package model
+package models
 
 import (
 	"github.com/google/uuid"
 )
 
-type Location struct {
+type Category struct {
 	Name        string  `validate:"required,gte=3,lt=128" json:"name"`
 	Description *string `json:"description"`
 

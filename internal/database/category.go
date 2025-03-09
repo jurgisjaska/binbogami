@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
 
@@ -103,7 +103,7 @@ func (r *CategoryRepository) ManyByOrganization(org *uuid.UUID) (*Categories, er
 	return categories, nil
 }
 
-func (r *CategoryRepository) Create(c *model.Category) (*Category, error) {
+func (r *CategoryRepository) Create(c *models.Category) (*Category, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err

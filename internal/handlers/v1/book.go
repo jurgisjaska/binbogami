@@ -7,14 +7,14 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/labstack/echo/v4"
 )
 
-// Book represents a book handler.
+// Book represents a book handlers.
 type Book struct {
 	echo         *echo.Group
 	database     *sqlx.DB
@@ -44,7 +44,7 @@ func (h *Book) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	bm := &model.CreateBook{}
+	bm := &models.CreateBook{}
 	bm.CreatedBy = member.UserId
 	bm.OrganizationId = member.OrganizationId
 
@@ -71,7 +71,7 @@ func (h *Book) update(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
 
-	bm := &model.UpdateBook{}
+	bm := &models.UpdateBook{}
 	if err := c.Bind(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
@@ -117,7 +117,7 @@ func (h *Book) add(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("book not found"))
 	}
 
-	m := model.DetermineBookObject(c.Request().URL.String())
+	m := models.DetermineBookObject(c.Request().URL.String())
 	if err := c.Bind(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
@@ -164,7 +164,7 @@ func (h *Book) show(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-// CreateBook creates a new instance of Book handler.
+// CreateBook creates a new instance of Book handlers.
 func CreateBook(g *echo.Group, d *sqlx.DB) *Book {
 	return (&Book{echo: g, database: d}).initialize()
 }

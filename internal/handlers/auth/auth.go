@@ -70,7 +70,7 @@ func (h *Auth) initialize() *Auth {
 
 // membership determine if a user is a member of any organization and return the organization information if true
 // if member has multiple organization but no default he will be marked as member but will not have default organization
-// relates to internal/handler/v1/v1.go
+// relates to internal/handlers/v1/v1.go
 func (h *Auth) membership(u *user.User) (bool, *organization.Organization) {
 	m := false
 	var organization *uuid.UUID
@@ -110,7 +110,7 @@ func (h *Auth) hashPassword(password string, salt string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-// CreateAuth creates a new instance of the Auth handler and initializes it.
+// CreateAuth creates a new instance of the Auth handlers and initializes it.
 func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Auth {
 	return (&Auth{
 		echo:          e,

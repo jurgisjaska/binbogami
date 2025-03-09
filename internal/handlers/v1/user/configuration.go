@@ -6,12 +6,12 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	um "github.com/jurgisjaska/binbogami/internal/api/model/user"
+	um "github.com/jurgisjaska/binbogami/internal/api/models/user"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	ud "github.com/jurgisjaska/binbogami/internal/database/user"
-	v1 "github.com/jurgisjaska/binbogami/internal/handler/v1"
+	v1 "github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/labstack/echo/v4"
 )
 

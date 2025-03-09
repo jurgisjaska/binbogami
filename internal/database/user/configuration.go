@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	model "github.com/jurgisjaska/binbogami/internal/api/model/user"
+	model "github.com/jurgisjaska/binbogami/internal/api/models/user"
 )
 
 const defaultOrganization int = iota + 1

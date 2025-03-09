@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
 type (
@@ -36,15 +36,15 @@ type (
 	}
 )
 
-func buildObject(book *Book, m model.BookObject) object {
-	if obj, ok := m.(*model.BookCategory); ok {
+func buildObject(book *Book, m models.BookObject) object {
+	if obj, ok := m.(*models.BookCategory); ok {
 		return category{
 			BookId:     book.Id,
 			CategoryId: obj.CategoryId,
 			CreatedBy:  obj.CreatedBy,
 			CreatedAt:  time.Now(),
 		}
-	} else if obj, ok := m.(*model.BookLocation); ok {
+	} else if obj, ok := m.(*models.BookLocation); ok {
 		return location{
 			BookId:     book.Id,
 			LocationId: obj.LocationId,

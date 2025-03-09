@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 )
 
@@ -97,7 +97,7 @@ func (r *InvitationRepository) FindByMember(m *member.Member, req *api.Request) 
 	return invitations, count, nil
 }
 
-func (r *InvitationRepository) Create(model *model.InvitationRequest) (Invitations, error) {
+func (r *InvitationRepository) Create(model *models.InvitationRequest) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Email {
 		id, err := uuid.NewUUID()

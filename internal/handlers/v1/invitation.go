@@ -6,7 +6,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
@@ -56,7 +56,7 @@ func (h *Invitation) byOrganizationMember(c echo.Context) error {
 }
 
 func (h *Invitation) create(c echo.Context) error {
-	invitation := &model.InvitationRequest{}
+	invitation := &models.InvitationRequest{}
 	if err := c.Bind(invitation); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("invalid invitation"))
 	}
@@ -109,7 +109,7 @@ func (h *Invitation) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(invitations, api.CreateRequest(c)))
 }
 
-// CreateInvitation creates a new Invitation handler and initializes it.
+// CreateInvitation creates a new Invitation handlers and initializes it.
 func CreateInvitation(g *echo.Group, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Invitation {
 	return (&Invitation{
 		echo:          g,

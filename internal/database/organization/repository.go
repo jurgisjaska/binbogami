@@ -5,14 +5,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
 type Repository struct {
 	database *sqlx.DB
 }
 
-func (r *Repository) Create(o *model.Organization) (*Organization, error) {
+func (r *Repository) Create(o *models.Organization) (*Organization, error) {
 	id := uuid.New()
 	organization := &Organization{
 		Id:          &id,

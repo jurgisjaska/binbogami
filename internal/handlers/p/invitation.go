@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/labstack/echo/v4"
 )
 
@@ -25,6 +25,6 @@ func (h *Public) invite(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
 	}
 
-	response := &model.InvitationResponse{Invitation: invitation, Organization: organization}
+	response := &models.InvitationResponse{Invitation: invitation, Organization: organization}
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model/auth"
+	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/labstack/echo/v4"
 )
 
@@ -13,7 +13,7 @@ const passwordResetLimit int = 10
 func (h *Auth) forgot(c echo.Context) error {
 	request := &auth.ForgotRequest{}
 	if err := c.Bind(request); err != nil {
-		// request cannot be bind to model
+		// request cannot be bind to models
 		return c.JSON(http.StatusBadRequest, api.Error(requestError))
 	}
 

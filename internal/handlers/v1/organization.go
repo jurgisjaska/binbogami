@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/jurgisjaska/binbogami/internal/database/organization"
@@ -17,7 +17,7 @@ const (
 	organizationHeader = "organization"
 )
 
-// Organization represents an organization handler.
+// Organization represents an organization handlers.
 type Organization struct {
 	echo       *echo.Group
 	database   *sqlx.DB
@@ -56,7 +56,7 @@ func (h *Organization) show(c echo.Context) error {
 }
 
 func (h *Organization) create(c echo.Context) error {
-	organization := &model.Organization{}
+	organization := &models.Organization{}
 	if err := c.Bind(organization); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect organization"))
 	}
@@ -103,7 +103,7 @@ func (h *Organization) byMember(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(organizations, api.CreateRequest(c)))
 }
 
-// CreateOrganization initializes and returns an instance of Organization handler.
+// CreateOrganization initializes and returns an instance of Organization handlers.
 func CreateOrganization(g *echo.Group, d *sqlx.DB) *Organization {
 	return (&Organization{echo: g, database: d}).initialize()
 }

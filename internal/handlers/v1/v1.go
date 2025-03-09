@@ -17,7 +17,7 @@ const (
 )
 
 // membership checks the membership of a user in an organization by validating the organization header and token claims.
-// relates to internal/handler/auth/auth.go
+// relates to internal/handlers/auth/auth.go
 func membership(m *member.MemberRepository, c echo.Context) (*member.Member, error) {
 	org, err := uuid.Parse(c.Request().Header.Get(organizationHeader))
 	if err != nil {

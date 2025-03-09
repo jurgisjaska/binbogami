@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
@@ -37,7 +37,7 @@ func (h *Member) one(c echo.Context) error {
 
 // create adds new member to the organization
 func (h *Member) create(c echo.Context) error {
-	m := &model.Member{}
+	m := &models.Member{}
 	if err := c.Bind(m); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("invalid member data"))
 	}

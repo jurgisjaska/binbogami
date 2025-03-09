@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
 type (
@@ -32,7 +32,7 @@ type (
 	}
 )
 
-func (r *Repository) Create(m *model.CreateBook) (*Book, error) {
+func (r *Repository) Create(m *models.CreateBook) (*Book, error) {
 	id := uuid.New()
 	book := &Book{
 		Id:             &id,
@@ -55,7 +55,7 @@ func (r *Repository) Create(m *model.CreateBook) (*Book, error) {
 	return book, nil
 }
 
-func (r *Repository) Update(e *Book, m *model.UpdateBook) (*Book, error) {
+func (r *Repository) Update(e *Book, m *models.UpdateBook) (*Book, error) {
 	e.Name = m.Name
 	e.Description = m.Description
 	e.OrganizationId = m.OrganizationId
@@ -84,7 +84,7 @@ func (r *Repository) Find(id *uuid.UUID) (*Book, error) {
 	return book, nil
 }
 
-func (r *Repository) AddObject(book *Book, m model.BookObject) (*object, error) {
+func (r *Repository) AddObject(book *Book, m models.BookObject) (*object, error) {
 	e := buildObject(book, m)
 	query := fmt.Sprintf(`
 		INSERT INTO %s (id, book_id, %s, created_by, created_at)
