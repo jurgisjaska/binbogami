@@ -11,7 +11,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/handlers/auth"
-	"github.com/jurgisjaska/binbogami/internal/handlers/p"
+	"github.com/jurgisjaska/binbogami/internal/handlers/public"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -46,8 +46,8 @@ func main() {
 
 	// public resources that are not related with auth
 	// mus be accessible without authentication
-	pg := e.Group("/p")
-	p.CreatePublic(pg, database)
+	pg := e.Group("/public")
+	public.CreatePublic(pg, database)
 
 	// main API
 	g := e.Group("/v1")

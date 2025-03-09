@@ -1,4 +1,4 @@
-package p
+package public
 
 import (
 	"github.com/jmoiron/sqlx"
