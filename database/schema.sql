@@ -32,17 +32,20 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS organizations
 (
-    id          CHAR(36)    NOT NULL
+    id          CHAR(36)     NOT NULL
         PRIMARY KEY,
-    name        VARCHAR(64) NOT NULL,
-    description TEXT        NULL,
-    created_by  CHAR(36)    NOT NULL,
-    created_at  TIMESTAMP   NOT NULL,
-    updated_at  TIMESTAMP   NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at  TIMESTAMP   NULL,
+    name        VARCHAR(64)  NOT NULL,
+    description TEXT         NULL,
+    branding    VARCHAR(128) NULL,
+    created_by  CHAR(36)     NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP    NULL,
     CONSTRAINT organizations_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
+
+
 
 CREATE TABLE IF NOT EXISTS books
 (
