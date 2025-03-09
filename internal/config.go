@@ -11,12 +11,11 @@ type (
 	// Config represents the configuration for the application.
 	// It contains environment variables, database configuration, and mail configuration.
 	Config struct {
-		Environment string
-		Secret      string
-		App         *Authority
-		Web         *Authority
-		Database    *Database
-		Mail        *Mail
+		Secret   string
+		App      *Authority
+		Web      *Authority
+		Database *Database
+		Mail     *Mail
 	}
 
 	// Database represents the database configuration.
@@ -62,8 +61,7 @@ func CreateConfig() (*Config, error) {
 	wp, _ := strconv.Atoi(os.Getenv("WEB_APP_PORT"))
 
 	return &Config{
-		Environment: os.Getenv("APP_ENVIRONMENT"),
-		Secret:      os.Getenv("APP_SECRET"),
+		Secret: os.Getenv("APP_SECRET"),
 		App: &Authority{
 			Hostname: os.Getenv("APP_HOSTNAME"),
 			Port:     ap,
