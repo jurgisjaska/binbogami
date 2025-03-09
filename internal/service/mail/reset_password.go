@@ -39,7 +39,7 @@ func (m *ResetPassword) createMessage(u string, id *uuid.UUID) (string, error) {
 	_, f, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(f)
 
-	t, err := template.ParseFiles(filepath.Join(dir, "../../../var/template/reset_password.html"))
+	t, err := template.ParseFiles(filepath.Join(dir, "../../../var/templates/reset_password.html"))
 	if err != nil {
 		return "", err
 	}

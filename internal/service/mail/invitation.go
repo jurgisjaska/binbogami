@@ -46,7 +46,7 @@ func (m *Invitation) createMessage(sender *user.User, o *database.Organization, 
 	_, f, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(f)
 
-	t, err := template.ParseFiles(filepath.Join(dir, "../../../var/template/invitation.html"))
+	t, err := template.ParseFiles(filepath.Join(dir, "../../../var/templates/invitation.html"))
 	if err != nil {
 		return "", err
 	}

@@ -47,34 +47,51 @@ make setup
 Which performs all the steps needed for the first time use.
 After it's execution continue with the starting of the Docker containers
 
-### Code Style and Naming Conventions
+## Code Style and Naming Conventions
 
-#### Handler Methods
+### Handler Methods
 
-* GET /resources -> index
-* GET /resources/id -> show
-* POST /resources -> create
-* PUT /resources -> update
-* DELETE /resources/id -> destroy
+Recommended handler method names for HTTP methods.
 
-#### JSON API
+| Method | Endpoint        | Name    |
+|--------|-----------------|---------|
+| GET    | /resources      | index   |
+| GET    | /resources/{id} | show    |
+| POST   | /resources      | create  |
+| PUT    | /resources      | update  |
+| DELETE | /resources/{id} | destroy |
+
+### JSON API
 
 Service communicates using JSON API where JSON is formated to follow `camelCase` naming.
 
 ```json
 {
-  "description": "description",
+  "description": "this is a description",
   "organizationId": "3f89f6b5-3760-4d85-8b2e-31cca32e4913"
 }
 ```
 
-## Repository methods
+### Organization Header
 
-|                        |                                            |
-|------------------------|--------------------------------------------|
-| FindBy<*something>     | Find single entity by something            |
-| FindManyBy<*something> | Find many entities by somethinf            |
-| Save                   | Persist entity (create or update)          |
-| Create                 | Persist **new** entity in the database     |
-| Update                 | Persist **existing** entityto the database |
-| Find(id *uuid.UUID)    | Find single entity by ID                   |
+All requests going into endpoints under `v1` namespace must have a header `organization` with an active organization ID.
+
+### Database
+
+Database uses plural table names (ex.: `users`) and snake_case names with suffixes for fields (ex.: `created_at`)
+
+### Repositories
+
+Convention for repository method naming and return types.
+
+| Method             | Return     | Description                                                        |
+|--------------------|------------|--------------------------------------------------------------------|
+| Get({id})          | Entity     | Query single entity by ID                                          |
+| FindBy...({value}) | Collection | Query collection of entities by field in the method name and value |
+| Find({criteria})   | Collection | Query collection of entities by filter criteria                    |
+| Save({entity})     | Entity     | Persist entity (create or update)                                  |
+| Create({entity})   | Entity     | Persist **new** entity in the database                             |
+| Update({entity})   | Entity     | Persist **existing** entity to the database                        |
+
+Methods that return collection always return collection, if there are no records collection will empty.
+If entity is returned failing query will return `nil`.
