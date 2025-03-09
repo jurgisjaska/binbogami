@@ -7,6 +7,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
 )
 
 const (
@@ -67,7 +68,7 @@ func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-func (r *InvitationRepository) FindByMember(m *Member, req *api.Request) (*Invitations, int, error) {
+func (r *InvitationRepository) FindByMember(m *member.Member, req *api.Request) (*Invitations, int, error) {
 	invitations := &Invitations{}
 
 	query := `

@@ -9,6 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,13 +17,13 @@ type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *database.CategoryRepository
-	member     *database.MemberRepository
+	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Category) initialize() *Category {
 	h.repository = database.CreateCategory(h.database)
-	h.member = database.CreateMember(h.database)
+	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/categories", h.create)

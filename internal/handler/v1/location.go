@@ -9,6 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,13 +17,13 @@ type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *database.LocationRepository
-	member     *database.MemberRepository
+	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Location) initialize() *Location {
 	h.repository = database.CreateLocation(h.database)
-	h.member = database.CreateMember(h.database)
+	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/locations", h.create)

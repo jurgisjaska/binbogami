@@ -7,18 +7,18 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
 type Member struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *database.MemberRepository
+	repository *member.MemberRepository
 }
 
 func (h *Member) initialize() *Member {
-	h.repository = database.CreateMember(h.database)
+	h.repository = member.CreateMember(h.database)
 
 	h.echo.GET("/members", h.one)
 	h.echo.POST("/members", h.create)
@@ -48,10 +48,10 @@ func (h *Member) create(c echo.Context) error {
 	}
 
 	allow := map[int]bool{
-		database.MemberRoleDefault: false,
-		database.MemberRoleBilling: false,
-		database.MemberRoleAdmin:   true,
-		database.MemberRoleOwner:   true,
+		member.MemberRoleDefault: false,
+		member.MemberRoleBilling: false,
+		member.MemberRoleAdmin:   true,
+		member.MemberRoleOwner:   true,
 	}
 	cm, err := h.repository.Find(m.OrganizationId, claims.Id)
 	if err != nil || !allow[cm.Role] {
@@ -60,7 +60,7 @@ func (h *Member) create(c echo.Context) error {
 
 	// the organization can have only single member who is an owner
 	// for that reason it should be impossible to created member with role owner
-	if m.Role == database.MemberRoleOwner {
+	if m.Role == member.MemberRoleOwner {
 		return c.JSON(http.StatusConflict, api.Error("organization already have an owner"))
 	}
 

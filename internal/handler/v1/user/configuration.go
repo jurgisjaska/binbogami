@@ -8,7 +8,8 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	um "github.com/jurgisjaska/binbogami/internal/api/model/user"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
+	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	ud "github.com/jurgisjaska/binbogami/internal/database/user"
 	v1 "github.com/jurgisjaska/binbogami/internal/handler/v1"
 	"github.com/labstack/echo/v4"
@@ -17,15 +18,15 @@ import (
 type Configuration struct {
 	echo         *echo.Group
 	database     *sqlx.DB
-	member       *database.MemberRepository
-	organization *database.OrganizationRepository
+	member       *member.MemberRepository
+	organization *organization.Repository
 	repository   *ud.ConfigurationRepository
 }
 
 func (h *Configuration) initialize() *Configuration {
 	h.repository = ud.CreateConfiguration(h.database)
-	h.member = database.CreateMember(h.database)
-	h.organization = database.CreateOrganization(h.database)
+	h.member = member.CreateMember(h.database)
+	h.organization = organization.CreateOrganization(h.database)
 
 	h.echo.PUT("/users/configurations", h.set)
 

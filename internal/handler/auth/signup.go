@@ -7,7 +7,8 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model/auth"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
+	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -59,15 +60,15 @@ func (h *Auth) signup(c echo.Context) error {
 
 	// @todo should invitation and user email match when using invitation link?
 
-	member := &database.Member{}
-	organization := &database.Organization{}
+	member := &member.Member{}
+	organization := &organization.Organization{}
 	log.Infof("%+v", request)
 	if request.InvitationId != nil {
 		invitation, err := h.invitation.FindById(request.InvitationId)
 		log.Infof("%+v", invitation)
 		log.Error(err)
 		if err == nil {
-			member, err = h.member.Create(invitation.OrganizationId, u.Id, database.MemberRoleDefault, invitation.CreatedBy)
+			member, err = h.member.Create(invitation.OrganizationId, u.Id, member.MemberRoleDefault, invitation.CreatedBy)
 			if err == nil {
 				_ = h.invitation.Delete(invitation)
 			}

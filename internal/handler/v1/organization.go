@@ -8,7 +8,8 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
+	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/labstack/echo/v4"
 )
 
@@ -20,13 +21,13 @@ const (
 type Organization struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *database.OrganizationRepository
-	member     *database.MemberRepository
+	repository *organization.Repository
+	member     *member.MemberRepository
 }
 
 func (h *Organization) initialize() *Organization {
-	h.repository = database.CreateOrganization(h.database)
-	h.member = database.CreateMember(h.database)
+	h.repository = organization.CreateOrganization(h.database)
+	h.member = member.CreateMember(h.database)
 
 	h.echo.GET("/organizations/:id", h.show)
 	h.echo.GET("/organizations", h.byMember)
@@ -81,7 +82,7 @@ func (h *Organization) create(c echo.Context) error {
 	}
 
 	// @todo create a failure recovery process
-	_, _ = h.member.Create(entity.Id, claims.Id, database.MemberRoleOwner, claims.Id)
+	_, _ = h.member.Create(entity.Id, claims.Id, member.MemberRoleOwner, claims.Id)
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
+	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
@@ -27,8 +29,8 @@ type (
 		echo           *echo.Echo
 		database       *sqlx.DB
 		invitation     *database.InvitationRepository
-		member         *database.MemberRepository
-		organization   *database.OrganizationRepository
+		member         *member.MemberRepository
+		organization   *organization.Repository
 		configuration  *internal.Config
 		mailer         *mailer
 		userRepository *userRepository
@@ -40,7 +42,7 @@ type (
 	}
 
 	userRepository struct {
-		user          *user.Repository
+		user          *organization.Repository
 		configuration *user.ConfigurationRepository
 		passwordReset *user.PasswordResetRepository
 	}
@@ -48,8 +50,8 @@ type (
 
 func (h *Auth) initialize() *Auth {
 	h.invitation = database.CreateInvitation(h.database)
-	h.member = database.CreateMember(h.database)
-	h.organization = database.CreateOrganization(h.database)
+	h.member = member.CreateMember(h.database)
+	h.organization = organization.CreateOrganization(h.database)
 
 	h.userRepository = &userRepository{
 		user:          user.CreateUser(h.database),
@@ -69,7 +71,7 @@ func (h *Auth) initialize() *Auth {
 // membership determine if a user is a member of any organization and return the organization information if true
 // if member has multiple organization but no default he will be marked as member but will not have default organization
 // relates to internal/handler/v1/v1.go
-func (h *Auth) membership(u *user.User) (bool, *database.Organization) {
+func (h *Auth) membership(u *user.User) (bool, *organization.Organization) {
 	m := false
 	var organization *uuid.UUID
 

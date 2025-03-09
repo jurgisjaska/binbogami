@@ -9,6 +9,8 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
+	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
 	"github.com/labstack/echo/v4"
@@ -21,15 +23,15 @@ type Invitation struct {
 	mailer        *mail.Invitation
 	configuration *internal.Config
 	invitation    *database.InvitationRepository
-	member        *database.MemberRepository
-	organization  *database.OrganizationRepository
-	user          *user.Repository
+	member        *member.MemberRepository
+	organization  *organization.Repository
+	user          *organization.Repository
 }
 
 func (h *Invitation) initialize() *Invitation {
 	h.invitation = database.CreateInvitation(h.database)
-	h.member = database.CreateMember(h.database)
-	h.organization = database.CreateOrganization(h.database)
+	h.member = member.CreateMember(h.database)
+	h.organization = organization.CreateOrganization(h.database)
 	h.user = user.CreateUser(h.database)
 
 	h.echo.POST("/invitations", h.create)
@@ -65,10 +67,10 @@ func (h *Invitation) create(c echo.Context) error {
 	}
 
 	allow := map[int]bool{
-		database.MemberRoleDefault: false,
-		database.MemberRoleBilling: false,
-		database.MemberRoleAdmin:   true,
-		database.MemberRoleOwner:   true,
+		member.MemberRoleDefault: false,
+		member.MemberRoleBilling: false,
+		member.MemberRoleAdmin:   true,
+		member.MemberRoleOwner:   true,
 	}
 
 	member, err := membership(h.member, c)

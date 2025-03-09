@@ -8,6 +8,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/model"
 	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -16,7 +17,7 @@ type Entry struct {
 	database   *sqlx.DB
 	repository *database.EntryRepository
 
-	member   *database.MemberRepository
+	member   *member.MemberRepository
 	book     *book.Repository
 	category *database.CategoryRepository
 	location *database.LocationRepository
@@ -24,7 +25,7 @@ type Entry struct {
 
 func (h *Entry) initialize() *Entry {
 	h.repository = database.CreateEntry(h.database)
-	h.member = database.CreateMember(h.database)
+	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 	h.category = database.CreateCategory(h.database)
 	h.location = database.CreateLocation(h.database)
