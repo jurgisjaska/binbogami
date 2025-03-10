@@ -60,15 +60,15 @@ func (h *Auth) signup(c echo.Context) error {
 
 	// @todo should invitation and user email match when using invitation link?
 
-	member := &member.Member{}
-	organization := &organization.Organization{}
+	memberEntity := &member.Member{}
+	organizationEntity := &organization.Organization{}
 	log.Infof("%+v", request)
 	if request.InvitationId != nil {
 		invitation, err := h.invitation.FindById(request.InvitationId)
 		log.Infof("%+v", invitation)
 		log.Error(err)
 		if err == nil {
-			member, err = h.member.Create(invitation.OrganizationId, u.Id, member.MemberRoleDefault, invitation.CreatedBy)
+			memberEntity, err = h.member.Create(invitation.OrganizationId, u.Id, member.MemberRoleDefault, invitation.CreatedBy)
 			if err == nil {
 				_ = h.invitation.Delete(invitation)
 			}
@@ -76,26 +76,26 @@ func (h *Auth) signup(c echo.Context) error {
 			// error does not matter in this case
 			// organization either is there or no
 			// SQL not found can be ignored
-			organization, _ = h.organization.FindById(invitation.OrganizationId)
+			organizationEntity, _ = h.organization.FindById(invitation.OrganizationId)
 		}
 	}
 
 	// membership status
 	m := false
-	if member.Id != 0 {
+	if memberEntity.Id != 0 {
 		m = true
 	}
 
 	// reset organization to nil
 	// to keep consistency between sign in and sign up methods
-	if organization.Id == nil {
-		organization = nil
+	if organizationEntity.Id == nil {
+		organizationEntity = nil
 	}
 
 	return c.JSON(
 		http.StatusOK,
 		api.Success(
-			auth.SignupResponse{User: u, Token: t, Member: m, Organization: organization},
+			auth.SignupResponse{User: u, Token: t, Member: m, Organization: organizationEntity},
 			api.CreateRequest(c),
 		),
 	)

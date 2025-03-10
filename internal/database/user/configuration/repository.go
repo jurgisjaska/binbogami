@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	um "github.com/jurgisjaska/binbogami/internal/api/models/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 )
 
 // ConfigurationRepository represents a repository for storing user configuration data.
@@ -28,7 +30,7 @@ func (r *ConfigurationRepository) FindDefaultOrganization(u *user.User) (*Config
 }
 
 // Upsert inserts a new configuration record into the database if it does not exist, or updates an existing record if it does.
-func (r *ConfigurationRepository) Upsert(model *model.SetConfigurationRequest) (*Configuration, error) {
+func (r *ConfigurationRepository) Upsert(model *um.SetConfigurationRequest) (*Configuration, error) {
 	id := uuid.New()
 	configuration := &Configuration{
 		Id:            &id,

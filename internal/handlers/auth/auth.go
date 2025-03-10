@@ -44,7 +44,7 @@ type (
 	}
 
 	userRepository struct {
-		user          *organization.Repository
+		user          *user.Repository
 		configuration *configuration.ConfigurationRepository
 		passwordReset *password.PasswordResetRepository
 	}

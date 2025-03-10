@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 )
 
 // PasswordResetRepository represents a repository for storing user PasswordReset data.
@@ -12,8 +14,7 @@ type PasswordResetRepository struct {
 	database *sqlx.DB
 }
 
-// Save saves a new password reset request to the database.
-func (r *PasswordResetRepository) Save(m *model.ForgotRequest) (*PasswordReset, error) {
+func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, error) {
 	id := uuid.New()
 	reset := &PasswordReset{
 		Id:        &id,
