@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
 )
@@ -14,7 +13,7 @@ import (
 type User struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *organization.Repository
+	repository *user.Repository
 }
 
 func (h *User) initialize() *User {

@@ -25,7 +25,7 @@ type Invitation struct {
 	invitation    *invitation.InvitationRepository
 	member        *member.MemberRepository
 	organization  *organization.Repository
-	user          *organization.Repository
+	user          *user.Repository
 }
 
 func (h *Invitation) initialize() *Invitation {
