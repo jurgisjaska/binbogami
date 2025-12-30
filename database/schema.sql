@@ -30,39 +30,19 @@ CREATE TABLE IF NOT EXISTS users
         UNIQUE (email)
 );
 
-CREATE TABLE IF NOT EXISTS organizations
-(
-    id          CHAR(36)     NOT NULL
-        PRIMARY KEY,
-    name        VARCHAR(64)  NOT NULL,
-    description TEXT         NULL,
-    branding    VARCHAR(128) NULL,
-    created_by  CHAR(36)     NOT NULL,
-    created_at  TIMESTAMP    NOT NULL,
-    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at  TIMESTAMP    NULL,
-    CONSTRAINT organizations_users_id_fk
-        FOREIGN KEY (created_by) REFERENCES users (id)
-);
-
-
-
 CREATE TABLE IF NOT EXISTS books
 (
     id              CHAR(36)     NOT NULL
         PRIMARY KEY,
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
-    organization_id CHAR(36)     NOT NULL,
     created_by      CHAR(36)     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
     closed_at       TIMESTAMP    NULL,
-    CONSTRAINT books_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT books_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT books_name_uindex
+        UNIQUE (name),
     CONSTRAINT books_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -78,10 +58,8 @@ CREATE TABLE IF NOT EXISTS categories
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
-    CONSTRAINT categories_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT categories_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT categories_name_uindex
+        UNIQUE (name),
     CONSTRAINT categories_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -112,13 +90,10 @@ CREATE TABLE IF NOT EXISTS invitations
         PRIMARY KEY,
     email           VARCHAR(128) NOT NULL,
     created_by      CHAR(36)     NOT NULL,
-    organization_id CHAR(36)     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     opened_at       TIMESTAMP    NULL,
     deleted_at      TIMESTAMP    NULL,
     expired_at      TIMESTAMP    NOT NULL,
-    CONSTRAINT organizations_invitations_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
     CONSTRAINT organizations_invitations_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -129,15 +104,12 @@ CREATE TABLE IF NOT EXISTS locations
         PRIMARY KEY,
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
-    organization_id CHAR(36)     NOT NULL,
     created_by      CHAR(36)     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
-    CONSTRAINT locations_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT locations_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT locations_name_uindex
+        UNIQUE (name),
     CONSTRAINT locations_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -181,25 +153,6 @@ CREATE TABLE IF NOT EXISTS entries
         FOREIGN KEY (location_id) REFERENCES locations (id),
     CONSTRAINT entries_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
-);
-
-CREATE TABLE IF NOT EXISTS members
-(
-    id              INT AUTO_INCREMENT
-        PRIMARY KEY,
-    role            TINYINT(2) DEFAULT 1 NOT NULL,
-    organization_id CHAR(36)             NOT NULL,
-    user_id         CHAR(36)             NOT NULL,
-    created_by      CHAR(36)             NULL,
-    created_at      TIMESTAMP            NOT NULL,
-    updated_at      TIMESTAMP            NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP            NULL,
-    CONSTRAINT members_organization_id_user_id_uindex
-        UNIQUE (organization_id, user_id),
-    CONSTRAINT members_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
-    CONSTRAINT members_users_id_fk
-        FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS user_configurations
