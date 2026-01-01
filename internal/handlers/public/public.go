@@ -12,13 +12,11 @@ type Public struct {
 	echo          *echo.Group
 	database      *sqlx.DB
 	invitation    *invitation.InvitationRepository
-	organization  *organization.Repository
 	passwordReset *password.PasswordResetRepository
 }
 
 func (h *Public) initialize() *Public {
 	h.invitation = invitation.CreateInvitation(h.database)
-	h.organization = organization.CreateOrganization(h.database)
 	h.passwordReset = password.CreatePasswordReset(h.database)
 
 	h.echo.GET("/invitation/:id", h.invite)

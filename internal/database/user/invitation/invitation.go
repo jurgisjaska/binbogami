@@ -7,7 +7,6 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
 )
 
 const (
@@ -19,10 +18,9 @@ type (
 	// Id is used as unique key to ensure the invitation can only be used once.
 	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
 	Invitation struct {
-		Id             *uuid.UUID `json:"id"`
-		Email          string     `json:"email"`
-		CreatedBy      *uuid.UUID `db:"created_by" json:"createdBy"`
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organizationId"`
+		Id        *uuid.UUID `json:"id"`
+		Email     string     `json:"email"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		OpenedAt  *time.Time `db:"opened_at" json:"openedAt"`
@@ -68,35 +66,6 @@ func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-func (r *InvitationRepository) FindByMember(m *member.Member, req *api.Request) (*Invitations, int, error) {
-	invitations := &Invitations{}
-
-	query := `
-		SELECT * 
-		FROM invitations 
-		WHERE organization_id = ? AND created_by = ? AND deleted_at IS NULL
-		LIMIT ? OFFSET ?
-	`
-
-	offset := (req.Page - 1) * req.Limit
-	err := r.database.Select(invitations, query, m.OrganizationId, m.UserId, req.Limit, offset)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	query = `
-		SELECT COUNT(*) FROM invitations 
-		WHERE organization_id = ? AND created_by = ? AND deleted_at IS NULL
-	`
-	var count int
-	err = r.database.Get(&count, query, m.OrganizationId, m.UserId)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return invitations, count, nil
-}
-
 func (r *InvitationRepository) Create(model *models.InvitationRequest) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Email {
@@ -106,12 +75,11 @@ func (r *InvitationRepository) Create(model *models.InvitationRequest) (Invitati
 		}
 
 		invitation := &Invitation{
-			Id:             &id,
-			Email:          email,
-			CreatedBy:      model.CreatedBy,
-			OrganizationId: model.OrganizationId,
-			CreatedAt:      time.Now(),
-			ExpiredAt:      (time.Now()).Add(defaultInvitationDuration * time.Hour),
+			Id:        &id,
+			Email:     email,
+			CreatedBy: model.CreatedBy,
+			CreatedAt: time.Now(),
+			ExpiredAt: (time.Now()).Add(defaultInvitationDuration * time.Hour),
 		}
 
 		if err = r.flush(invitation); err != nil {

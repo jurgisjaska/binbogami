@@ -15,8 +15,7 @@ type (
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
 
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
-		CreatedBy      *uuid.UUID `db:"created_by" json:"created_by"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`

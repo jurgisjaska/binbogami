@@ -20,11 +20,6 @@ func (h *Public) invite(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("invitation not found"))
 	}
 
-	organization, err := h.organization.FindById(invitation.OrganizationId)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
-	}
-
-	response := &models.InvitationResponse{Invitation: invitation, Organization: organization}
+	response := &models.InvitationResponse{Invitation: invitation}
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }

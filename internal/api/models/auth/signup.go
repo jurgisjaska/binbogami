@@ -17,9 +17,7 @@ type (
 
 	// SignupResponse represents the response data structure for the signup process.
 	SignupResponse struct {
-		User         interface{} `json:"user"`
-		Token        string      `json:"token"`
-		Member       bool        `json:"member"`
-		Organization interface{} `json:"organization"`
+		User  interface{} `json:"user"`
+		Token string      `json:"token"`
 	}
 )
