@@ -41,8 +41,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, api.Error(err.Error()))
 	}
 
-	m, o := h.membership(u)
-	response := auth.SigninResponse{Token: t, User: u, Member: m, Organization: o}
+	response := auth.SigninResponse{Token: t, User: u}
 
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }

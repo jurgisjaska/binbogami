@@ -9,7 +9,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	"github.com/labstack/gommon/random"
 )
 
@@ -56,44 +55,10 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	// @todo should invitation and user email match when using invitation link?
-
-	memberEntity := &member.Member{}
-	organizationEntity := &organization.Organization{}
-	log.Infof("%+v", request)
-	if request.InvitationId != nil {
-		invitation, err := h.invitation.FindById(request.InvitationId)
-		log.Infof("%+v", invitation)
-		log.Error(err)
-		if err == nil {
-			memberEntity, err = h.member.Create(invitation.OrganizationId, u.Id, member.MemberRoleDefault, invitation.CreatedBy)
-			if err == nil {
-				_ = h.invitation.Delete(invitation)
-			}
-
-			// error does not matter in this case
-			// organization either is there or no
-			// SQL not found can be ignored
-			organizationEntity, _ = h.organization.FindById(invitation.OrganizationId)
-		}
-	}
-
-	// membership status
-	m := false
-	if memberEntity.Id != 0 {
-		m = true
-	}
-
-	// reset organization to nil
-	// to keep consistency between sign in and sign up methods
-	if organizationEntity.Id == nil {
-		organizationEntity = nil
-	}
-
 	return c.JSON(
 		http.StatusOK,
 		api.Success(
-			auth.SignupResponse{User: u, Token: t, Member: m, Organization: organizationEntity},
+			auth.SignupResponse{User: u, Token: t},
 			api.CreateRequest(c),
 		),
 	)

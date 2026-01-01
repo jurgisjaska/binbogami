@@ -24,7 +24,7 @@ func (h *Book) initialize() *Book {
 
 	h.echo.POST("/books", h.create)
 	h.echo.PUT("/books", h.update)
-	h.echo.GET("/books", h.byOrganization)
+	// h.echo.GET("/books", h.byOrganization)
 	h.echo.GET("/books/:id", h.show)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
@@ -33,14 +33,9 @@ func (h *Book) initialize() *Book {
 }
 
 func (h *Book) create(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	bm := &models.CreateBook{}
-	bm.CreatedBy = member.UserId
-	bm.OrganizationId = member.OrganizationId
+	// bm.CreatedBy = member.UserId
+	// bm.OrganizationId = member.OrganizationId
 
 	if err := c.Bind(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
@@ -60,21 +55,9 @@ func (h *Book) create(c echo.Context) error {
 }
 
 func (h *Book) update(c echo.Context) error {
-	_, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	bm := &models.UpdateBook{}
 	if err := c.Bind(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
-	}
-
-	// user performing the change must be a member of the new organization
-	// @todo this may not work if in the future there is an administrator dashboard
-	_, err = verifyMembership(h.member, c, bm.OrganizationId)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error("not a member of new organization"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
@@ -96,11 +79,6 @@ func (h *Book) update(c echo.Context) error {
 }
 
 func (h *Book) add(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -120,28 +98,13 @@ func (h *Book) add(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	m.SetCreatedBy(member.UserId)
+	// m.SetCreatedBy(member.UserId)
 	entity, err := h.repository.AddObject(book, m)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
-}
-
-func (h *Book) byOrganization(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
-	request := api.CreateRequest(c)
-	books, total, err := h.repository.FindManyByOrganization(member.OrganizationId, request)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no books found in the organization"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(books, request, total))
 }
 
 func (h *Book) show(c echo.Context) error {

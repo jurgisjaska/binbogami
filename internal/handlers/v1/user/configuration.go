@@ -3,7 +3,6 @@ package user
 import (
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	um "github.com/jurgisjaska/binbogami/internal/api/models/user"
@@ -43,23 +42,23 @@ func (h *Configuration) set(c echo.Context) error {
 	}
 	request.UserId = claims.Id
 
-	organization := uuid.MustParse(request.Value)
-	_, err := h.member.Find(&organization, claims.Id)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
+	// organization := uuid.MustParse(request.Value)
+	// _, err := h.member.Find(&organization, claims.Id)
+	// if err != nil {
+	// 	return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	// }
 
 	entity, err := h.repository.Upsert(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	o, err := h.organization.FindById(&organization)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
-	}
+	// o, err := h.organization.FindById(&organization)
+	// if err != nil {
+	// 	return c.JSON(http.StatusNotFound, api.Error("organization not found"))
+	// }
 
-	response := &um.ConfigurationResponse{entity, o}
+	response := &um.ConfigurationResponse{entity}
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
 

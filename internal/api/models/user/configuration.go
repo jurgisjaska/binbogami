@@ -14,6 +14,5 @@ type (
 
 	ConfigurationResponse struct {
 		Configuration interface{} `json:"configuration"`
-		Organization  interface{} `json:"organization"`
 	}
 )

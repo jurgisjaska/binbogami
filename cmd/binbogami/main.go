@@ -53,11 +53,9 @@ func main() {
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
-	v1.CreateOrganization(g, database)
 	user.CreateUser(g, database)
 	user.CreateConfiguration(g, database)
-	v1.CreateInvitation(g, database, config, dialer)
-	v1.CreateMember(g, database)
+	// v1.CreateInvitation(g, database, config, dialer)
 
 	v1.CreateBook(g, database)
 	v1.CreateCategory(g, database)

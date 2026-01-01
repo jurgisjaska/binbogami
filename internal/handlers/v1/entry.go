@@ -62,7 +62,7 @@ func (h *Entry) create(c echo.Context) error {
 		return c.JSON(http.StatusForbidden, api.Error("location does not belong to the book"))
 	}
 
-	entry.CreatedBy = member.UserId
+	// entry.CreatedBy = member.UserId
 	entity, err := h.repository.Create(entry)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))

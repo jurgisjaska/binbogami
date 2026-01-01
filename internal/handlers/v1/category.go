@@ -24,7 +24,7 @@ func (h *Category) initialize() *Category {
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/categories", h.create)
-	h.echo.GET("/categories", h.byOrganization)
+	// h.echo.GET("/categories", h.byOrganization)
 	h.echo.GET("/books/:id/categories", h.byBook)
 
 	return h
@@ -45,11 +45,6 @@ func (h *Category) one(c echo.Context) error {
 }
 
 func (h *Category) byBook(c echo.Context) error {
-	_, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -69,11 +64,6 @@ func (h *Category) byBook(c echo.Context) error {
 }
 
 func (h *Category) create(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	category := &models.Category{}
 	if err := c.Bind(category); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
@@ -83,8 +73,8 @@ func (h *Category) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect category data", err.Error()))
 	}
 
-	category.CreatedBy = member.UserId
-	category.OrganizationId = member.OrganizationId
+	// category.CreatedBy = member.UserId
+	// category.OrganizationId = member.OrganizationId
 	entity, err := h.repository.Create(category)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
