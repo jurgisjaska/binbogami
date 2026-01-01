@@ -24,6 +24,17 @@ func (r *Repository) FindByColumn(column string, value interface{}) (*User, erro
 	return user, nil
 }
 
+// FindByEmail retrieves a user from the database based on their email address.
+func (r *Repository) FindByEmail(e string) (*User, error) {
+	user := &User{}
+	err := r.database.Get(user, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL and confirmed_at IS NOT NULL", e)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *Repository) FindMany(filter string) (*Users, error) {
 	users := &Users{}
 

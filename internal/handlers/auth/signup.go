@@ -28,7 +28,7 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(passwordsMatchError, fmt.Errorf("passwords does not match")))
 	}
 
-	existingUser, err := h.userRepository.user.FindByColumn("email", *request.Email)
+	existingUser, err := h.user.repository.FindByColumn("email", *request.Email)
 	if existingUser != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
@@ -45,7 +45,7 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.userRepository.user.Create(u)
+	err = h.user.repository.Create(u)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}

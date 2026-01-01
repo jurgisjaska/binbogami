@@ -22,7 +22,7 @@ func (h *Auth) signin(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
-	u, err := h.userRepository.user.FindByColumn("email", request.Email)
+	u, err := h.user.repository.FindByEmail(request.Email)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}

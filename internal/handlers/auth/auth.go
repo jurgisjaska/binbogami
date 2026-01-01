@@ -25,12 +25,12 @@ const (
 
 type (
 	Auth struct {
-		echo           *echo.Echo
-		database       *sqlx.DB
-		invitation     *invitation.InvitationRepository
-		configuration  *internal.Config
-		mailer         *mailer
-		userRepository *userRepository
+		echo          *echo.Echo
+		database      *sqlx.DB
+		invitation    *invitation.InvitationRepository
+		configuration *internal.Config
+		mailer        *mailer
+		user          *userRepositories
 	}
 
 	// @todo go level up on a tree if there will not be any other mailers
@@ -38,8 +38,8 @@ type (
 		resetPassword *mail.ResetPassword
 	}
 
-	userRepository struct {
-		user          *user.Repository
+	userRepositories struct {
+		repository    *user.Repository
 		configuration *configuration.ConfigurationRepository
 		passwordReset *password.PasswordResetRepository
 	}
@@ -47,8 +47,8 @@ type (
 
 func (h *Auth) initialize() *Auth {
 	h.invitation = invitation.CreateInvitation(h.database)
-	h.userRepository = &userRepository{
-		user:          user.CreateUser(h.database),
+	h.user = &userRepositories{
+		repository:    user.CreateUser(h.database),
 		configuration: configuration.CreateConfiguration(h.database),
 		passwordReset: password.CreatePasswordReset(h.database),
 	}
