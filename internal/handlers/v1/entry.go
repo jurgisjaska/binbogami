@@ -10,7 +10,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/database/category"
 	"github.com/jurgisjaska/binbogami/internal/database/entry"
 	"github.com/jurgisjaska/binbogami/internal/database/location"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -19,7 +18,6 @@ type Entry struct {
 	database   *sqlx.DB
 	repository *entry.EntryRepository
 
-	member   *member.MemberRepository
 	book     *book.Repository
 	category *category.CategoryRepository
 	location *location.LocationRepository
@@ -27,7 +25,6 @@ type Entry struct {
 
 func (h *Entry) initialize() *Entry {
 	h.repository = entry.CreateEntry(h.database)
-	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 	h.category = category.CreateCategory(h.database)
 	h.location = location.CreateLocation(h.database)
@@ -38,11 +35,6 @@ func (h *Entry) initialize() *Entry {
 }
 
 func (h *Entry) create(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	entry := &models.Entry{}
 	if err := c.Bind(entry); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect entry data", err.Error()))

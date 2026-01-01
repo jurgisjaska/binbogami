@@ -9,7 +9,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/category"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,13 +16,11 @@ type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *category.CategoryRepository
-	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Category) initialize() *Category {
 	h.repository = category.CreateCategory(h.database)
-	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/categories", h.create)
@@ -45,20 +42,6 @@ func (h *Category) one(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
-}
-
-func (h *Category) byOrganization(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
-	categories, err := h.repository.ManyByOrganization(member.OrganizationId)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
 }
 
 func (h *Category) byBook(c echo.Context) error {

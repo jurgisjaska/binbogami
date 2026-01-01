@@ -2,7 +2,6 @@ package public
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"github.com/labstack/echo/v4"

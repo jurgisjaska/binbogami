@@ -5,7 +5,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
@@ -101,8 +100,8 @@ func (r *InvitationRepository) Delete(invitation *Invitation) error {
 
 func (r *InvitationRepository) flush(invitation *Invitation) error {
 	query := `
-		INSERT INTO invitations (id, email, created_by, organization_id, created_at, opened_at, expired_at, deleted_at)
-		VALUES (:id, :email, :created_by, :organization_id, :created_at, :opened_at, :expired_at, :deleted_at)
+		INSERT INTO invitations (id, email, created_by, created_at, opened_at, expired_at, deleted_at)
+		VALUES (:id, :email, :created_by, :created_at, :opened_at, :expired_at, :deleted_at)
 		ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at
 	`
 	_, err := r.database.NamedExec(query, invitation)

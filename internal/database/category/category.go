@@ -84,24 +84,6 @@ func (r *CategoryRepository) ManyByBook(book *book.Book) (*Categories, error) {
 	return categories, nil
 }
 
-// ManyByOrganization retrieves all categories for a given organization.
-func (r *CategoryRepository) ManyByOrganization(org *uuid.UUID) (*Categories, error) {
-	categories := &Categories{}
-	query := `
-		SELECT * 
-		FROM categories 
-		WHERE organization_id = ?
-		AND deleted_at IS NULL
-	`
-
-	err := r.database.Select(categories, query, org)
-	if err != nil {
-		return nil, err
-	}
-
-	return categories, nil
-}
-
 func (r *CategoryRepository) Create(c *models.Category) (*Category, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
@@ -109,17 +91,16 @@ func (r *CategoryRepository) Create(c *models.Category) (*Category, error) {
 	}
 
 	category := &Category{
-		Id:             &id,
-		Name:           c.Name,
-		Description:    c.Description,
-		OrganizationId: c.OrganizationId,
-		CreatedBy:      c.CreatedBy,
-		CreatedAt:      time.Now(),
+		Id:          &id,
+		Name:        c.Name,
+		Description: c.Description,
+		CreatedBy:   c.CreatedBy,
+		CreatedAt:   time.Now(),
 	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO categories (id, name, description, organization_id, created_by, created_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
+		INSERT INTO categories (id, name, description, created_by, created_at)
+		VALUES (:id, :name, :description, :created_by, :created_at)
 	`, category)
 
 	if err != nil {

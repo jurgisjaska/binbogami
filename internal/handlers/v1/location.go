@@ -9,7 +9,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/location"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,13 +16,11 @@ type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *location.LocationRepository
-	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Location) initialize() *Location {
 	h.repository = location.CreateLocation(h.database)
-	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/locations", h.create)
@@ -47,26 +44,7 @@ func (h *Location) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
 }
 
-func (h *Location) byOrganization(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
-	locations, err := h.repository.ManyByOrganization(member.OrganizationId)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no locations found in the organization"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(locations, api.CreateRequest(c)))
-}
-
 func (h *Location) create(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	location := &models.Location{}
 	if err := c.Bind(location); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect location data"))
@@ -87,11 +65,6 @@ func (h *Location) create(c echo.Context) error {
 }
 
 func (h *Location) byBook(c echo.Context) error {
-	_, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
