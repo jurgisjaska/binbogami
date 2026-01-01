@@ -14,21 +14,25 @@ DEALLOCATE PREPARE stmt;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-CREATE TABLE IF NOT EXISTS users
+create table if not exists users
 (
-    id         CHAR(36)     NOT NULL
-        PRIMARY KEY,
-    email      VARCHAR(128) NOT NULL,
-    name       VARCHAR(64)  NOT NULL,
-    surname    VARCHAR(64)  NOT NULL,
-    salt       CHAR(16)     NOT NULL,
-    password   VARCHAR(256) NOT NULL,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at TIMESTAMP    NULL,
-    CONSTRAINT users_email_uindex
-        UNIQUE (email)
+    id           char(36)     not null
+        primary key,
+    email        varchar(128) not null,
+    name         varchar(64)  not null,
+    surname      varchar(64)  not null,
+    salt         char(16)     not null,
+    password     varchar(256) not null,
+    role         int          not null,
+    created_at   timestamp    not null,
+    updated_at   timestamp    null on update current_timestamp(),
+    confirmed_at timestamp    null,
+    deleted_at   timestamp    null,
+    constraint users_email_uindex
+        unique (email)
 );
+
+
 
 CREATE TABLE IF NOT EXISTS books
 (

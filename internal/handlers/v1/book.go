@@ -9,24 +9,18 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/labstack/echo/v4"
 )
 
 // Book represents a book handlers.
 type Book struct {
-	echo         *echo.Group
-	database     *sqlx.DB
-	repository   *book.Repository
-	organization *organization.Repository
-	member       *member.MemberRepository
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *book.Repository
 }
 
 func (h *Book) initialize() *Book {
 	h.repository = book.CreateBook(h.database)
-	h.organization = organization.CreateOrganization(h.database)
-	h.member = member.CreateMember(h.database)
 
 	h.echo.POST("/books", h.create)
 	h.echo.PUT("/books", h.update)

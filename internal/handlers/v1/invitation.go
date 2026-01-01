@@ -8,8 +8,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
@@ -23,15 +21,11 @@ type Invitation struct {
 	mailer        *mail.Invitation
 	configuration *internal.Config
 	invitation    *invitation.InvitationRepository
-	member        *member.MemberRepository
-	organization  *organization.Repository
 	user          *user.Repository
 }
 
 func (h *Invitation) initialize() *Invitation {
 	h.invitation = invitation.CreateInvitation(h.database)
-	h.member = member.CreateMember(h.database)
-	h.organization = organization.CreateOrganization(h.database)
 	h.user = user.CreateUser(h.database)
 
 	h.echo.POST("/invitations", h.create)
