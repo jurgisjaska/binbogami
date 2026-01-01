@@ -3,7 +3,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET SESSION group_concat_max_len = 1000000;
 
 SET @tables = NULL;
-SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables
+SELECT GROUP_CONCAT('`', table_name, '`')
+INTO @tables
 FROM information_schema.tables
 WHERE table_schema = 'binbogami';
 
@@ -16,14 +17,14 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 create table if not exists users
 (
-    id           char(36)     not null
+    id           uuid         not null
         primary key,
     email        varchar(128) not null,
     name         varchar(64)  not null,
     surname      varchar(64)  not null,
     salt         char(16)     not null,
     password     varchar(256) not null,
-    role         int          not null,
+    role         int          not null default 1,
     created_at   timestamp    not null,
     updated_at   timestamp    null on update current_timestamp(),
     confirmed_at timestamp    null,
@@ -32,19 +33,17 @@ create table if not exists users
         unique (email)
 );
 
-
-
 CREATE TABLE IF NOT EXISTS books
 (
-    id              CHAR(36)     NOT NULL
+    id          uuid         NOT NULL
         PRIMARY KEY,
-    name            VARCHAR(128) NOT NULL,
-    description     TEXT         NULL,
-    created_by      CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP    NULL,
-    closed_at       TIMESTAMP    NULL,
+    name        VARCHAR(128) NOT NULL,
+    description TEXT         NULL,
+    created_by  UUID     NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP    NULL,
+    closed_at   TIMESTAMP    NULL,
     CONSTRAINT books_name_uindex
         UNIQUE (name),
     CONSTRAINT books_users_id_fk
@@ -53,12 +52,11 @@ CREATE TABLE IF NOT EXISTS books
 
 CREATE TABLE IF NOT EXISTS categories
 (
-    id              CHAR(36)     NOT NULL
+    id              uuid         NOT NULL
         PRIMARY KEY,
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
-    organization_id CHAR(36)     NULL,
-    created_by      CHAR(36)     NOT NULL,
+    created_by      UUID     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
@@ -72,9 +70,9 @@ CREATE TABLE IF NOT EXISTS books_categories
 (
     id          INT AUTO_INCREMENT
         PRIMARY KEY,
-    book_id     CHAR(36)  NOT NULL,
-    category_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID      NOT NULL,
+    category_id UUID      NOT NULL,
+    created_by  UUID      NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     deleted_at  TIMESTAMP NULL,
     CONSTRAINT books_categories_books_id_fk
@@ -90,28 +88,28 @@ CREATE INDEX IF NOT EXISTS categories_name_index
 
 CREATE TABLE IF NOT EXISTS invitations
 (
-    id              CHAR(36)     NOT NULL
+    id         UUID     NOT NULL
         PRIMARY KEY,
-    email           VARCHAR(128) NOT NULL,
-    created_by      CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    opened_at       TIMESTAMP    NULL,
-    deleted_at      TIMESTAMP    NULL,
-    expired_at      TIMESTAMP    NOT NULL,
+    email      VARCHAR(128) NOT NULL,
+    created_by UUID     NOT NULL,
+    created_at TIMESTAMP    NOT NULL,
+    opened_at  TIMESTAMP    NULL,
+    deleted_at TIMESTAMP    NULL,
+    expired_at TIMESTAMP    NOT NULL,
     CONSTRAINT organizations_invitations_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS locations
 (
-    id              CHAR(36)     NOT NULL
+    id          UUID     NOT NULL
         PRIMARY KEY,
-    name            VARCHAR(128) NOT NULL,
-    description     TEXT         NULL,
-    created_by      CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP    NULL,
+    name        VARCHAR(128) NOT NULL,
+    description TEXT         NULL,
+    created_by  UUID     NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP    NULL,
     CONSTRAINT locations_name_uindex
         UNIQUE (name),
     CONSTRAINT locations_users_id_fk
@@ -122,9 +120,9 @@ CREATE TABLE IF NOT EXISTS books_locations
 (
     id          INT AUTO_INCREMENT
         PRIMARY KEY,
-    book_id     CHAR(36)  NOT NULL,
-    location_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID  NOT NULL,
+    location_id UUID  NOT NULL,
+    created_by  UUID  NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     deleted_at  TIMESTAMP NULL,
     CONSTRAINT books_locations_books_id_fk
@@ -137,14 +135,14 @@ CREATE TABLE IF NOT EXISTS books_locations
 
 CREATE TABLE IF NOT EXISTS entries
 (
-    id          CHAR(36)  NOT NULL
+    id          UUID  NOT NULL
         PRIMARY KEY,
     amount      FLOAT     NOT NULL,
     description TEXT      NULL,
-    book_id     CHAR(36)  NOT NULL,
-    category_id CHAR(36)  NOT NULL,
-    location_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID  NOT NULL,
+    category_id UUID  NOT NULL,
+    location_id UUID  NOT NULL,
+    created_by  UUID  NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at  TIMESTAMP NULL,
@@ -161,11 +159,11 @@ CREATE TABLE IF NOT EXISTS entries
 
 CREATE TABLE IF NOT EXISTS user_configurations
 (
-    id            CHAR(36)  NOT NULL
+    id            UUID  NOT NULL
         PRIMARY KEY,
     configuration INT       NOT NULL,
     value         TEXT      NULL,
-    user_id       CHAR(36)  NOT NULL,
+    user_id       UUID  NOT NULL,
     created_at    TIMESTAMP NOT NULL,
     updated_at    TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
     CONSTRAINT user_configurations_user_id_configuration_uindex
