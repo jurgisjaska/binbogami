@@ -8,16 +8,17 @@ import (
 
 const (
 	RoleDefault int = iota + 1
+	RoleReadonly
 	RoleBilling
 	RoleAdmin
 )
 
 type (
 	User struct {
-		Id          *uuid.UUID `json:"id"`
-		Email       *string    `json:"email"`
-		Name        *string    `json:"name"`
-		Surname     *string    `json:"surname"`
+		Id          uuid.UUID  `json:"id"`
+		Email       string     `json:"email"`
+		Name        string     `json:"name"`
+		Surname     string     `json:"surname"`
 		Salt        string     `json:"-"`
 		Password    string     `json:"-"`
 		Role        int        `json:"role"`

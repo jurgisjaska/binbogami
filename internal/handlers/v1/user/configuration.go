@@ -40,7 +40,7 @@ func (h *Configuration) set(c echo.Context) error {
 	if claims.Id == nil {
 		return c.JSON(http.StatusBadRequest, api.Error(v1.ErrorToken))
 	}
-	request.UserId = claims.Id
+	request.UserId = *claims.Id
 
 	// organization := uuid.MustParse(request.Value)
 	// _, err := h.member.Find(&organization, claims.Id)

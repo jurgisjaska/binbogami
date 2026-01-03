@@ -13,7 +13,7 @@ type (
 	// PasswordReset represents a data structure for storing information about a password reset.
 	PasswordReset struct {
 		Id     *uuid.UUID `json:"id"`
-		UserId *uuid.UUID `db:"user_id" json:"userId"`
+		UserId uuid.UUID  `db:"user_id" json:"userId"`
 
 		Ip        string `db:"ip" json:"-"`
 		UserAgent string `db:"user_agent" json:"-"`

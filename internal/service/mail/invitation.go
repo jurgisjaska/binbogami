@@ -54,7 +54,7 @@ func (m *Invitation) createMessage(sender *user.User, i *invitation.Invitation) 
 	url := fmt.Sprintf("http://%s:%d/signup/%s", m.c.Web.Hostname, m.c.Web.Port, i.Id.String())
 	content := InvitationContent{
 		URL:    url,
-		Sender: fmt.Sprintf("%s %s", *sender.Name, *sender.Surname),
+		Sender: fmt.Sprintf("%s %s", sender.Name, sender.Surname),
 	}
 
 	var b bytes.Buffer

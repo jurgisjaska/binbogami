@@ -23,10 +23,10 @@ type ResetPassword struct {
 func (m *ResetPassword) Send(u *user.User, pr *password.PasswordReset) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", m.c.Mail.Sender)
-	message.SetHeader("To", *u.Email)
+	message.SetHeader("To", u.Email)
 	message.SetHeader("Subject", "Reset Password")
 
-	content, err := m.createMessage(*u.Name, pr.Id)
+	content, err := m.createMessage(u.Name, pr.Id)
 	if err != nil {
 		return err
 	}

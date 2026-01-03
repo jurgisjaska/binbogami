@@ -18,7 +18,7 @@ func (r *PasswordResetRepository) Save(m *auth.ForgotRequest) (*PasswordReset, e
 	id := uuid.New()
 	reset := &PasswordReset{
 		Id:        &id,
-		UserId:    m.User.(*user.User).Id,
+		UserId:    m.User.(user.User).Id,
 		Ip:        m.Ip,
 		UserAgent: m.UserAgent,
 		CreatedAt: time.Now(),

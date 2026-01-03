@@ -26,9 +26,9 @@ type Claims struct {
 func CreateToken(u *user.User, key string) (string, error) {
 	expire := jwt.NewNumericDate(time.Now().Add(time.Hour * expire))
 	claim := &Claims{
-		Id:    u.Id,
-		Email: u.Email,
-		Name:  fmt.Sprintf("%s %s", *u.Name, *u.Surname),
+		Id:    &u.Id,
+		Email: &u.Email,
+		Name:  fmt.Sprintf("%s %s", u.Name, u.Surname),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: expire,
 		},

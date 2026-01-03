@@ -2,9 +2,7 @@ package user
 
 import (
 	"fmt"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -64,10 +62,6 @@ func (r *Repository) FindMany(filter string) (*Users, error) {
 }
 
 func (r *Repository) Create(u *User) error {
-	id := uuid.New()
-	u.Id = &id
-	u.CreatedAt = time.Now()
-
 	query := `
 		INSERT INTO users (id, email, name, surname, salt, password, created_at)
 		VALUES (:id, :email, :name, :surname, :salt, :password, :created_at) 
