@@ -10,6 +10,7 @@ type Repository struct {
 	database *sqlx.DB
 }
 
+// @todo Deprecated and need to be removed.
 func (r *Repository) FindByColumn(column string, value interface{}) (*User, error) {
 	query := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
 
@@ -61,10 +62,11 @@ func (r *Repository) FindMany(filter string) (*Users, error) {
 	return users, nil
 }
 
+// Create inserts a new user into the database.
 func (r *Repository) Create(u *User) error {
 	query := `
-		INSERT INTO users (id, email, name, surname, salt, password, created_at)
-		VALUES (:id, :email, :name, :surname, :salt, :password, :created_at) 
+		INSERT INTO users (id, email, name, surname, salt, role, password, created_at)
+		VALUES (:id, :email, :name, :surname, :salt, :role, :password, :created_at) 
 	`
 
 	_, err := r.database.NamedExec(query, u)
