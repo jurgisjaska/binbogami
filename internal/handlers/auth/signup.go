@@ -10,6 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/random"
 )
@@ -36,16 +37,17 @@ func (h *Auth) signup(c echo.Context) error {
 	}
 
 	role := user.RoleDefault
+	var inv *invitation.Invitation
 	var confirmedAt *time.Time
 
 	if request.InvitationId != nil {
-		invitation, err := h.invitation.Find(*request.InvitationId)
+		inv, err = h.invitation.Find(*request.InvitationId)
 		if err == nil {
 			n := time.Now()
 			confirmedAt = &n
 
-			if invitation.Role != nil {
-				role = *invitation.Role
+			if inv.Role != nil {
+				role = *inv.Role
 			}
 		}
 	}
@@ -74,6 +76,10 @@ func (h *Auth) signup(c echo.Context) error {
 	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+	}
+
+	if inv != nil {
+		_ = h.invitation.Delete(inv)
 	}
 
 	return c.JSON(
