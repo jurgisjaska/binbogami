@@ -15,7 +15,7 @@ func (h *Public) invite(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect invitation"))
 	}
 
-	invitation, err := h.invitation.Open(&id)
+	invitation, err := h.invitation.Open(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("invitation not found"))
 	}

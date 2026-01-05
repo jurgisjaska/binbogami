@@ -19,6 +19,7 @@ type (
 	Invitation struct {
 		Id        *uuid.UUID `json:"id"`
 		Email     string     `json:"email"`
+		Role      *int       `json:"role"`
 		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
@@ -35,8 +36,8 @@ type (
 )
 
 // Open retrieves the invitation entity from the database by its UUID and marks invitation as opened.
-func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
-	invitation, err := r.FindById(id)
+func (r *InvitationRepository) Open(id uuid.UUID) (*Invitation, error) {
+	invitation, err := r.Find(id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,8 +52,8 @@ func (r *InvitationRepository) Open(id *uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-// FindById retrieves the invitation entity form the database by its UUID.
-func (r *InvitationRepository) FindById(id *uuid.UUID) (*Invitation, error) {
+// Find retrieves the invitation entity form the database by its UUID.
+func (r *InvitationRepository) Find(id uuid.UUID) (*Invitation, error) {
 	query := `
 		SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()
 	`

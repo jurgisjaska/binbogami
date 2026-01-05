@@ -86,19 +86,22 @@ CREATE TABLE IF NOT EXISTS books_categories
 CREATE INDEX IF NOT EXISTS categories_name_index
     ON categories (name);
 
-CREATE TABLE IF NOT EXISTS invitations
+create table if not exists invitations
 (
-    id         UUID     NOT NULL
-        PRIMARY KEY,
-    email      VARCHAR(128) NOT NULL,
-    created_by UUID     NOT NULL,
-    created_at TIMESTAMP    NOT NULL,
-    opened_at  TIMESTAMP    NULL,
-    deleted_at TIMESTAMP    NULL,
-    expired_at TIMESTAMP    NOT NULL,
-    CONSTRAINT organizations_invitations_users_id_fk
-        FOREIGN KEY (created_by) REFERENCES users (id)
+    id         uuid         not null
+        primary key,
+    email      varchar(128) not null,
+    role       int          null,
+    created_by uuid         not null,
+    created_at timestamp    not null,
+    opened_at  timestamp    null,
+    deleted_at timestamp    null,
+    expired_at timestamp    not null,
+    constraint invitations_users_id_fk
+        foreign key (created_by) references users (id)
 );
+
+
 
 CREATE TABLE IF NOT EXISTS locations
 (

@@ -53,7 +53,7 @@ func (h *Configuration) set(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	// o, err := h.organization.FindById(&organization)
+	// o, err := h.organization.Find(&organization)
 	// if err != nil {
 	// 	return c.JSON(http.StatusNotFound, api.Error("organization not found"))
 	// }

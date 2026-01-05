@@ -78,7 +78,7 @@ package v1
 // 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 // 	}
 //
-// 	// organization, err := h.organization.FindById(invitation.OrganizationId)
+// 	// organization, err := h.organization.Find(invitation.OrganizationId)
 // 	// if err != nil {
 // 	// 	return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 // 	// }
