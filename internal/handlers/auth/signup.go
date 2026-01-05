@@ -35,14 +35,30 @@ func (h *Auth) signup(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
 
+	role := user.RoleDefault
+	var confirmedAt *time.Time
+
+	if request.InvitationId != nil {
+		invitation, err := h.invitation.Find(*request.InvitationId)
+		if err == nil {
+			n := time.Now()
+			confirmedAt = &n
+
+			if invitation.Role != nil {
+				role = *invitation.Role
+			}
+		}
+	}
+
 	u := &user.User{
-		Id:        uuid.New(),
-		Email:     request.Email,
-		Name:      request.Name,
-		Surname:   request.Surname,
-		Salt:      random.String(16),
-		Role:      user.RoleDefault,
-		CreatedAt: time.Now(),
+		Id:          uuid.New(),
+		Email:       request.Email,
+		Name:        request.Name,
+		Surname:     request.Surname,
+		Salt:        random.String(16),
+		Role:        role,
+		CreatedAt:   time.Now(),
+		ConfirmedAt: confirmedAt,
 	}
 
 	u.Password, err = h.hashPassword(request.Password, u.Salt)
