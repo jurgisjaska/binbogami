@@ -23,10 +23,21 @@ func (r *Repository) FindByColumn(column string, value interface{}) (*User, erro
 	return user, nil
 }
 
+// FindActiveByEmail retrieves a user from the database based on their email address, ensuring they are active
+// (not deleted and confirmed).
+func (r *Repository) FindActiveByEmail(e string) (*User, error) {
+	return r.findByEmail(e, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL AND confirmed_at IS NOT NULL")
+}
+
 // FindByEmail retrieves a user from the database based on their email address.
 func (r *Repository) FindByEmail(e string) (*User, error) {
+	return r.findByEmail(e, "SELECT * FROM users WHERE email = ?")
+}
+
+// findByEmail is a private helper method to retrieve a user by their email address using a custom query.
+func (r *Repository) findByEmail(e string, q string) (*User, error) {
 	user := &User{}
-	err := r.database.Get(user, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL and confirmed_at IS NOT NULL", e)
+	err := r.database.Get(user, q, e)
 	if err != nil {
 		return nil, err
 	}
