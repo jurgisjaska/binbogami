@@ -76,7 +76,7 @@ func (r *Repository) FindMany(filter string) (*Users, error) {
 func (r *Repository) Create(u *User) error {
 	query := `
 		INSERT INTO users (id, email, name, surname, salt, role, password, created_at, confirmed_at)
-		VALUES (:id, :email, :name, :surname, :salt, :role, :password, :created_at, confirmed_at) 
+		VALUES (:id, :email, :name, :surname, :salt, :role, :password, :created_at, :confirmed_at) 
 	`
 
 	_, err := r.database.NamedExec(query, u)
