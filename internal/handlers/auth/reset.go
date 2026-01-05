@@ -31,7 +31,7 @@ func (h *Auth) reset(c echo.Context) error {
 	}
 
 	// retrieve the repository that's attempting to reset password
-	user, err := h.user.repository.FindByColumn("id", entity.UserId)
+	user, err := h.user.repository.Find(entity.UserId)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}

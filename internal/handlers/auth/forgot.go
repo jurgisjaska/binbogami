@@ -23,7 +23,7 @@ func (h *Auth) forgot(c echo.Context) error {
 	}
 
 	// attempt to locate used by email
-	user, err := h.user.repository.FindByColumn("email", request.Email)
+	user, err := h.user.repository.FindActiveByEmail(request.Email)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no repository associated with this email", err.Error()))
 	}

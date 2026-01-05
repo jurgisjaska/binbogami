@@ -3,6 +3,7 @@ package user
 import (
 	"fmt"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -10,12 +11,10 @@ type Repository struct {
 	database *sqlx.DB
 }
 
-// @todo Deprecated and need to be removed.
-func (r *Repository) FindByColumn(column string, value interface{}) (*User, error) {
-	query := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
-
+// Find retrieves a User from the database by its UUID.
+func (r *Repository) Find(id uuid.UUID) (*User, error) {
 	user := &User{}
-	err := r.database.Get(user, query, value)
+	err := r.database.Get(user, "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", id.String())
 	if err != nil {
 		return nil, err
 	}
