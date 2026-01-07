@@ -11,7 +11,7 @@ type Public struct {
 	echo          *echo.Group
 	database      *sqlx.DB
 	invitation    *invitation.InvitationRepository
-	passwordReset *password.PasswordResetRepository
+	passwordReset *password.ResetRepository
 }
 
 func (h *Public) initialize() *Public {

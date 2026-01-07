@@ -41,7 +41,7 @@ type (
 	userRepositories struct {
 		repository    *user.Repository
 		configuration *configuration.ConfigurationRepository
-		passwordReset *password.PasswordResetRepository
+		passwordReset *password.ResetRepository
 	}
 )
 

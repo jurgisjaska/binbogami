@@ -25,7 +25,7 @@ func (h *Auth) reset(c echo.Context) error {
 	}
 
 	// retrieve the password reset token
-	entity, err := h.user.passwordReset.FindById(request.Token)
+	entity, err := h.user.passwordReset.Find(request.Token)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
 	}

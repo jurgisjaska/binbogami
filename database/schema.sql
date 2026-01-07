@@ -33,6 +33,21 @@ create table if not exists users
         unique (email)
 );
 
+create table user_password_resets
+(
+    id         uuid        not null
+        primary key,
+    user_id    uuid        not null,
+    ip         varchar(39) not null,
+    user_agent text        not null,
+    created_at timestamp   not null,
+    opened_at timestamp   null on update current_timestamp(),
+    expire_at  timestamp   not null,
+    constraint user_password_resets_users_id_fk
+        foreign key (user_id) references users (id)
+);
+
+
 CREATE TABLE IF NOT EXISTS books
 (
     id          uuid         NOT NULL
@@ -174,4 +189,3 @@ CREATE TABLE IF NOT EXISTS user_configurations
     CONSTRAINT user_configuration_users_id_fk
         FOREIGN KEY (user_id) REFERENCES users (id)
 );
-

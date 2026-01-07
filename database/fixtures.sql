@@ -50,3 +50,17 @@ INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, cre
 --
 INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'random.1@sgc.example.com', null, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
 INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('0685f091-63c3-4d24-8765-e35680621101', 'random.2@sgc.example.com', 2, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
+
+--
+-- Add password resets
+--
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:23', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('aa7d1712-c6d0-488a-8b0d-0172f28b05d0', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:24', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('f686a0b8-4886-42b4-a2a1-03b6bf21a045', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:27', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('c8b5bde0-6190-4ce7-84b9-0f8243ce274a', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:26', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('f729b34c-8563-4e9c-9ab8-161212b8fa1f', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:25', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('1b014ea0-fb87-469a-9c43-1da4def16164', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:56:18', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('d9cdff05-325a-46f3-a14a-223995f86334', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:56:20', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('6a8d7b6a-5de0-4961-b982-26943092884b', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('e2900b08-d6f5-4e98-9159-2f532d8c097c', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('4a60bad4-bdfd-4cb4-ba2d-30fde81eb90a', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:32', null, '2027-01-01 01:01:01');

@@ -20,13 +20,13 @@ type ResetPassword struct {
 	c *internal.Config
 }
 
-func (m *ResetPassword) Send(u *user.User, pr *password.PasswordReset) error {
+func (m *ResetPassword) Send(u *user.User, pr *password.Reset) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", m.c.Mail.Sender)
 	message.SetHeader("To", u.Email)
 	message.SetHeader("Subject", "Reset Password")
 
-	content, err := m.createMessage(u.Name, pr.Id)
+	content, err := m.createMessage(u.Name, &pr.Id)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,9 @@ func (m *ResetPassword) createMessage(u string, id *uuid.UUID) (string, error) {
 	_, f, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(f)
 
-	t, err := template.ParseFiles(filepath.Join(dir, "../../../var/templates/reset_password.html"))
+	// trying to remember reason why this was moved ???
+	// was it because templates are static?
+	t, err := template.ParseFiles(filepath.Join(dir, "../../../templates/reset_password.html"))
 	if err != nil {
 		return "", err
 	}

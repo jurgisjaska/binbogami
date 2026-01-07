@@ -40,6 +40,7 @@ func main() {
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
 	}))
+	e.HideBanner = true
 	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
 	auth.CreateAuth(e, database, config, dialer)
