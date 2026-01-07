@@ -48,4 +48,5 @@ INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, cre
 --
 -- Add invitations
 --
-INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'random@sgc.example.com', null, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
+INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'random.1@sgc.example.com', null, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
+INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('0685f091-63c3-4d24-8765-e35680621101', 'random.2@sgc.example.com', 2, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
