@@ -3,11 +3,8 @@ package auth
 import (
 	"fmt"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/database/user/configuration"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
@@ -28,14 +25,12 @@ const (
 
 type (
 	Auth struct {
-		echo           *echo.Echo
-		database       *sqlx.DB
-		invitation     *invitation.InvitationRepository
-		member         *member.MemberRepository
-		organization   *organization.Repository
-		configuration  *internal.Config
-		mailer         *mailer
-		userRepository *userRepository
+		echo          *echo.Echo
+		database      *sqlx.DB
+		invitation    *invitation.InvitationRepository
+		configuration *internal.Config
+		mailer        *mailer
+		user          *userRepositories
 	}
 
 	// @todo go level up on a tree if there will not be any other mailers
@@ -43,20 +38,17 @@ type (
 		resetPassword *mail.ResetPassword
 	}
 
-	userRepository struct {
-		user          *user.Repository
+	userRepositories struct {
+		repository    *user.Repository
 		configuration *configuration.ConfigurationRepository
-		passwordReset *password.PasswordResetRepository
+		passwordReset *password.ResetRepository
 	}
 )
 
 func (h *Auth) initialize() *Auth {
 	h.invitation = invitation.CreateInvitation(h.database)
-	h.member = member.CreateMember(h.database)
-	h.organization = organization.CreateOrganization(h.database)
-
-	h.userRepository = &userRepository{
-		user:          user.CreateUser(h.database),
+	h.user = &userRepositories{
+		repository:    user.CreateUser(h.database),
 		configuration: configuration.CreateConfiguration(h.database),
 		passwordReset: password.CreatePasswordReset(h.database),
 	}
@@ -68,32 +60,6 @@ func (h *Auth) initialize() *Auth {
 	h.echo.POST("/auth/reset-password", h.reset)
 
 	return h
-}
-
-// membership determine if a user is a member of any organization and return the organization information if true
-// if member has multiple organization but no default he will be marked as member but will not have default organization
-// relates to internal/handlers/v1/v1.go
-func (h *Auth) membership(u *user.User) (bool, *organization.Organization) {
-	m := false
-	var organization *uuid.UUID
-
-	members, err := h.member.ManyByUser(u)
-	if err == nil && len(*members) != 0 {
-		m = true
-
-		if len(*members) > 1 {
-			defaultConfiguration, err := h.userRepository.configuration.FindDefaultOrganization(u)
-			if err == nil && defaultConfiguration != nil {
-				defaultId, _ := uuid.Parse(defaultConfiguration.Value)
-				organization = &defaultId
-			}
-		} else {
-			organization = (*members)[0].OrganizationId
-		}
-	}
-
-	o, _ := h.organization.FindById(organization)
-	return m, o
 }
 
 // hashPassword creates new password hash using bcrypt.

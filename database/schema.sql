@@ -3,7 +3,8 @@ SET FOREIGN_KEY_CHECKS = 0;
 SET SESSION group_concat_max_len = 1000000;
 
 SET @tables = NULL;
-SELECT GROUP_CONCAT('`', table_name, '`') INTO @tables
+SELECT GROUP_CONCAT('`', table_name, '`')
+INTO @tables
 FROM information_schema.tables
 WHERE table_schema = 'binbogami';
 
@@ -14,74 +15,68 @@ DEALLOCATE PREPARE stmt;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
-CREATE TABLE IF NOT EXISTS users
+create table if not exists users
 (
-    id         CHAR(36)     NOT NULL
-        PRIMARY KEY,
-    email      VARCHAR(128) NOT NULL,
-    name       VARCHAR(64)  NOT NULL,
-    surname    VARCHAR(64)  NOT NULL,
-    salt       CHAR(16)     NOT NULL,
-    password   VARCHAR(256) NOT NULL,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at TIMESTAMP    NULL,
-    CONSTRAINT users_email_uindex
-        UNIQUE (email)
+    id           uuid         not null
+        primary key,
+    email        varchar(128) not null,
+    name         varchar(64)  not null,
+    surname      varchar(64)  not null,
+    salt         char(16)     not null,
+    password     varchar(256) not null,
+    role         int          not null default 1,
+    created_at   timestamp    not null,
+    updated_at   timestamp    null on update current_timestamp(),
+    confirmed_at timestamp    null,
+    deleted_at   timestamp    null,
+    constraint users_email_uindex
+        unique (email)
 );
 
-CREATE TABLE IF NOT EXISTS organizations
+create table user_password_resets
 (
-    id          CHAR(36)     NOT NULL
-        PRIMARY KEY,
-    name        VARCHAR(64)  NOT NULL,
-    description TEXT         NULL,
-    branding    VARCHAR(128) NULL,
-    created_by  CHAR(36)     NOT NULL,
-    created_at  TIMESTAMP    NOT NULL,
-    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at  TIMESTAMP    NULL,
-    CONSTRAINT organizations_users_id_fk
-        FOREIGN KEY (created_by) REFERENCES users (id)
+    id         uuid        not null
+        primary key,
+    user_id    uuid        not null,
+    ip         varchar(39) not null,
+    user_agent text        not null,
+    created_at timestamp   not null,
+    opened_at timestamp   null on update current_timestamp(),
+    expire_at  timestamp   not null,
+    constraint user_password_resets_users_id_fk
+        foreign key (user_id) references users (id)
 );
-
 
 
 CREATE TABLE IF NOT EXISTS books
 (
-    id              CHAR(36)     NOT NULL
+    id          uuid         NOT NULL
         PRIMARY KEY,
-    name            VARCHAR(128) NOT NULL,
-    description     TEXT         NULL,
-    organization_id CHAR(36)     NOT NULL,
-    created_by      CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP    NULL,
-    closed_at       TIMESTAMP    NULL,
-    CONSTRAINT books_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT books_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    name        VARCHAR(128) NOT NULL,
+    description TEXT         NULL,
+    created_by  UUID     NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP    NULL,
+    closed_at   TIMESTAMP    NULL,
+    CONSTRAINT books_name_uindex
+        UNIQUE (name),
     CONSTRAINT books_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS categories
 (
-    id              CHAR(36)     NOT NULL
+    id              uuid         NOT NULL
         PRIMARY KEY,
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
-    organization_id CHAR(36)     NULL,
-    created_by      CHAR(36)     NOT NULL,
+    created_by      UUID     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at      TIMESTAMP    NULL,
-    CONSTRAINT categories_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT categories_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    CONSTRAINT categories_name_uindex
+        UNIQUE (name),
     CONSTRAINT categories_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -90,9 +85,9 @@ CREATE TABLE IF NOT EXISTS books_categories
 (
     id          INT AUTO_INCREMENT
         PRIMARY KEY,
-    book_id     CHAR(36)  NOT NULL,
-    category_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID      NOT NULL,
+    category_id UUID      NOT NULL,
+    created_by  UUID      NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     deleted_at  TIMESTAMP NULL,
     CONSTRAINT books_categories_books_id_fk
@@ -106,38 +101,35 @@ CREATE TABLE IF NOT EXISTS books_categories
 CREATE INDEX IF NOT EXISTS categories_name_index
     ON categories (name);
 
-CREATE TABLE IF NOT EXISTS invitations
+create table if not exists invitations
 (
-    id              CHAR(36)     NOT NULL
-        PRIMARY KEY,
-    email           VARCHAR(128) NOT NULL,
-    created_by      CHAR(36)     NOT NULL,
-    organization_id CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    opened_at       TIMESTAMP    NULL,
-    deleted_at      TIMESTAMP    NULL,
-    expired_at      TIMESTAMP    NOT NULL,
-    CONSTRAINT organizations_invitations_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
-    CONSTRAINT organizations_invitations_users_id_fk
-        FOREIGN KEY (created_by) REFERENCES users (id)
+    id         uuid         not null
+        primary key,
+    email      varchar(128) not null,
+    role       int          null,
+    created_by uuid         not null,
+    created_at timestamp    not null,
+    opened_at  timestamp    null,
+    deleted_at timestamp    null,
+    expired_at timestamp    not null,
+    constraint invitations_users_id_fk
+        foreign key (created_by) references users (id)
 );
+
+
 
 CREATE TABLE IF NOT EXISTS locations
 (
-    id              CHAR(36)     NOT NULL
+    id          UUID     NOT NULL
         PRIMARY KEY,
-    name            VARCHAR(128) NOT NULL,
-    description     TEXT         NULL,
-    organization_id CHAR(36)     NOT NULL,
-    created_by      CHAR(36)     NOT NULL,
-    created_at      TIMESTAMP    NOT NULL,
-    updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP    NULL,
-    CONSTRAINT locations_organization_id_name_uindex
-        UNIQUE (organization_id, name),
-    CONSTRAINT locations_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
+    name        VARCHAR(128) NOT NULL,
+    description TEXT         NULL,
+    created_by  UUID     NOT NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP    NULL,
+    CONSTRAINT locations_name_uindex
+        UNIQUE (name),
     CONSTRAINT locations_users_id_fk
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
@@ -146,9 +138,9 @@ CREATE TABLE IF NOT EXISTS books_locations
 (
     id          INT AUTO_INCREMENT
         PRIMARY KEY,
-    book_id     CHAR(36)  NOT NULL,
-    location_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID  NOT NULL,
+    location_id UUID  NOT NULL,
+    created_by  UUID  NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     deleted_at  TIMESTAMP NULL,
     CONSTRAINT books_locations_books_id_fk
@@ -161,14 +153,14 @@ CREATE TABLE IF NOT EXISTS books_locations
 
 CREATE TABLE IF NOT EXISTS entries
 (
-    id          CHAR(36)  NOT NULL
+    id          UUID  NOT NULL
         PRIMARY KEY,
     amount      FLOAT     NOT NULL,
     description TEXT      NULL,
-    book_id     CHAR(36)  NOT NULL,
-    category_id CHAR(36)  NOT NULL,
-    location_id CHAR(36)  NOT NULL,
-    created_by  CHAR(36)  NOT NULL,
+    book_id     UUID  NOT NULL,
+    category_id UUID  NOT NULL,
+    location_id UUID  NOT NULL,
+    created_by  UUID  NOT NULL,
     created_at  TIMESTAMP NOT NULL,
     updated_at  TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
     deleted_at  TIMESTAMP NULL,
@@ -183,32 +175,13 @@ CREATE TABLE IF NOT EXISTS entries
         FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS members
-(
-    id              INT AUTO_INCREMENT
-        PRIMARY KEY,
-    role            TINYINT(2) DEFAULT 1 NOT NULL,
-    organization_id CHAR(36)             NOT NULL,
-    user_id         CHAR(36)             NOT NULL,
-    created_by      CHAR(36)             NULL,
-    created_at      TIMESTAMP            NOT NULL,
-    updated_at      TIMESTAMP            NULL ON UPDATE CURRENT_TIMESTAMP(),
-    deleted_at      TIMESTAMP            NULL,
-    CONSTRAINT members_organization_id_user_id_uindex
-        UNIQUE (organization_id, user_id),
-    CONSTRAINT members_organizations_id_fk
-        FOREIGN KEY (organization_id) REFERENCES organizations (id),
-    CONSTRAINT members_users_id_fk
-        FOREIGN KEY (user_id) REFERENCES users (id)
-);
-
 CREATE TABLE IF NOT EXISTS user_configurations
 (
-    id            CHAR(36)  NOT NULL
+    id            UUID  NOT NULL
         PRIMARY KEY,
     configuration INT       NOT NULL,
     value         TEXT      NULL,
-    user_id       CHAR(36)  NOT NULL,
+    user_id       UUID  NOT NULL,
     created_at    TIMESTAMP NOT NULL,
     updated_at    TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP(),
     CONSTRAINT user_configurations_user_id_configuration_uindex
@@ -216,4 +189,3 @@ CREATE TABLE IF NOT EXISTS user_configurations
     CONSTRAINT user_configuration_users_id_fk
         FOREIGN KEY (user_id) REFERENCES users (id)
 );
-

@@ -2,7 +2,6 @@ package public
 
 import (
 	"github.com/jmoiron/sqlx"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"github.com/labstack/echo/v4"
@@ -12,13 +11,11 @@ type Public struct {
 	echo          *echo.Group
 	database      *sqlx.DB
 	invitation    *invitation.InvitationRepository
-	organization  *organization.Repository
-	passwordReset *password.PasswordResetRepository
+	passwordReset *password.ResetRepository
 }
 
 func (h *Public) initialize() *Public {
 	h.invitation = invitation.CreateInvitation(h.database)
-	h.organization = organization.CreateOrganization(h.database)
 	h.passwordReset = password.CreatePasswordReset(h.database)
 
 	h.echo.GET("/invitation/:id", h.invite)

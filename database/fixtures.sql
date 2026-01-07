@@ -3,50 +3,64 @@
 --
 SET FOREIGN_KEY_CHECKS=0;
 
-TRUNCATE binbogami.members;
-TRUNCATE binbogami.entries;
-TRUNCATE binbogami.books_categories;
-TRUNCATE binbogami.books_locations;
-TRUNCATE binbogami.categories;
-TRUNCATE binbogami.locations;
-TRUNCATE binbogami.books;
-TRUNCATE binbogami.organizations;
-TRUNCATE binbogami.invitations;
-TRUNCATE binbogami.users;
-TRUNCATE binbogami.user_configurations;
+DELIMITER $$
+DROP PROCEDURE IF EXISTS TruncateAllTables$$
+CREATE PROCEDURE TruncateAllTables()
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE _table_name VARCHAR(255);
+    DECLARE cur CURSOR FOR SELECT table_name FROM information_schema.tables WHERE table_schema = 'binbogami' AND TABLE_TYPE = 'BASE TABLE';
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN cur;
+
+    read_loop: LOOP
+        FETCH cur INTO _table_name;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        SET @s = CONCAT('TRUNCATE TABLE binbogami.', _table_name);
+        PREPARE stmt FROM @s;
+        EXECUTE stmt;
+        DEALLOCATE PREPARE stmt;
+    END LOOP;
+
+    CLOSE cur;
+END$$
+DELIMITER ;
+
+CALL TruncateAllTables();
+DROP PROCEDURE TruncateAllTables;
 
 SET FOREIGN_KEY_CHECKS=1;
+
 --
 -- Add users
 --
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('03a5ac74-b21b-11ee-9a7a-5ab75f0c1cab', 'george.hammond@sgc.gov', 'George', 'Hammond', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 13:52:39', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', 'jack.oneil@sgc.gov', 'Jack', 'O\'Neil', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 13:59:52', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', 'samantha.carter@sgc.gov', 'Samantha', 'Carter', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 14:00:27', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', 'daniel.jackson@sgc.gov', 'Daniel', 'Jackson', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 14:00:55', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('aff84550-b21f-11ee-8ac0-5ab75f0c1cab', 'tealc.of.chulak@sgc.gov', 'Teal\'c', 'Chulak', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 14:26:06', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('89705c9b-fe47-4c16-93f7-89cce8807f02', 'apophis@system.lords', 'Apophis', 'Goa\'uld', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 14:26:06', null, null);
-INSERT INTO binbogami.users (id, email, name, surname, salt, password, created_at, updated_at, deleted_at) VALUES ('5f4dcc3b-5aa5-487d-8f6a-64cbd3665b4e', 'ra@system.lords', 'Ra', 'Goa\'uld', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', '2024-01-13 14:26:06', null, '2024-01-13 14:26:07');
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('68b329da-9893-4d34-9d6b-549302554020', 'jonas.quinn@sgc.example.com', 'Jonas', 'Quinn', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 1, '2024-01-01 01:01:01', null, '2024-07-01 01:01:01', '2026-01-01 01:01:01');
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('aff84550-b21f-11ee-8ac0-5ab75f0c1cab', 'tealc.of.chulak@sgc.example.com', 'Teal\'c', 'Chulak', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 1, '2024-01-01 01:01:01', '2026-01-01 12:48:42', '2024-01-01 01:01:01', null);
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', 'jack.oneil@sgc.example.com', 'Jack', 'O\'Neil', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 3, '2024-01-01 01:01:01', '2026-01-01 12:56:33', '2024-01-01 01:01:01', null);
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', 'samantha.carter@sgc.example.com', 'Samantha', 'Carter', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 1, '2024-01-01 01:01:01', '2026-01-01 12:48:42', '2024-01-01 01:01:01', null);
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', 'daniel.jackson@sgc.example.com', 'Daniel', 'Jackson', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 1, '2024-01-01 01:01:01', '2026-01-01 12:48:42', '2024-01-01 01:01:01', null);
+INSERT INTO binbogami.users (id, email, name, surname, salt, password, role, created_at, updated_at, confirmed_at, deleted_at) VALUES ('c0f8c245-1b3d-4d5f-9234-8c7d6e5f4a3b', 'cameron.mitchell@sgc.example.com', 'Cameron', 'Mitchell', 'bUcdCORadqkbqHa1', '$2a$10$aIW8Elr5Q.2IXLl4ARI5hO6KGHT/DX4VGxPG0Od.CEUp7HQ.i8.Ry', 1, '2024-01-01 01:01:01', null, null, null);
 
 --
--- Add organizations
+-- Add invitations
 --
-INSERT INTO binbogami.organizations (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('1a530066-b21b-11ee-9a7a-5ab75f0c1cab', 'SGC', 'Stargate Command', '03a5ac74-b21b-11ee-9a7a-5ab75f0c1cab', '2024-01-13 13:53:17', null, null);
-INSERT INTO binbogami.organizations (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('1d8408ef-8f56-4b95-83c4-033e9e343ead', 'SG-1', 'SG-1 Unit', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-13 13:53:17', null, null);
-INSERT INTO binbogami.organizations (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('7b70bf48-c6cd-4aeb-8916-4ce73e8c7511', 'System Lords', 'Goa\'uld System Lords', '89705c9b-fe47-4c16-93f7-89cce8807f02', '2024-01-13 13:53:17', null, null);
+INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'random.1@sgc.example.com', null, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
+INSERT INTO binbogami.invitations (id, email, role, created_by, created_at, opened_at, deleted_at, expired_at) VALUES ('0685f091-63c3-4d24-8765-e35680621101', 'random.2@sgc.example.com', 2, '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-05 15:46:35', null, null, '2028-01-01 01:01:01');
 
 --
--- Assign memberships
+-- Add password resets
 --
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 4, '1a530066-b21b-11ee-9a7a-5ab75f0c1cab', '03a5ac74-b21b-11ee-9a7a-5ab75f0c1cab', '03a5ac74-b21b-11ee-9a7a-5ab75f0c1cab', '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 3, '1a530066-b21b-11ee-9a7a-5ab75f0c1cab', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1a530066-b21b-11ee-9a7a-5ab75f0c1cab', '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1a530066-b21b-11ee-9a7a-5ab75f0c1cab', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1a530066-b21b-11ee-9a7a-5ab75f0c1cab', 'aff84550-b21f-11ee-8ac0-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 4, '1d8408ef-8f56-4b95-83c4-033e9e343ead', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1d8408ef-8f56-4b95-83c4-033e9e343ead', '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1d8408ef-8f56-4b95-83c4-033e9e343ead', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 1, '1d8408ef-8f56-4b95-83c4-033e9e343ead', 'aff84550-b21f-11ee-8ac0-5ab75f0c1cab', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 4, '7b70bf48-c6cd-4aeb-8916-4ce73e8c7511', '89705c9b-fe47-4c16-93f7-89cce8807f02', null, '2024-03-31 17:42:43', null, null);
-INSERT INTO binbogami.members (id, role, organization_id, user_id, created_by, created_at, updated_at, deleted_at) VALUES (NULL, 3, '7b70bf48-c6cd-4aeb-8916-4ce73e8c7511', '5f4dcc3b-5aa5-487d-8f6a-64cbd3665b4e', null, '2024-03-31 17:42:43', null, null);
-
-
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:23', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('aa7d1712-c6d0-488a-8b0d-0172f28b05d0', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:24', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('f686a0b8-4886-42b4-a2a1-03b6bf21a045', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:27', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('c8b5bde0-6190-4ce7-84b9-0f8243ce274a', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:26', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('f729b34c-8563-4e9c-9ab8-161212b8fa1f', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:25', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('1b014ea0-fb87-469a-9c43-1da4def16164', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:56:18', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('d9cdff05-325a-46f3-a14a-223995f86334', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:56:20', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('6a8d7b6a-5de0-4961-b982-26943092884b', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('e2900b08-d6f5-4e98-9159-2f532d8c097c', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
+INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('4a60bad4-bdfd-4cb4-ba2d-30fde81eb90a', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:32', null, '2027-01-01 01:01:01');

@@ -40,6 +40,7 @@ func main() {
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
 	}))
+	e.HideBanner = true
 	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
 	auth.CreateAuth(e, database, config, dialer)
@@ -53,11 +54,9 @@ func main() {
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
-	v1.CreateOrganization(g, database)
 	user.CreateUser(g, database)
 	user.CreateConfiguration(g, database)
-	v1.CreateInvitation(g, database, config, dialer)
-	v1.CreateMember(g, database)
+	// v1.CreateInvitation(g, database, config, dialer)
 
 	v1.CreateBook(g, database)
 	v1.CreateCategory(g, database)

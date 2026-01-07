@@ -2,9 +2,12 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
+	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"github.com/labstack/echo/v4"
 )
 
@@ -22,36 +25,40 @@ func (h *Auth) forgot(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
 	}
 
-	// attempt to locate used by email
-	user, err := h.userRepository.user.FindByColumn("email", request.Email)
+	// attempt to locate user (active) by email
+	user, err := h.user.repository.FindActiveByEmail(request.Email)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no user associated with this email", err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no repository associated with this email", err.Error()))
 	}
 
-	// find other password resets for the user
-	resets, _ := h.userRepository.passwordReset.FindManyByUser(user)
+	// find other password resets for the repository
+	resets, err := h.user.passwordReset.FindManyByUser(user, passwordResetLimit)
 
-	// verify that user do not have much of them
+	// verify that repository does not have much of them
 	if resets != nil && len(*resets) >= passwordResetLimit {
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("too many reset requests"))
 	}
 
-	// collect additional information
-	request.Ip = c.RealIP()
-	request.UserAgent = c.Request().UserAgent()
-	request.User = user
+	reset := &password.Reset{
+		Id:        uuid.New(),
+		UserId:    user.Id,
+		Ip:        c.RealIP(),
+		UserAgent: c.Request().UserAgent(),
+		CreatedAt: time.Now(),
+		ExpireAt:  time.Now().Add(time.Hour * password.DefaultPasswordResetDuration),
+	}
 
 	// save new password reset
-	entity, err := h.userRepository.passwordReset.Save(request)
+	err = h.user.passwordReset.Create(reset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
 	// send email with reset password link
-	err = h.mailer.resetPassword.Send(user, entity)
+	err = h.mailer.resetPassword.Send(user, reset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(reset, api.CreateRequest(c)))
 }

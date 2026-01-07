@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"github.com/jurgisjaska/binbogami/internal"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"gopkg.in/gomail.v2"
@@ -21,19 +20,18 @@ type (
 	}
 
 	InvitationContent struct {
-		URL          string
-		Sender       string
-		Organization string
+		URL    string
+		Sender string
 	}
 )
 
-func (m *Invitation) Send(sender *user.User, o *organization.Organization, i *invitation.Invitation) error {
+func (m *Invitation) Send(sender *user.User, i *invitation.Invitation) error {
 	message := gomail.NewMessage()
 	message.SetHeader("From", m.c.Mail.Sender)
 	message.SetHeader("To", i.Email)
 	message.SetHeader("Subject", "Invitation")
 
-	content, err := m.createMessage(sender, o, i)
+	content, err := m.createMessage(sender, i)
 	if err != nil {
 		return err
 	}
@@ -43,7 +41,7 @@ func (m *Invitation) Send(sender *user.User, o *organization.Organization, i *in
 	return m.d.DialAndSend(message)
 }
 
-func (m *Invitation) createMessage(sender *user.User, o *organization.Organization, i *invitation.Invitation) (string, error) {
+func (m *Invitation) createMessage(sender *user.User, i *invitation.Invitation) (string, error) {
 	_, f, _, _ := runtime.Caller(0)
 	dir := filepath.Dir(f)
 
@@ -54,9 +52,8 @@ func (m *Invitation) createMessage(sender *user.User, o *organization.Organizati
 
 	url := fmt.Sprintf("http://%s:%d/signup/%s", m.c.Web.Hostname, m.c.Web.Port, i.Id.String())
 	content := InvitationContent{
-		URL:          url,
-		Sender:       fmt.Sprintf("%s %s", *sender.Name, *sender.Surname),
-		Organization: o.Name,
+		URL:    url,
+		Sender: fmt.Sprintf("%s %s", sender.Name, sender.Surname),
 	}
 
 	var b bytes.Buffer

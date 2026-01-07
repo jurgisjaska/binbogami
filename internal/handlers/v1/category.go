@@ -9,7 +9,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/category"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
 	"github.com/labstack/echo/v4"
 )
 
@@ -17,17 +16,14 @@ type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *category.CategoryRepository
-	member     *member.MemberRepository
 	book       *book.Repository
 }
 
 func (h *Category) initialize() *Category {
 	h.repository = category.CreateCategory(h.database)
-	h.member = member.CreateMember(h.database)
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/categories", h.create)
-	h.echo.GET("/categories", h.byOrganization)
 	h.echo.GET("/books/:id/categories", h.byBook)
 
 	return h
@@ -47,26 +43,7 @@ func (h *Category) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(category, api.CreateRequest(c)))
 }
 
-func (h *Category) byOrganization(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
-	categories, err := h.repository.ManyByOrganization(member.OrganizationId)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no categories found in the organization"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
-}
-
 func (h *Category) byBook(c echo.Context) error {
-	_, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -86,11 +63,6 @@ func (h *Category) byBook(c echo.Context) error {
 }
 
 func (h *Category) create(c echo.Context) error {
-	member, err := membership(h.member, c)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
-
 	category := &models.Category{}
 	if err := c.Bind(category); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
@@ -100,8 +72,7 @@ func (h *Category) create(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect category data", err.Error()))
 	}
 
-	category.CreatedBy = member.UserId
-	category.OrganizationId = member.OrganizationId
+	// category.CreatedBy = member.UserId
 	entity, err := h.repository.Create(category)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))

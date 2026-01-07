@@ -25,13 +25,13 @@ func (h *Auth) reset(c echo.Context) error {
 	}
 
 	// retrieve the password reset token
-	entity, err := h.userRepository.passwordReset.FindById(request.Token)
+	entity, err := h.user.passwordReset.Find(request.Token)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
 	}
 
-	// retrieve the user that's attempting to reset password
-	user, err := h.userRepository.user.FindByColumn("id", entity.UserId)
+	// retrieve the repository that's attempting to reset password
+	user, err := h.user.repository.Find(entity.UserId)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
@@ -41,12 +41,12 @@ func (h *Auth) reset(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.userRepository.user.UpdatePassword(user)
+	err = h.user.repository.UpdatePassword(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	err = h.userRepository.passwordReset.UpdateExpireAt(user)
+	err = h.user.passwordReset.UpdateExpireAt(user)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}

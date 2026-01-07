@@ -16,8 +16,7 @@ type (
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
 
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organizationId"`
-		CreatedBy      *uuid.UUID `db:"created_by" json:"createdBy"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
@@ -35,17 +34,16 @@ type (
 func (r *Repository) Create(m *models.CreateBook) (*Book, error) {
 	id := uuid.New()
 	book := &Book{
-		Id:             &id,
-		Name:           m.Name,
-		Description:    m.Description,
-		OrganizationId: m.OrganizationId,
-		CreatedBy:      m.CreatedBy,
-		CreatedAt:      time.Now(),
+		Id:          &id,
+		Name:        m.Name,
+		Description: m.Description,
+		CreatedBy:   m.CreatedBy,
+		CreatedAt:   time.Now(),
 	}
 
 	_, err := r.database.NamedExec(`
-		INSERT INTO books (id, name, description, organization_id, created_by, created_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
+		INSERT INTO books (id, name, description, created_by, created_at)
+		VALUES (:id, :name, :description, :created_by, :created_at)
 	`, book)
 
 	if err != nil {
@@ -58,11 +56,10 @@ func (r *Repository) Create(m *models.CreateBook) (*Book, error) {
 func (r *Repository) Update(e *Book, m *models.UpdateBook) (*Book, error) {
 	e.Name = m.Name
 	e.Description = m.Description
-	e.OrganizationId = m.OrganizationId
 
 	_, err := r.database.NamedExec(`
 		UPDATE books
-		SET name = :name, description = :description, organization_id = :organization_id 
+		SET name = :name, description = :description
 		WHERE id = :id AND deleted_at IS NULL
 	`, e)
 
@@ -98,33 +95,6 @@ func (r *Repository) AddObject(book *Book, m models.BookObject) (*object, error)
 	}
 
 	return &e, nil
-}
-
-func (r *Repository) FindManyByOrganization(org *uuid.UUID, req *api.Request) (*Books, int, error) {
-	books := &Books{}
-	query := `
-		SELECT * FROM books 
-		WHERE organization_id = ? AND deleted_at IS NULL
-		LIMIT ? OFFSET ?
-	`
-
-	offset := (req.Page - 1) * req.Limit
-	err := r.database.Select(books, query, org, req.Limit, offset)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	query = `
-		SELECT COUNT(*) FROM books 
-		WHERE organization_id = ? AND deleted_at IS NULL
-	`
-	var count int
-	err = r.database.Get(&count, query, org)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return books, count, nil
 }
 
 func CreateBook(d *sqlx.DB) *Repository {

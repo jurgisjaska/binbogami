@@ -2,7 +2,6 @@ package user
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
@@ -12,11 +11,32 @@ type Repository struct {
 	database *sqlx.DB
 }
 
-func (r *Repository) FindByColumn(column string, value interface{}) (*User, error) {
-	query := fmt.Sprintf("SELECT * FROM users WHERE %s = ? AND deleted_at IS NULL", column)
-
+// Find retrieves a User from the database by its UUID.
+func (r *Repository) Find(id uuid.UUID) (*User, error) {
 	user := &User{}
-	err := r.database.Get(user, query, value)
+	err := r.database.Get(user, "SELECT * FROM users WHERE id = ? AND deleted_at IS NULL", id.String())
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// FindActiveByEmail retrieves a user from the database based on their email address, ensuring they are active
+// (not deleted and confirmed).
+func (r *Repository) FindActiveByEmail(e string) (*User, error) {
+	return r.findByEmail(e, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL AND confirmed_at IS NOT NULL")
+}
+
+// FindByEmail retrieves a user from the database based on their email address.
+func (r *Repository) FindByEmail(e string) (*User, error) {
+	return r.findByEmail(e, "SELECT * FROM users WHERE email = ?")
+}
+
+// findByEmail is a private helper method to retrieve a user by their email address using a custom query.
+func (r *Repository) findByEmail(e string, q string) (*User, error) {
+	user := &User{}
+	err := r.database.Get(user, q, e)
 	if err != nil {
 		return nil, err
 	}
@@ -52,14 +72,11 @@ func (r *Repository) FindMany(filter string) (*Users, error) {
 	return users, nil
 }
 
+// Create inserts a new user into the database.
 func (r *Repository) Create(u *User) error {
-	id := uuid.New()
-	u.Id = &id
-	u.CreatedAt = time.Now()
-
 	query := `
-		INSERT INTO users (id, email, name, surname, salt, password, created_at)
-		VALUES (:id, :email, :name, :surname, :salt, :password, :created_at) 
+		INSERT INTO users (id, email, name, surname, salt, role, password, created_at, confirmed_at)
+		VALUES (:id, :email, :name, :surname, :salt, :role, :password, :created_at, :confirmed_at) 
 	`
 
 	_, err := r.database.NamedExec(query, u)

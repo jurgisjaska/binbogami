@@ -11,15 +11,13 @@ type (
 		Name        string  `validate:"required,gte=3" json:"name"`
 		Description *string `json:"description"`
 
-		CreatedBy      *uuid.UUID
-		OrganizationId *uuid.UUID
+		CreatedBy *uuid.UUID
 	}
 
 	UpdateBook struct {
-		Id             *uuid.UUID `validate:"required,uuid" json:"id"`
-		Name           string     `validate:"required,gte=3" json:"name"`
-		Description    *string    `json:"description"`
-		OrganizationId *uuid.UUID `validate:"required,uuid" json:"organizationId"`
+		Id          *uuid.UUID `validate:"required,uuid" json:"id"`
+		Name        string     `validate:"required,gte=3" json:"name"`
+		Description *string    `json:"description"`
 	}
 
 	BookObject interface {

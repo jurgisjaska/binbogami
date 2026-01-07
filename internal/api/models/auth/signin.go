@@ -9,9 +9,7 @@ type (
 
 	// SigninResponse struct represents the successful sign-in response.
 	SigninResponse struct {
-		Token        string      `json:"token"`
-		User         interface{} `json:"user"`
-		Organization interface{} `json:"organization"`
-		Member       bool        `json:"member"`
+		Token string      `json:"token"`
+		User  interface{} `json:"user"`
 	}
 )

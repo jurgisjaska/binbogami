@@ -68,13 +68,9 @@ Service communicates using JSON API where JSON is formated to follow `camelCase`
 ```json
 {
   "description": "this is a description",
-  "organizationId": "3f89f6b5-3760-4d85-8b2e-31cca32e4913"
+  "userId": "3f89f6b5-3760-4d85-8b2e-31cca32e4913"
 }
 ```
-
-### Organization Header
-
-All requests going into endpoints under `v1` namespace must have a header `organization` with an active organization ID.
 
 ### Database
 

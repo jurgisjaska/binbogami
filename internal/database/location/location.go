@@ -15,8 +15,7 @@ type (
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
 
-		OrganizationId *uuid.UUID `db:"organization_id" json:"organization_id"`
-		CreatedBy      *uuid.UUID `db:"created_by" json:"created_by"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
@@ -62,24 +61,6 @@ func (r *LocationRepository) ByBook(book *book.Book, id *uuid.UUID) (*Location, 
 	return location, nil
 }
 
-// ByOrganization retrieves all locations for a given organization.
-func (r *LocationRepository) ManyByOrganization(org *uuid.UUID) (*Locations, error) {
-	locations := &Locations{}
-	query := `
-		SELECT * 
-		FROM locations 
-		WHERE organization_id = ?
-		AND deleted_at IS NULL
-	`
-
-	err := r.database.Select(locations, query, org)
-	if err != nil {
-		return nil, err
-	}
-
-	return locations, nil
-}
-
 // ManyByBook retrieves locations associated with a book.
 func (r *LocationRepository) ManyByBook(book *book.Book) (*Locations, error) {
 	locations := &Locations{}
@@ -109,17 +90,16 @@ func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
 	}
 
 	Location := &Location{
-		Id:             &id,
-		Name:           c.Name,
-		Description:    c.Description,
-		OrganizationId: c.OrganizationId,
-		CreatedBy:      c.CreatedBy,
-		CreatedAt:      time.Now(),
+		Id:          &id,
+		Name:        c.Name,
+		Description: c.Description,
+		CreatedBy:   c.CreatedBy,
+		CreatedAt:   time.Now(),
 	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO locations (id, name, description, organization_id, created_by, created_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
+		INSERT INTO locations (id, name, description, created_by, created_at)
+		VALUES (:id, :name, :description, :created_by, :created_at)
 	`, Location)
 
 	if err != nil {

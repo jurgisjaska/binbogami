@@ -3,30 +3,23 @@ package user
 import (
 	"net/http"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	um "github.com/jurgisjaska/binbogami/internal/api/models/user"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/database/member"
-	"github.com/jurgisjaska/binbogami/internal/database/organization"
 	ud "github.com/jurgisjaska/binbogami/internal/database/user/configuration"
 	v1 "github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/labstack/echo/v4"
 )
 
 type Configuration struct {
-	echo         *echo.Group
-	database     *sqlx.DB
-	member       *member.MemberRepository
-	organization *organization.Repository
-	repository   *ud.ConfigurationRepository
+	echo       *echo.Group
+	database   *sqlx.DB
+	repository *ud.ConfigurationRepository
 }
 
 func (h *Configuration) initialize() *Configuration {
 	h.repository = ud.CreateConfiguration(h.database)
-	h.member = member.CreateMember(h.database)
-	h.organization = organization.CreateOrganization(h.database)
 
 	h.echo.PUT("/users/configurations", h.set)
 
@@ -47,25 +40,14 @@ func (h *Configuration) set(c echo.Context) error {
 	if claims.Id == nil {
 		return c.JSON(http.StatusBadRequest, api.Error(v1.ErrorToken))
 	}
-	request.UserId = claims.Id
-
-	organization := uuid.MustParse(request.Value)
-	_, err := h.member.Find(&organization, claims.Id)
-	if err != nil {
-		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
-	}
+	request.UserId = *claims.Id
 
 	entity, err := h.repository.Upsert(request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	o, err := h.organization.FindById(&organization)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("organization not found"))
-	}
-
-	response := &um.ConfigurationResponse{entity, o}
+	response := &um.ConfigurationResponse{entity}
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
 
