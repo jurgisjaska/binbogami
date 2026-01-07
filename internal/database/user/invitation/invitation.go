@@ -13,7 +13,7 @@ const (
 )
 
 type (
-	// Invitation defines an entity of every invitation to join an organization send out by the email.
+	// Invitation defines an entity of every invitation to join send out by the email.
 	// Id is used as unique key to ensure the invitation can only be used once.
 	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
 	Invitation struct {

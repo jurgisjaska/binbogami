@@ -99,7 +99,7 @@ func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
 
 	_, err = r.database.NamedExec(`
 		INSERT INTO locations (id, name, description, created_by, created_at)
-		VALUES (:id, :name, :description, :organization_id, :created_by, :created_at)
+		VALUES (:id, :name, :description, :created_by, :created_at)
 	`, Location)
 
 	if err != nil {

@@ -24,7 +24,6 @@ func (h *Location) initialize() *Location {
 	h.book = book.CreateBook(h.database)
 
 	h.echo.POST("/locations", h.create)
-	// h.echo.GET("/locations", h.byOrganization)
 	h.echo.GET("/books/:id/locations", h.byBook)
 
 	return h
@@ -55,7 +54,6 @@ func (h *Location) create(c echo.Context) error {
 	}
 
 	// location.CreatedBy = member.UserId
-	// location.OrganizationId = member.OrganizationId
 	entity, err := h.repository.Create(location)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))

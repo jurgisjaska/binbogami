@@ -72,16 +72,10 @@ package v1
 // 	}
 //
 // 	invitation.CreatedBy = claims.Id
-// 	invitation.OrganizationId = member.OrganizationId
 // 	invitations, err := h.invitation.Create(invitation)
 // 	if err != nil {
 // 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 // 	}
-//
-// 	// organization, err := h.organization.Find(invitation.OrganizationId)
-// 	// if err != nil {
-// 	// 	return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
-// 	// }
 //
 // 	sender, err := h.user.FindByColumn("id", invitation.CreatedBy)
 // 	if err != nil {

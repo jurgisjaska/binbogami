@@ -20,9 +20,8 @@ type (
 	}
 
 	InvitationContent struct {
-		URL          string
-		Sender       string
-		Organization string
+		URL    string
+		Sender string
 	}
 )
 

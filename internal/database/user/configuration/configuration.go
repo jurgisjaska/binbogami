@@ -6,8 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-const defaultOrganization int = iota + 1
-
 type (
 	Configuration struct {
 		Id            *uuid.UUID `json:"id"`

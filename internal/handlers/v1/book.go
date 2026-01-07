@@ -24,7 +24,6 @@ func (h *Book) initialize() *Book {
 
 	h.echo.POST("/books", h.create)
 	h.echo.PUT("/books", h.update)
-	// h.echo.GET("/books", h.byOrganization)
 	h.echo.GET("/books/:id", h.show)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
@@ -35,7 +34,6 @@ func (h *Book) initialize() *Book {
 func (h *Book) create(c echo.Context) error {
 	bm := &models.CreateBook{}
 	// bm.CreatedBy = member.UserId
-	// bm.OrganizationId = member.OrganizationId
 
 	if err := c.Bind(bm); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
