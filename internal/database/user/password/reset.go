@@ -71,7 +71,7 @@ func (r *ResetRepository) UpdateExpireAt(u *user.User) error {
 }
 
 // Find retrieves a password reset entity with a specific id.
-func (r *ResetRepository) Find(id *uuid.UUID) (*Reset, error) {
+func (r *ResetRepository) Find(id uuid.UUID) (*Reset, error) {
 	query := `
 		SELECT pr.* FROM user_password_resets AS pr
 		WHERE pr.id = ? AND pr.expire_at > NOW()
