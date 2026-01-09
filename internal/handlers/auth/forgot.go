@@ -28,7 +28,7 @@ func (h *Auth) forgot(c echo.Context) error {
 	// attempt to locate user (active) by email
 	user, err := h.user.repository.FindActiveByEmail(request.Email)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no repository associated with this email", err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors("no user associated with this email", err.Error()))
 	}
 
 	// find other password resets for the repository

@@ -14,7 +14,8 @@ func (h *Public) reset(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect password reset token"))
 	}
 
-	entity, err := h.passwordReset.Find(&id)
+	entity, err := h.passwordReset.Find(id)
+
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
 	}
