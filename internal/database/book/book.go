@@ -70,6 +70,7 @@ func (r *Repository) statusQuery(s string) string {
 	case statusAny:
 		return ""
 	case statusActive:
+		return " AND closed_at IS NULL "
 	default:
 		return " AND closed_at IS NULL "
 	}
