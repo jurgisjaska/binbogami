@@ -64,3 +64,10 @@ INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created
 INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('6a8d7b6a-5de0-4961-b982-26943092884b', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
 INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('e2900b08-d6f5-4e98-9159-2f532d8c097c', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:35', null, '2027-01-01 01:01:01');
 INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created_at, opened_at, expire_at) VALUES ('4a60bad4-bdfd-4cb4-ba2d-30fde81eb90a', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '::1', 'PostmanRuntime/7.51.0', '2026-01-07 12:53:32', null, '2027-01-01 01:01:01');
+
+--
+-- Add books
+--
+INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('5e6f7a8b-9c0d-4e1f-b2a3-4b5c6d7e8f9a', 'Year 2025', 'The book for year of 2025', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2025-01-12 16:46:42', null, null, '2026-01-13 16:46:52');
+INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('7b3a1f90-2c4d-4e5f-8a1b-9c0d1e2f3a4b', 'Year 2026', 'The book for year of 2026', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-01 16:46:32', null, null, null);
+INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('1a2b3c4d-5e6f-4789-a0b1-c2d3e4f5a6b7', 'Year 2025 deleted', 'Book that was created incorrect and deleted', '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', '2025-01-12 16:46:47', null, '2026-01-13 16:46:59', null);

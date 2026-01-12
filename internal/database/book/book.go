@@ -6,7 +6,14 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
+)
+
+const (
+	statusAny    string = "any"
+	statusActive string = "active"
+	statusClosed string = "closed"
 )
 
 type (
@@ -29,6 +36,46 @@ type (
 		database *sqlx.DB
 	}
 )
+
+// FindMany retrieves a list of books from the database based on the provided request and status.
+func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, error) {
+	books := &Books{}
+	query := fmt.Sprintf(
+		`SELECT * FROM books WHERE deleted_at IS NULL %s LIMIT ? OFFSET ?`,
+		r.statusQuery(status),
+	)
+
+	err := r.database.Select(books, query, req.Limit, req.Offset())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query = fmt.Sprintf(
+		`SELECT COUNT(*) FROM books WHERE deleted_at IS NULL %s`,
+		r.statusQuery(status),
+	)
+	var count int
+	err = r.database.Get(&count, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return books, count, nil
+}
+
+func (r *Repository) statusQuery(s string) string {
+	switch s {
+	case statusClosed:
+		return " AND closed_at IS NOT NULL "
+	case statusAny:
+		return ""
+	case statusActive:
+	default:
+		return " AND closed_at IS NULL "
+	}
+
+	return ""
+}
 
 func (r *Repository) Create(m *models.CreateBook) (*Book, error) {
 	id := uuid.New()

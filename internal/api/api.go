@@ -67,6 +67,11 @@ func CreateRequest(c echo.Context) *Request {
 	return &Request{page, limit, orderBy, order}
 }
 
+// Offset calculates the offset based on the current page and limit.
+func (r *Request) Offset() int {
+	return (r.Page - 1) * r.Limit
+}
+
 // @todo all list pages MUST be updated with correct total!
 func Success(data interface{}, req *Request, t ...int) *Response {
 	total, pages := totalPages(data, req, t)

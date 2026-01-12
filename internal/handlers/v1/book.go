@@ -22,6 +22,7 @@ type Book struct {
 func (h *Book) initialize() *Book {
 	h.repository = book.CreateBook(h.database)
 
+	h.echo.GET("/books", h.index)
 	h.echo.POST("/books", h.create)
 	h.echo.PUT("/books", h.update)
 	h.echo.GET("/books/:id", h.show)
@@ -29,6 +30,18 @@ func (h *Book) initialize() *Book {
 	h.echo.POST("/books/:id/locations", h.add)
 
 	return h
+}
+
+func (h *Book) index(c echo.Context) error {
+	req := api.CreateRequest(c)
+	status := c.QueryParam("status")
+
+	books, t, err := h.repository.FindMany(req, status)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no books found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(books, req, t))
 }
 
 func (h *Book) create(c echo.Context) error {
