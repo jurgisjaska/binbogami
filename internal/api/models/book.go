@@ -10,8 +10,6 @@ type (
 	CreateBook struct {
 		Name        string  `validate:"required,gte=3" json:"name"`
 		Description *string `json:"description"`
-
-		CreatedBy *uuid.UUID
 	}
 
 	UpdateBook struct {

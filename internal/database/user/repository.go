@@ -22,6 +22,21 @@ func (r *Repository) Find(id uuid.UUID) (*User, error) {
 	return user, nil
 }
 
+func (r *Repository) FindActive(id uuid.UUID) (*User, error) {
+	user := &User{}
+	err := r.database.Get(
+		user,
+		"SELECT * FROM users WHERE id = ? AND deleted_at IS NULL AND confirmed_at IS NOT NULL",
+		id.String(),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 // FindActiveByEmail retrieves a user from the database based on their email address, ensuring they are active
 // (not deleted and confirmed).
 func (r *Repository) FindActiveByEmail(e string) (*User, error) {

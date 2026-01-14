@@ -2,6 +2,7 @@ package v1
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -9,18 +10,21 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/labstack/echo/v4"
 )
 
 // Book represents a book handlers.
 type Book struct {
-	echo       *echo.Group
-	database   *sqlx.DB
-	repository *book.Repository
+	echo           *echo.Group
+	database       *sqlx.DB
+	repository     *book.Repository
+	userRepository *user.Repository
 }
 
 func (h *Book) initialize() *Book {
 	h.repository = book.CreateBook(h.database)
+	h.userRepository = user.CreateUser(h.database)
 
 	h.echo.GET("/books", h.index)
 	h.echo.POST("/books", h.create)
@@ -45,24 +49,35 @@ func (h *Book) index(c echo.Context) error {
 }
 
 func (h *Book) create(c echo.Context) error {
-	bm := &models.CreateBook{}
-	// bm.CreatedBy = member.UserId
+	request := &models.CreateBook{}
+	u, err := currentUser(h.userRepository, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
 
-	if err := c.Bind(bm); err != nil {
+	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(bm); err != nil {
+	if err := v.Struct(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	entity, err := h.repository.Create(bm)
+	book := &book.Book{
+		Id:          uuid.New(),
+		Name:        request.Name,
+		Description: request.Description,
+		CreatedBy:   u.Id,
+		CreatedAt:   time.Now(),
+	}
+
+	err = h.repository.Create(book)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
 }
 
 func (h *Book) update(c echo.Context) error {

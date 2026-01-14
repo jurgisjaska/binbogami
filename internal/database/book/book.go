@@ -18,11 +18,11 @@ const (
 
 type (
 	Book struct {
-		Id          *uuid.UUID `json:"id"`
-		Name        string     `json:"name"`
-		Description *string    `json:"description"`
+		Id          uuid.UUID `json:"id"`
+		Name        string    `json:"name"`
+		Description *string   `json:"description"`
 
-		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
+		CreatedBy uuid.UUID `db:"created_by" json:"createdBy"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
@@ -74,30 +74,19 @@ func (r *Repository) statusQuery(s string) string {
 	default:
 		return " AND closed_at IS NULL "
 	}
-
-	return ""
 }
 
-func (r *Repository) Create(m *models.CreateBook) (*Book, error) {
-	id := uuid.New()
-	book := &Book{
-		Id:          &id,
-		Name:        m.Name,
-		Description: m.Description,
-		CreatedBy:   m.CreatedBy,
-		CreatedAt:   time.Now(),
-	}
-
+func (r *Repository) Create(b *Book) error {
 	_, err := r.database.NamedExec(`
 		INSERT INTO books (id, name, description, created_by, created_at)
 		VALUES (:id, :name, :description, :created_by, :created_at)
-	`, book)
+	`, b)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return book, nil
+	return nil
 }
 
 func (r *Repository) Update(e *Book, m *models.UpdateBook) (*Book, error) {

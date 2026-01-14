@@ -15,7 +15,7 @@ type (
 
 	category struct {
 		Id         int        `json:"id"`
-		BookId     *uuid.UUID `db:"book_id" json:"book_id"`
+		BookId     uuid.UUID  `db:"book_id" json:"book_id"`
 		CategoryId *uuid.UUID `db:"category_id" json:"category_id"`
 
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
@@ -26,7 +26,7 @@ type (
 
 	location struct {
 		Id         int        `json:"id"`
-		BookId     *uuid.UUID `db:"book_id" json:"book_id"`
+		BookId     uuid.UUID  `db:"book_id" json:"book_id"`
 		LocationId *uuid.UUID `db:"location_id" json:"location_id"`
 
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
