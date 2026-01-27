@@ -13,9 +13,9 @@ type (
 	}
 
 	UpdateBook struct {
-		Id          *uuid.UUID `validate:"required,uuid" json:"id"`
-		Name        string     `validate:"required,gte=3" json:"name"`
-		Description *string    `json:"description"`
+		Id          uuid.UUID `validate:"required,uuid" json:"id"`
+		Name        string    `validate:"required,gte=3" json:"name"`
+		Description *string   `json:"description"`
 	}
 
 	BookObject interface {

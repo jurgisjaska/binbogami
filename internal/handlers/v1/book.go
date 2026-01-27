@@ -28,7 +28,7 @@ func (h *Book) initialize() *Book {
 
 	h.echo.GET("/books", h.index)
 	h.echo.POST("/books", h.create)
-	h.echo.PUT("/books", h.update)
+	h.echo.PUT("/books/:id", h.update)
 	h.echo.GET("/books/:id", h.show)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
@@ -81,22 +81,27 @@ func (h *Book) create(c echo.Context) error {
 }
 
 func (h *Book) update(c echo.Context) error {
-	bm := &models.UpdateBook{}
-	if err := c.Bind(bm); err != nil {
+	request := &models.UpdateBook{}
+	_, err := currentUser(h.userRepository, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book data"))
 	}
 
 	v := validator.New(validator.WithRequiredStructEnabled())
-	if err := v.Struct(bm); err != nil {
+	if err := v.Struct(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	b, err := h.repository.Find(bm.Id)
+	b, err := h.repository.Find(request.Id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
 	}
 
-	entity, err := h.repository.Update(b, bm)
+	entity, err := h.repository.Update(b, request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
@@ -110,7 +115,7 @@ func (h *Book) add(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
 	}
 
-	book, err := h.repository.Find(&id)
+	book, err := h.repository.Find(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("book not found"))
 	}
@@ -139,7 +144,7 @@ func (h *Book) show(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
 	}
 
-	entity, err := h.repository.Find(&id)
+	entity, err := h.repository.Find(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no books found"))
 	}

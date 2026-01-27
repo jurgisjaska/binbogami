@@ -107,7 +107,7 @@ func (r *Repository) Update(e *Book, m *models.UpdateBook) (*Book, error) {
 }
 
 // Find retrieves a book by its ID from the database if it exists and hasn't been marked as deleted.
-func (r *Repository) Find(id *uuid.UUID) (*Book, error) {
+func (r *Repository) Find(id uuid.UUID) (*Book, error) {
 	book := &Book{}
 	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)
 	if err != nil {

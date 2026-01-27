@@ -14,7 +14,7 @@ type (
 		Amount      float64    `json:"amount"`
 		Description *string    `json:"description"`
 
-		BookId     *uuid.UUID `db:"book_id" json:"book_id"`
+		BookId     uuid.UUID  `db:"book_id" json:"book_id"`
 		CategoryId *uuid.UUID `db:"category_id" json:"category_id"`
 		LocationId *uuid.UUID `db:"location_id" json:"location_id"`
 		CreatedBy  *uuid.UUID `db:"created_by" json:"created_by"`

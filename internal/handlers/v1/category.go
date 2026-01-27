@@ -49,7 +49,7 @@ func (h *Category) byBook(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
 	}
 
-	book, err := h.book.Find(&id)
+	book, err := h.book.Find(id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("book not found"))
 	}
