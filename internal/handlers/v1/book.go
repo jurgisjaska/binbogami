@@ -39,8 +39,18 @@ func (h *Book) initialize() *Book {
 func (h *Book) index(c echo.Context) error {
 	req := api.CreateRequest(c)
 	status := c.QueryParam("status")
+	query := c.QueryParam("query")
 
-	books, t, err := h.repository.FindMany(req, status)
+	var books *book.Books
+	var t int
+	var err error
+
+	if len(query) == 0 {
+		books, t, err = h.repository.FindMany(req, status)
+	} else {
+		books, t, err = h.repository.FindManyByName(req, status, query)
+	}
+
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error("no books found"))
 	}

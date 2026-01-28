@@ -63,6 +63,31 @@ func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, err
 	return books, count, nil
 }
 
+func (r *Repository) FindManyByName(req *api.Request, status string, search string) (*Books, int, error) {
+	books := &Books{}
+	query := fmt.Sprintf(
+		`SELECT * FROM books WHERE name LIKE ? AND deleted_at IS NULL %s LIMIT ? OFFSET ?`,
+		r.statusQuery(status),
+	)
+
+	err := r.database.Select(books, query, fmt.Sprintf("%%%s%%", search), req.Limit, req.Offset())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query = fmt.Sprintf(
+		`SELECT COUNT(*) FROM books WHERE name LIKE ? AND deleted_at IS NULL %s`,
+		r.statusQuery(status),
+	)
+	var count int
+	err = r.database.Get(&count, query, fmt.Sprintf("%%%s%%", search))
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return books, count, nil
+}
+
 func (r *Repository) statusQuery(s string) string {
 	switch s {
 	case statusClosed:
