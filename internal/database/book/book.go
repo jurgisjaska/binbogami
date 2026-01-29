@@ -23,6 +23,7 @@ type (
 		Description *string   `json:"description"`
 
 		CreatedBy uuid.UUID `db:"created_by" json:"createdBy"`
+		Author    *string   `db:"-" json:"author"`
 
 		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
 		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
@@ -40,8 +41,10 @@ type (
 // FindMany retrieves a list of books from the database based on the provided request and status.
 func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, error) {
 	books := &Books{}
-	query := fmt.Sprintf(
-		`SELECT * FROM books WHERE deleted_at IS NULL %s LIMIT ? OFFSET ?`,
+	query := fmt.Sprintf(`
+			SELECT b.* FROM books AS b 
+		    WHERE b.deleted_at IS NULL %s LIMIT ? OFFSET ?
+		`,
 		r.statusQuery(status),
 	)
 
@@ -51,7 +54,7 @@ func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, err
 	}
 
 	query = fmt.Sprintf(
-		`SELECT COUNT(*) FROM books WHERE deleted_at IS NULL %s`,
+		`SELECT COUNT(b.id) FROM books AS b WHERE b.deleted_at IS NULL %s`,
 		r.statusQuery(status),
 	)
 	var count int
@@ -65,8 +68,10 @@ func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, err
 
 func (r *Repository) FindManyByName(req *api.Request, status string, search string) (*Books, int, error) {
 	books := &Books{}
-	query := fmt.Sprintf(
-		`SELECT * FROM books WHERE name LIKE ? AND deleted_at IS NULL %s LIMIT ? OFFSET ?`,
+	query := fmt.Sprintf(`
+			SELECT b.* FROM books AS b 
+            WHERE b.name LIKE ? AND b.deleted_at IS NULL %s LIMIT ? OFFSET ?
+		`,
 		r.statusQuery(status),
 	)
 
@@ -76,7 +81,7 @@ func (r *Repository) FindManyByName(req *api.Request, status string, search stri
 	}
 
 	query = fmt.Sprintf(
-		`SELECT COUNT(*) FROM books WHERE name LIKE ? AND deleted_at IS NULL %s`,
+		`SELECT COUNT(b.id) FROM books AS b WHERE b.name LIKE ? AND b.deleted_at IS NULL %s`,
 		r.statusQuery(status),
 	)
 	var count int
@@ -91,21 +96,21 @@ func (r *Repository) FindManyByName(req *api.Request, status string, search stri
 func (r *Repository) statusQuery(s string) string {
 	switch s {
 	case statusClosed:
-		return " AND closed_at IS NOT NULL "
+		return " AND b.closed_at IS NOT NULL "
 	case statusAny:
 		return ""
 	case statusActive:
-		return " AND closed_at IS NULL "
+		return " AND b.closed_at IS NULL "
 	default:
-		return " AND closed_at IS NULL "
+		return " AND b.closed_at IS NULL "
 	}
 }
 
-func (r *Repository) Create(b *Book) error {
+func (r *Repository) Create(book *Book) error {
 	_, err := r.database.NamedExec(`
 		INSERT INTO books (id, name, description, created_by, created_at)
 		VALUES (:id, :name, :description, :created_by, :created_at)
-	`, b)
+	`, book)
 
 	if err != nil {
 		return err
@@ -114,21 +119,22 @@ func (r *Repository) Create(b *Book) error {
 	return nil
 }
 
-func (r *Repository) Update(e *Book, m *models.UpdateBook) (*Book, error) {
-	e.Name = m.Name
-	e.Description = m.Description
-
+func (r *Repository) Update(book *Book) error {
 	_, err := r.database.NamedExec(`
 		UPDATE books
-		SET name = :name, description = :description
-		WHERE id = :id AND deleted_at IS NULL
-	`, e)
+		SET 
+		    name = :name, 
+		    description = :description,
+			closed_at = :closed_at,
+			deleted_at = :deleted_at
+		WHERE id = :id
+	`, book)
 
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return e, nil
+	return nil
 }
 
 // Find retrieves a book by its ID from the database if it exists and hasn't been marked as deleted.

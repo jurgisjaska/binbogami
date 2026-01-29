@@ -13,7 +13,7 @@ type (
 	}
 
 	UpdateBook struct {
-		Id          uuid.UUID `validate:"required,uuid" json:"id"`
+		Id          uuid.UUID `validate:"required,uuid" json:"id"` // @todo remove this
 		Name        string    `validate:"required,gte=3" json:"name"`
 		Description *string   `json:"description"`
 	}

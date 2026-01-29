@@ -14,6 +14,11 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+const (
+	destroyDelete = "deleted"
+	destroyClose  = "closed"
+)
+
 // Book represents a book handlers.
 type Book struct {
 	echo           *echo.Group
@@ -30,6 +35,7 @@ func (h *Book) initialize() *Book {
 	h.echo.POST("/books", h.create)
 	h.echo.PUT("/books/:id", h.update)
 	h.echo.GET("/books/:id", h.show)
+	h.echo.DELETE("/books/:id", h.destroy)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
 
@@ -106,12 +112,51 @@ func (h *Book) update(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect book data", err.Error()))
 	}
 
-	b, err := h.repository.Find(request.Id)
+	book, err := h.repository.Find(request.Id)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
 	}
 
-	entity, err := h.repository.Update(b, request)
+	book.Name = request.Name
+	book.Description = request.Description
+
+	err = h.repository.Update(book)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
+}
+
+func (h *Book) destroy(c echo.Context) error {
+	_, err := currentUser(h.userRepository, c)
+	if err != nil {
+		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
+	}
+
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	entity, err := h.repository.Find(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no books found"))
+	}
+
+	n := time.Now()
+	t := c.QueryParam("type")
+
+	switch t {
+	case destroyClose:
+		entity.ClosedAt = &n
+	case destroyDelete:
+		entity.DeletedAt = &n
+	default:
+		entity.DeletedAt = &n
+	}
+
+	err = h.repository.Update(entity)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(err.Error()))
 	}
