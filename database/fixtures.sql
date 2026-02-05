@@ -71,3 +71,12 @@ INSERT INTO binbogami.user_password_resets (id, user_id, ip, user_agent, created
 INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('5e6f7a8b-9c0d-4e1f-b2a3-4b5c6d7e8f9a', 'Year 2025', 'The book for year of 2025', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2025-01-12 16:46:42', null, null, '2026-01-13 16:46:52');
 INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('7b3a1f90-2c4d-4e5f-8a1b-9c0d1e2f3a4b', 'Year 2026', 'The book for year of 2026', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2026-01-01 16:46:32', null, null, null);
 INSERT INTO binbogami.books (id, name, description, created_by, created_at, updated_at, deleted_at, closed_at) VALUES ('1a2b3c4d-5e6f-4789-a0b1-c2d3e4f5a6b7', 'Year 2025 deleted', 'Book that was created incorrect and deleted', '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', '2025-01-12 16:46:47', null, '2026-01-13 16:46:59', null);
+
+-- 
+-- Add categories
+-- 
+INSERT INTO binbogami.categories (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('d4c3b2a1-0e9f-48d7-b6c5-a4b3c2d1e0f9', 'Mission Supplies', 'P90 ammo, C4, and standard issue gear', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-15 08:30:00', null, null);
+INSERT INTO binbogami.categories (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('f9e8d7c6-b5a4-4321-80f1-e2d3c4b5a697', 'Artifact Research', 'Tools and resources for archaeological analysis', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-15 09:15:00', null, null);
+INSERT INTO binbogami.categories (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('1a2b3c4d-5e6f-4012-9345-6789abcdef01', 'Deep Space Telemetry', 'Cover story expenses and patent fees', '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-15 10:00:00', null, null);
+INSERT INTO binbogami.categories (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('01234567-89ab-4cde-a012-34567890abcd', 'Mess Hall Provisions', 'Candles and Jaffa cakes', 'aff84550-b21f-11ee-8ac0-5ab75f0c1cab', '2024-01-15 11:45:00', null, null);
+INSERT INTO binbogami.categories (id, name, description, created_by, created_at, updated_at, deleted_at) VALUES ('fedcba98-7654-4321-8fed-cba987654321', 'NID Black Budget', 'Off-book acquisitions (Unauthorized)', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-01 00:00:00', '2024-01-20 12:00:00', '2024-01-20 12:00:00');
