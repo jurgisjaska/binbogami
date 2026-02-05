@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	destroyDelete = "deleted"
-	destroyClose  = "closed"
+	destroyDelete = "delete"
+	destroyClose  = "close"
 )
 
 // Book represents a book handlers.

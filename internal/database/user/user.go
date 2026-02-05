@@ -19,6 +19,7 @@ type (
 		Email       string     `json:"email"`
 		Name        string     `json:"name"`
 		Surname     string     `json:"surname"`
+		Position    *string    `json:"position"`
 		Salt        string     `json:"-"`
 		Password    string     `json:"-"`
 		Role        int        `json:"role"`

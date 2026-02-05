@@ -17,21 +17,23 @@ SET FOREIGN_KEY_CHECKS = 1;
 
 create table if not exists users
 (
-    id           uuid         not null
+    id           uuid          not null
         primary key,
-    email        varchar(128) not null,
-    name         varchar(64)  not null,
-    surname      varchar(64)  not null,
-    salt         char(16)     not null,
-    password     varchar(256) not null,
-    role         int          not null default 1,
-    created_at   timestamp    not null,
-    updated_at   timestamp    null on update current_timestamp(),
-    confirmed_at timestamp    null,
-    deleted_at   timestamp    null,
+    email        varchar(128)  not null,
+    name         varchar(64)   not null,
+    surname      varchar(64)   not null,
+    position     varchar(64)   null,
+    salt         char(16)      not null,
+    password     varchar(256)  not null,
+    role         int default 1 not null,
+    created_at   timestamp     not null,
+    updated_at   timestamp     null on update current_timestamp(),
+    confirmed_at timestamp     null,
+    deleted_at   timestamp     null,
     constraint users_email_uindex
         unique (email)
 );
+
 
 create table user_password_resets
 (
