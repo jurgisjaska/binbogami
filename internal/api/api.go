@@ -13,6 +13,7 @@ const (
 	defaultPage     int    = 1
 	defaultLimit    int    = 25
 	defaultOrder    string = "asc"
+	defaultSearch   string = ""
 	orderAscending  string = "asc"
 	orderDescending string = "desc"
 	statusError     string = "error"
@@ -30,10 +31,11 @@ type (
 
 	// ResponseMetadata represents the metadata for the response.
 	ResponseMetadata struct {
-		Total int     `json:"total"`
-		Limit int     `json:"limit"`
-		Page  int     `json:"page"`
-		Pages float64 `json:"pages"`
+		Total  int     `json:"total"`
+		Limit  int     `json:"limit"`
+		Page   int     `json:"page"`
+		Pages  float64 `json:"pages"`
+		Search string  `json:"search"`
 	}
 
 	// Request represents the structure for making a request.
@@ -42,6 +44,7 @@ type (
 		Limit   int    `json:"limit"`
 		OrderBy string `json:"order_by"`
 		Order   string `json:"order"`
+		Search  string `json:"search"`
 	}
 )
 
@@ -51,6 +54,7 @@ func CreateRequest(c echo.Context) *Request {
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	orderBy := strings.ToLower(c.QueryParam("order_by"))
 	order := strings.ToLower(c.QueryParam("order"))
+	search := strings.ToLower(c.QueryParam("search"))
 
 	if page < 1 {
 		page = defaultPage
@@ -64,7 +68,7 @@ func CreateRequest(c echo.Context) *Request {
 		order = defaultOrder
 	}
 
-	return &Request{page, limit, orderBy, order}
+	return &Request{page, limit, orderBy, order, search}
 }
 
 // Offset calculates the offset based on the current page and limit.
@@ -80,10 +84,11 @@ func Success(data interface{}, req *Request, t ...int) *Response {
 		Status: statusSuccess,
 		Data:   data,
 		Metadata: ResponseMetadata{
-			Total: total,
-			Limit: req.Limit,
-			Page:  req.Page,
-			Pages: pages,
+			Total:  total,
+			Limit:  req.Limit,
+			Page:   req.Page,
+			Pages:  pages,
+			Search: req.Search,
 		},
 	}
 }
