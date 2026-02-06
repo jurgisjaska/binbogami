@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS categories
         PRIMARY KEY,
     name            VARCHAR(128) NOT NULL,
     description     TEXT         NULL,
+    color           VARCHAR(7)   NULL,
     created_by      UUID     NOT NULL,
     created_at      TIMESTAMP    NOT NULL,
     updated_at      TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),

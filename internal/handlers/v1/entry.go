@@ -19,7 +19,7 @@ type Entry struct {
 	repository *entry.EntryRepository
 
 	book     *book.Repository
-	category *category.CategoryRepository
+	category *category.Repository
 	location *location.LocationRepository
 }
 
