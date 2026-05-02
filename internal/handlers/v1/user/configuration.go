@@ -9,7 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	ud "github.com/jurgisjaska/binbogami/internal/database/user/configuration"
 	v1 "github.com/jurgisjaska/binbogami/internal/handlers/v1"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type Configuration struct {

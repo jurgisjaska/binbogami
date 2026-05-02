@@ -6,7 +6,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func (h *Public) invite(c echo.Context) error {

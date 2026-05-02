@@ -4,7 +4,7 @@
 
 ## Project Context
 - **Language**: Go 1.25+
-- **Frameworks**: Echo
+- **Frameworks**: Labstack Echo
 - **Primary database**: MariaDB 12.1+
 
 ## Project Structure

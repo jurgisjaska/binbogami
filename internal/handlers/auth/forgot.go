@@ -8,7 +8,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/jurgisjaska/binbogami/internal/database/user/password"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 const passwordResetLimit int = 10

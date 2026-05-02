@@ -14,9 +14,9 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/handlers/public"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
-	echojwt "github.com/labstack/echo-jwt/v4"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	echojwt "github.com/labstack/echo-jwt/v5"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 func main() {
@@ -35,18 +35,18 @@ func main() {
 	dialer := internal.CreateDialer(config.Mail)
 
 	e := echo.New()
+	e.Use(middleware.RequestLogger())
 	// @todo if this ever goes to production it needs to have proper values!
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
 	}))
-	e.HideBanner = true
-	e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
+	// e.HTTPErrorHandler = customHTTPErrorHandler // @todo move to the api?
 	e.Validator = &api.Validator{Validator: validator.New()}
 	auth.CreateAuth(e, database, config, dialer)
 
 	// public resources that are not related with auth
-	// mus be accessible without authentication
+	// must be accessible without authentication
 	pg := e.Group("/public")
 	public.CreatePublic(pg, database)
 
@@ -64,7 +64,9 @@ func main() {
 
 	v1.CreateEntry(g, database)
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", config.App.Port)))
+	if err := e.Start(fmt.Sprintf(":%d", config.App.Port)); err != nil {
+		e.Logger.Error("failed to start server", "error", err)
+	}
 }
 
 // customHTTPErrorHandler handles HTTP errors and provides custom error responses.

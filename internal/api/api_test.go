@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -59,22 +59,22 @@ func TestCreateRequest(t *testing.T) {
 		{
 			name:       "DefaultValues",
 			urlParams:  "?page=&limit=&order_by=&order=",
-			wantResult: &Request{defaultPage, defaultLimit, "", defaultOrder},
+			wantResult: &Request{defaultPage, defaultLimit, "", defaultOrder, defaultSearch},
 		},
 		{
 			name:       "PageAndLimit",
 			urlParams:  "?page=2&limit=5",
-			wantResult: &Request{2, 5, "", defaultOrder},
+			wantResult: &Request{2, 5, "", defaultOrder, defaultSearch},
 		},
 		{
 			name:       "OrderByAndOrder",
 			urlParams:  "?order_by=name&order=asc",
-			wantResult: &Request{defaultPage, defaultLimit, "name", "asc"},
+			wantResult: &Request{defaultPage, defaultLimit, "name", "asc", defaultSearch},
 		},
 		{
 			name:       "InvalidOrder",
 			urlParams:  "?order=invalid",
-			wantResult: &Request{defaultPage, defaultLimit, "", defaultOrder},
+			wantResult: &Request{defaultPage, defaultLimit, "", defaultOrder, defaultSearch},
 		},
 	}
 

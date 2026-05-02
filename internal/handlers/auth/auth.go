@@ -10,7 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/jurgisjaska/binbogami/internal/database/user/password"
 	"github.com/jurgisjaska/binbogami/internal/service/mail"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )

@@ -11,7 +11,7 @@ package v1
 // 	"github.com/jurgisjaska/binbogami/internal/database/user"
 // 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 // 	"github.com/jurgisjaska/binbogami/internal/service/mail"
-// 	"github.com/labstack/echo/v4"
+// 	"github.com/labstack/echo/v5"
 // 	"gopkg.in/gomail.v2"
 // )
 //

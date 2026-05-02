@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func (h *Public) reset(c echo.Context) error {

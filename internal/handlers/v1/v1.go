@@ -5,7 +5,7 @@ import (
 
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	u "github.com/jurgisjaska/binbogami/internal/database/user"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 const (

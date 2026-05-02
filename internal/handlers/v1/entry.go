@@ -10,7 +10,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/database/category"
 	"github.com/jurgisjaska/binbogami/internal/database/entry"
 	"github.com/jurgisjaska/binbogami/internal/database/location"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type Entry struct {
