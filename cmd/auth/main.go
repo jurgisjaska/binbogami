@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/handlers/auth"
@@ -31,6 +32,7 @@ func main() {
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
 	e.HTTPErrorHandler = api.CustomHTTPErrorHandler
+	e.Validator = &api.Validator{Validator: validator.New()}
 
 	// @todo if this ever goes to production it needs to have proper values!
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{

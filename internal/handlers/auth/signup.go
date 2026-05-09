@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -15,7 +14,7 @@ import (
 	"github.com/labstack/gommon/random"
 )
 
-// signup validates signup form data and creates new user
+// signup validates signup form data and creates a new user
 // if the invitation UUID is present and valid assigns confirmed status to the new user.
 func (h *Auth) signup(c *echo.Context) error {
 	request := &auth.SignupRequest{}
@@ -25,10 +24,6 @@ func (h *Auth) signup(c *echo.Context) error {
 
 	if err := c.Validate(request); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
-	}
-
-	if request.Password != request.RepeatedPassword {
-		return c.JSON(http.StatusUnprocessableEntity, api.Errors(passwordsMatchError, fmt.Errorf("passwords does not match")))
 	}
 
 	existingUser, err := h.user.repository.FindByEmail(request.Email)

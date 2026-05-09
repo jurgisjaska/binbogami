@@ -1,10 +1,8 @@
 # Agents
 
-## Repository Overview
-
 ## Project Context
 - **Language**: Go 1.25+
-- **Frameworks**: Labstack Echo
+- **Frameworks**: Labstack Echo v5
 - **Primary database**: MariaDB 12.1+
 
 ## Project Structure

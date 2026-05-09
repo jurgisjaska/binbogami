@@ -14,7 +14,7 @@ import (
 // expire is a constant representing the number of hours for token expiration.
 const expire = 72
 
-// Claims represents the claims contained in a JWT token.
+// Claims represent the claims contained in a JWT token.
 type Claims struct {
 	Id    *uuid.UUID `json:"id"`
 	Email *string    `json:"email"`
@@ -49,7 +49,7 @@ func CreateJWTConfig(key string) echojwt.Config {
 	}
 }
 
-func FromContext(c echo.Context) *Claims {
+func FromContext(c *echo.Context) *Claims {
 	token := c.Get("user").(*jwt.Token)
 	return token.Claims.(*Claims)
 }
