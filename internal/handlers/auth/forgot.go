@@ -60,5 +60,5 @@ func (h *Auth) forgot(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(reset, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(reset, api.CreateRequest(&c)))
 }

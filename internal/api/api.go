@@ -49,7 +49,7 @@ type (
 )
 
 // CreateRequest creates a new Request object based on the query parameters in the provided echo.Context.
-func CreateRequest(c echo.Context) *Request {
+func CreateRequest(c *echo.Context) *Request {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
 	orderBy := strings.ToLower(c.QueryParam("order_by"))

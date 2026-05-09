@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+// CustomHTTPErrorHandler handles errors in an HTTP request and returns a JSON response with appropriate status and message.
 func CustomHTTPErrorHandler(c *echo.Context, err error) {
 	if resp, uErr := echo.UnwrapResponse(c.Response()); uErr == nil {
 		if resp.Committed {

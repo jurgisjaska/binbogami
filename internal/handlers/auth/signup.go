@@ -86,7 +86,7 @@ func (h *Auth) signup(c echo.Context) error {
 		http.StatusOK,
 		api.Success(
 			auth.SignupResponse{User: u, Token: t},
-			api.CreateRequest(c),
+			api.CreateRequest(&c),
 		),
 	)
 }

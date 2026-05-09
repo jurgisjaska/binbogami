@@ -51,5 +51,5 @@ func (h *Auth) reset(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(&c)))
 }

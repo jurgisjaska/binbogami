@@ -43,5 +43,5 @@ func (h *Auth) signin(c echo.Context) error {
 
 	response := auth.SigninResponse{Token: t, User: u}
 
-	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
+	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(&c)))
 }
