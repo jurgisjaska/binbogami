@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/jurgisjaska/binbogami/internal"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -28,6 +29,8 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
+	e.HTTPErrorHandler = api.CustomHTTPErrorHandler
+
 	// @todo if this ever goes to production it needs to have proper values!
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
