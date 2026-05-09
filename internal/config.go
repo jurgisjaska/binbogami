@@ -12,10 +12,11 @@ type (
 	// It contains environment variables, database configuration, and mail configuration.
 	Config struct {
 		Secret   string
-		App      *Authority
-		Web      *Authority
+		App      *URI
+		Web      *URI
 		Database *Database
 		Mail     *Mail
+		Auth     *Auth
 	}
 
 	// Database represents the database configuration.
@@ -40,11 +41,18 @@ type (
 		Password string
 	}
 
-	// Authority represents an authority configuration.
-	// It contains the hostname and port information.
-	Authority struct {
+	// URI represents the Uniform Resource Identifier configuration.
+	// It holds the scheme, hostname, and port for a service.
+	URI struct {
+		Scheme   string
 		Hostname string
 		Port     int
+	}
+
+	// Auth represents the authentication configuration, including a secret and a URI for the authentication service.
+	Auth struct {
+		Secret string
+		*URI
 	}
 )
 
@@ -54,27 +62,19 @@ func CreateConfig() (*Config, error) {
 		return nil, err
 	}
 
-	p, _ := strconv.Atoi(os.Getenv("DATABASE_PORT"))
-	ap, _ := strconv.Atoi(os.Getenv("APP_PORT"))
-	mp, _ := strconv.Atoi(os.Getenv("MAIL_PORT"))
-
-	wp, _ := strconv.Atoi(os.Getenv("WEB_APP_PORT"))
-
 	return &Config{
 		Secret: os.Getenv("APP_SECRET"),
-		App: &Authority{
-			Hostname: os.Getenv("APP_HOSTNAME"),
-			Port:     ap,
+		App:    uri("APP"),
+		Auth: &Auth{
+			Secret: os.Getenv("AUTH_SERVICE_SECRET"),
+			URI:    uri("AUTH_SERVICE"),
 		},
-		Web: &Authority{
-			Hostname: os.Getenv("WEB_APP_HOSTNAME"),
-			Port:     wp,
-		},
+		Web: uri("WEB_APPLICATION"),
 		Database: &Database{
 			Name: os.Getenv("DATABASE_NAME"),
 			Connection: &Connection{
 				Hostname: os.Getenv("DATABASE_HOSTNAME"),
-				Port:     p,
+				Port:     port(os.Getenv("DATABASE_PORT")),
 				Username: os.Getenv("DATABASE_USERNAME"),
 				Password: os.Getenv("DATABASE_PASSWORD"),
 			},
@@ -83,10 +83,34 @@ func CreateConfig() (*Config, error) {
 			Sender: os.Getenv("MAIL_SENDER"),
 			Connection: &Connection{
 				Hostname: os.Getenv("MAIL_HOSTNAME"),
-				Port:     mp,
+				Port:     port(os.Getenv("MAIL_PORT")),
 				Username: os.Getenv("MAIL_USERNAME"),
 				Password: os.Getenv("MAIL_PASSWORD"),
 			},
 		},
 	}, nil
+}
+
+// port is a helper method that converts a string to an integer.
+// It returns 0 if the string is empty or cannot be converted.
+func port(s string) int {
+	if s == "" {
+		return 0
+	}
+
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+
+	return i
+}
+
+// uri is a helper method that creates a URI from environment variables with a given prefix.
+func uri(prefix string) *URI {
+	return &URI{
+		Scheme:   os.Getenv(prefix + "_SCHEME"),
+		Hostname: os.Getenv(prefix + "_HOSTNAME"),
+		Port:     port(os.Getenv(prefix + "_PORT")),
+	}
 }

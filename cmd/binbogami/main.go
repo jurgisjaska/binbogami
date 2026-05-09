@@ -1,10 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jurgisjaska/binbogami/internal"
@@ -70,40 +68,40 @@ func main() {
 }
 
 // customHTTPErrorHandler handles HTTP errors and provides custom error responses.
-func customHTTPErrorHandler(err error, c echo.Context) {
-	if c.Response().Committed {
-		return
-	}
-
-	he, ok := err.(*echo.HTTPError)
-	if ok {
-		if he.Internal != nil {
-			if herr, ok := he.Internal.(*echo.HTTPError); ok {
-				he = herr
-			}
-		}
-	} else {
-		he = &echo.HTTPError{
-			Code:    http.StatusInternalServerError,
-			Message: http.StatusText(http.StatusInternalServerError),
-		}
-	}
-
-	code := he.Code
-	message := he.Message.(string)
-
-	if err == sql.ErrNoRows {
-		code = http.StatusNotFound
-		message = http.StatusText(code)
-	}
-
-	if c.Request().Method == http.MethodHead {
-		err = c.NoContent(he.Code)
-	} else {
-		err = c.JSON(code, api.Error(message))
-	}
-
-	if err != nil {
-		log.Fatal(err)
-	}
-}
+// func customHTTPErrorHandler(err error, c echo.Context) {
+// 	if c.Response().Committed {
+// 		return
+// 	}
+//
+// 	he, ok := err.(*echo.HTTPError)
+// 	if ok {
+// 		if he.Internal != nil {
+// 			if herr, ok := he.Internal.(*echo.HTTPError); ok {
+// 				he = herr
+// 			}
+// 		}
+// 	} else {
+// 		he = &echo.HTTPError{
+// 			Code:    http.StatusInternalServerError,
+// 			Message: http.StatusText(http.StatusInternalServerError),
+// 		}
+// 	}
+//
+// 	code := he.Code
+// 	message := he.Message.(string)
+//
+// 	if err == sql.ErrNoRows {
+// 		code = http.StatusNotFound
+// 		message = http.StatusText(code)
+// 	}
+//
+// 	if c.Request().Method == http.MethodHead {
+// 		err = c.NoContent(he.Code)
+// 	} else {
+// 		err = c.JSON(code, api.Error(message))
+// 	}
+//
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// }
