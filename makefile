@@ -1,16 +1,17 @@
 .PHONY: build run clean up down kill rm ps network setup
 .PHONY: schema fixtures
 
-NAME=binbogami
+PROJECT=binbogami
+SERVICE?=binbogami
 include .env
 export $(shell sed 's/=.*//' .env)
 
 build:
-	@go build -o ./bin/${NAME} ./cmd/${NAME}
+	@go build -o ./bin/${SERVICE} ./cmd/${SERVICE}
 
 run:
-	@$(MAKE) build
-	@bin/${NAME}
+	@$(MAKE) build SERVICE=${SERVICE}
+	@bin/${SERVICE}
 
 test:
 	@go test -v -cover -coverprofile=coverage.out ./...
@@ -23,21 +24,21 @@ down:
 	@docker-compose kill
 
 network:
-	@if ! docker network ls | grep -q ${NAME}; then \
-		docker network create binbogami; \
+	@if ! docker network ls | grep -q ${PROJECT}; then \
+		docker network create ${PROJECT}; \
 	fi
 
 setup:
 	@cp -f .env.example .env
 	@go get ./...
 	@sudo -v
-	@if ! grep -q ${NAME} /etc/hosts; then \
-		sudo -- sh -c "echo '127.0.0.1	${NAME}' >> /etc/hosts"; \
+	@if ! grep -q ${PROJECT} /etc/hosts; then \
+		sudo -- sh -c "echo '127.0.0.1	${PROJECT}' >> /etc/hosts"; \
 		sudo -- sh -c "echo '127.0.0.1	mariadb' >> /etc/hosts"; \
 		sudo -- sh -c "echo '127.0.0.1	mailcatcher' >> /etc/hosts"; \
 	fi
-	@if ! docker network ls | grep -q ${NAME}; then \
-  		docker network create ${NAME}; \
+	@if ! docker network ls | grep -q ${PROJECT}; then \
+  		docker network create ${PROJECT}; \
   	fi
 
 schema:
