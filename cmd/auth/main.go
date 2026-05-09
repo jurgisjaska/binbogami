@@ -6,6 +6,7 @@ import (
 
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	"github.com/jurgisjaska/binbogami/internal/handlers/auth"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 )
@@ -36,6 +37,9 @@ func main() {
 		AllowOrigins: []string{"*"},
 		AllowHeaders: []string{"*"},
 	}))
+
+	dialer := internal.CreateDialer(config.Mail)
+	auth.CreateAuth(e, database, config, dialer)
 
 	if err := e.Start(fmt.Sprintf(":%d", config.Auth.Port)); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

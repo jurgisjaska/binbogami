@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-func (h *Auth) reset(c echo.Context) error {
+func (h *Auth) reset(c *echo.Context) error {
 	request := &auth.ResetPasswordRequest{}
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(requestError))
@@ -51,5 +51,5 @@ func (h *Auth) reset(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(&c)))
+	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))
 }

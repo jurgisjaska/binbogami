@@ -42,7 +42,7 @@ func CreateToken(u *user.User, key string) (string, error) {
 // The configuration includes a function to create new claims and the signing key.
 func CreateJWTConfig(key string) echojwt.Config {
 	return echojwt.Config{
-		NewClaimsFunc: func(c echo.Context) jwt.Claims {
+		NewClaimsFunc: func(c *echo.Context) jwt.Claims {
 			return new(Claims)
 		},
 		SigningKey: []byte(key),

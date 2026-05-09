@@ -62,7 +62,7 @@ func (h *Auth) initialize() *Auth {
 	return h
 }
 
-// hashPassword creates new password hash using bcrypt.
+// hashPassword creates a new password hash using bcrypt.
 func (h *Auth) hashPassword(password string, salt string) (string, error) {
 	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Secret)
 

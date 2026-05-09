@@ -17,7 +17,7 @@ import (
 
 // signup validates signup form data and creates new user
 // if the invitation UUID is present and valid assigns confirmed status to the new user.
-func (h *Auth) signup(c echo.Context) error {
+func (h *Auth) signup(c *echo.Context) error {
 	request := &auth.SignupRequest{}
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error(requestError))
@@ -86,7 +86,7 @@ func (h *Auth) signup(c echo.Context) error {
 		http.StatusOK,
 		api.Success(
 			auth.SignupResponse{User: u, Token: t},
-			api.CreateRequest(&c),
+			api.CreateRequest(c),
 		),
 	)
 }

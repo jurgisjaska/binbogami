@@ -8,7 +8,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/handlers/auth"
 	"github.com/jurgisjaska/binbogami/internal/handlers/public"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
@@ -29,9 +28,6 @@ func main() {
 	}
 	defer func() { _ = database.Close() }()
 
-	// create mail dialer
-	dialer := internal.CreateDialer(config.Mail)
-
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
 	// @todo if this ever goes to production it needs to have proper values!
@@ -41,7 +37,6 @@ func main() {
 	}))
 	e.HTTPErrorHandler = api.CustomHTTPErrorHandler
 	e.Validator = &api.Validator{Validator: validator.New()}
-	auth.CreateAuth(e, database, config, dialer)
 
 	// public resources that are not related with auth
 	// must be accessible without authentication

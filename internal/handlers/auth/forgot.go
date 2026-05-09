@@ -13,7 +13,7 @@ import (
 
 const passwordResetLimit int = 10
 
-func (h *Auth) forgot(c echo.Context) error {
+func (h *Auth) forgot(c *echo.Context) error {
 	request := &auth.ForgotRequest{}
 	if err := c.Bind(request); err != nil {
 		// request cannot be bind to models
@@ -60,5 +60,5 @@ func (h *Auth) forgot(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(reset, api.CreateRequest(&c)))
+	return c.JSON(http.StatusOK, api.Success(reset, api.CreateRequest(c)))
 }

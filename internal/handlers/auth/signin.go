@@ -12,7 +12,7 @@ import (
 )
 
 // signin in creates new JWT token for the user if credentials are correct
-func (h *Auth) signin(c echo.Context) error {
+func (h *Auth) signin(c *echo.Context) error {
 	request := &auth.SigninRequest{}
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
@@ -43,5 +43,5 @@ func (h *Auth) signin(c echo.Context) error {
 
 	response := auth.SigninResponse{Token: t, User: u}
 
-	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(&c)))
+	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
