@@ -14,21 +14,24 @@ import (
 func (h *Auth) signin(c *echo.Context) error {
 	request := &auth.SigninRequest{}
 	if err := c.Bind(request); err != nil {
+		h.auditlog.Warn("User signin error", "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
 	}
 
 	if err := c.Validate(request); err != nil {
+		h.auditlog.Warn("User signin error", "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
 	u, err := h.user.repository.FindActiveByEmail(request.Email)
 	if err != nil {
+		h.auditlog.Warn("User signin error", "email", request.Email, "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
 	password := h.buildPassword(request.Password, u.Salt)
-
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
+		h.auditlog.Warn("User signin error", "user_id", u.Id, "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, api.Error(err.Error()))
 	}
 
@@ -38,6 +41,7 @@ func (h *Auth) signin(c *echo.Context) error {
 	}
 
 	response := auth.SigninResponse{Token: t, User: u}
+	h.auditlog.Info("User signed in", "user_id", u.Id)
 
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }

@@ -22,6 +22,30 @@ services:
       - ".env.docker"
     networks:
       - "binbogami"
+  grafana:
+    image: grafana/grafana:13.0
+    container_name: "binbogami_grafana"
+    restart: "no"
+    volumes:
+      - "./var/volumes/grafana:/var/lib/grafana"
+    ports:
+      - "3000:3000"
+    env_file:
+      - ".env.docker"
+    networks:
+      - "binbogami"
+  loki:
+    image: grafana/loki:3.7
+    container_name: "binbogami_loki"
+    restart: "no"
+    volumes:
+      - "./var/volumes/loki:/loki"
+    ports:
+      - "3100:3100"
+    env_file:
+      - ".env.docker"
+    networks:
+      - "binbogami"
 networks:
   binbogami:
     name: "binbogami"

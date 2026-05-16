@@ -2,6 +2,7 @@ package auth
 
 import (
 	"fmt"
+	"log/slog"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
@@ -31,6 +32,7 @@ type (
 		configuration *internal.Config
 		mailer        *mailer
 		user          *userRepositories
+		auditlog      *slog.Logger
 	}
 
 	// @todo go level up on a tree if there will not be any other mailers
@@ -84,7 +86,7 @@ func (h *Auth) buildPassword(password string, salt string) string {
 }
 
 // CreateAuth creates a new instance of the Auth handlers and initializes it.
-func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer) *Auth {
+func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer, auditlog *slog.Logger) *Auth {
 	return (&Auth{
 		echo:          e,
 		database:      d,
@@ -92,5 +94,6 @@ func CreateAuth(e *echo.Echo, d *sqlx.DB, c *internal.Config, md *gomail.Dialer)
 		mailer: &mailer{
 			resetPassword: mail.CreateResetPassword(md, c),
 		},
+		auditlog: auditlog,
 	}).initialize()
 }

@@ -17,6 +17,7 @@ type (
 		Database *Database
 		Mail     *Mail
 		Auth     *Auth
+		Loki     *Connection
 	}
 
 	// Database represents the database configuration.
@@ -87,6 +88,12 @@ func CreateConfig() (*Config, error) {
 				Username: os.Getenv("MAIL_USERNAME"),
 				Password: os.Getenv("MAIL_PASSWORD"),
 			},
+		},
+		Loki: &Connection{
+			Hostname: os.Getenv("LOKI_HOSTNAME"),
+			Port:     port(os.Getenv("LOKI_PORT")),
+			Username: os.Getenv("LOKI_USERNAME"),
+			Password: os.Getenv("LOKI_PASSWORD"),
 		},
 	}, nil
 }
