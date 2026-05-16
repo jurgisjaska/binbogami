@@ -31,6 +31,7 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.RequestLogger())
+	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
 	e.HTTPErrorHandler = api.CustomHTTPErrorHandler
 	e.Validator = &api.Validator{Validator: validator.New()}
 
