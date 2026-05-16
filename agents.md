@@ -29,7 +29,7 @@
     - `Save`: Persist entity (create or update)
     - `Create(entity *Entity) error`: Persist new entity in the database
     - `Update(entity *Entity) error`: Persist existing entity in the database
-    - `Find(id uuid.UUID) (*Entity, Error)`: Find single entity by ID
+    - `Find(id uuid.UUID) (*Entity, Error)`: Find single entity by UUID
   - **REST API Handlers**:
     - **GET** for multiple entities assigned endpoint `/resources` and function name `index`
     - **GET** for sinle entity assigned endpoint `/resources/{:id}` and function name `show`

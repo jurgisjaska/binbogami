@@ -11,6 +11,8 @@ const (
 	RoleReadonly
 	RoleBilling
 	RoleAdmin
+	RoleManager
+	RoleOwner
 )
 
 type (

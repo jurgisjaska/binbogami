@@ -64,18 +64,23 @@ func (h *Auth) initialize() *Auth {
 
 // hashPassword creates a new password hash using bcrypt.
 func (h *Auth) hashPassword(password string, salt string) (string, error) {
-	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Secret)
-
-	if len(p) > 71 {
-		p = p[:71]
-	}
-
+	p := h.buildPassword(password, salt)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(p), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
 
 	return string(hashedPassword), nil
+}
+
+func (h *Auth) buildPassword(password string, salt string) string {
+	p := fmt.Sprintf("%s%s%s", password, salt, h.configuration.Secret)
+
+	if len(p) > 71 {
+		p = p[:71]
+	}
+
+	return p
 }
 
 // CreateAuth creates a new instance of the Auth handlers and initializes it.

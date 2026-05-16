@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -11,7 +10,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// signin in creates new JWT token for the user if credentials are correct
+// signin in creates a new JWT token for the user if credentials are correct
 func (h *Auth) signin(c *echo.Context) error {
 	request := &auth.SigninRequest{}
 	if err := c.Bind(request); err != nil {
@@ -27,10 +26,7 @@ func (h *Auth) signin(c *echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
 	}
 
-	password := fmt.Sprintf("%s%s%s", request.Password, u.Salt, h.configuration.Secret)
-	if len(password) > 71 {
-		password = password[:71]
-	}
+	password := h.buildPassword(request.Password, u.Salt)
 
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
 		return c.JSON(http.StatusUnauthorized, api.Error(err.Error()))
