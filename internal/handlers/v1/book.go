@@ -42,7 +42,7 @@ func (h *Book) initialize() *Book {
 	return h
 }
 
-func (h *Book) index(c echo.Context) error {
+func (h *Book) index(c *echo.Context) error {
 	req := api.CreateRequest(c)
 	status := c.QueryParam("status")
 	query := c.QueryParam("query")
@@ -64,7 +64,7 @@ func (h *Book) index(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(books, req, t))
 }
 
-func (h *Book) create(c echo.Context) error {
+func (h *Book) create(c *echo.Context) error {
 	request := &models.CreateBook{}
 	u, err := currentUser(h.userRepository, c)
 	if err != nil {
@@ -96,7 +96,7 @@ func (h *Book) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
 }
 
-func (h *Book) update(c echo.Context) error {
+func (h *Book) update(c *echo.Context) error {
 	request := &models.UpdateBook{}
 	_, err := currentUser(h.userRepository, c)
 	if err != nil {
@@ -128,7 +128,7 @@ func (h *Book) update(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
 }
 
-func (h *Book) destroy(c echo.Context) error {
+func (h *Book) destroy(c *echo.Context) error {
 	_, err := currentUser(h.userRepository, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
@@ -164,7 +164,7 @@ func (h *Book) destroy(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Book) add(c echo.Context) error {
+func (h *Book) add(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -193,7 +193,7 @@ func (h *Book) add(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Book) show(c echo.Context) error {
+func (h *Book) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))

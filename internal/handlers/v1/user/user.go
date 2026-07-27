@@ -25,7 +25,7 @@ func (h *User) initialize() *User {
 	return h
 }
 
-func (h *User) one(c echo.Context) error {
+func (h *User) one(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect user"))
@@ -39,7 +39,7 @@ func (h *User) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))
 }
 
-func (h *User) many(c echo.Context) error {
+func (h *User) many(c *echo.Context) error {
 	filter := c.QueryParam("filter")
 	users, err := h.repository.FindMany(filter)
 	if err != nil {

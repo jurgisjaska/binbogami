@@ -36,7 +36,7 @@ func (h *Category) initialize() *Category {
 	return h
 }
 
-func (h *Category) index(c echo.Context) error {
+func (h *Category) index(c *echo.Context) error {
 	request := api.CreateRequest(c)
 
 	var categories *category.Categories
@@ -52,7 +52,7 @@ func (h *Category) index(c echo.Context) error {
 }
 
 // show retrieves a category by ID, fetches the category from the database, and returns a JSON response.
-func (h *Category) show(c echo.Context) error {
+func (h *Category) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category id"))
@@ -68,7 +68,7 @@ func (h *Category) show(c echo.Context) error {
 
 // @deprecated
 // @todo remove
-func (h *Category) byBook(c echo.Context) error {
+func (h *Category) byBook(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
@@ -87,7 +87,7 @@ func (h *Category) byBook(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(categories, api.CreateRequest(c)))
 }
 
-func (h *Category) create(c echo.Context) error {
+func (h *Category) create(c *echo.Context) error {
 	category := &models.Category{}
 	if err := c.Bind(category); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category data"))
@@ -107,7 +107,7 @@ func (h *Category) create(c echo.Context) error {
 }
 
 // @deprecated
-func (h *Category) update(c echo.Context) error {
+func (h *Category) update(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))
@@ -122,7 +122,7 @@ func (h *Category) update(c echo.Context) error {
 }
 
 // @deprecated
-func (h *Category) destroy(c echo.Context) error {
+func (h *Category) destroy(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))

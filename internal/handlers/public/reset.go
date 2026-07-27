@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-func (h *Public) reset(c echo.Context) error {
+func (h *Public) reset(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect password reset token"))

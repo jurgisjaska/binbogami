@@ -12,7 +12,7 @@ const (
 	ErrorToken string = "invalid authentication token"
 )
 
-func currentUser(r *u.Repository, c echo.Context) (*u.User, error) {
+func currentUser(r *u.Repository, c *echo.Context) (*u.User, error) {
 	claims := token.FromContext(c)
 	if claims.Id == nil {
 		return nil, fmt.Errorf(ErrorToken)

@@ -34,7 +34,7 @@ func (h *Entry) initialize() *Entry {
 	return h
 }
 
-func (h *Entry) create(c echo.Context) error {
+func (h *Entry) create(c *echo.Context) error {
 	entry := &models.Entry{}
 	if err := c.Bind(entry); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect entry data", err.Error()))

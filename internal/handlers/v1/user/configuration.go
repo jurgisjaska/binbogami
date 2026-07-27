@@ -26,7 +26,7 @@ func (h *Configuration) initialize() *Configuration {
 	return h
 }
 
-func (h *Configuration) set(c echo.Context) error {
+func (h *Configuration) set(c *echo.Context) error {
 	request := &um.SetConfigurationRequest{}
 	if err := c.Bind(request); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Errors("incorrect user configuration data", err.Error()))

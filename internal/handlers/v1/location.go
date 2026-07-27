@@ -29,7 +29,7 @@ func (h *Location) initialize() *Location {
 	return h
 }
 
-func (h *Location) one(c echo.Context) error {
+func (h *Location) one(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect location"))
@@ -43,7 +43,7 @@ func (h *Location) one(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
 }
 
-func (h *Location) create(c echo.Context) error {
+func (h *Location) create(c *echo.Context) error {
 	location := &models.Location{}
 	if err := c.Bind(location); err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect location data"))
@@ -62,7 +62,7 @@ func (h *Location) create(c echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Location) byBook(c echo.Context) error {
+func (h *Location) byBook(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
