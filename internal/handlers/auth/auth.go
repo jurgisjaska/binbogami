@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
@@ -17,11 +18,10 @@ import (
 )
 
 const (
-	credentialError     string = "incorrect credentials"
-	validationError     string = "error encountered during data validation"
-	requestError        string = "bad request"
-	passwordsMatchError string = "passwords do not match"
-	internalError       string = "internal server error"
+	credentialError string = "incorrect credentials"
+	validationError string = "error encountered during data validation"
+	requestError    string = "bad request"
+	internalError   string = "internal server error"
 )
 
 type (
@@ -40,8 +40,18 @@ type (
 		resetPassword *mail.ResetPassword
 	}
 
+	// @todo fix naming
+	userRepository interface {
+		Create(u *user.User) error
+		Find(id uuid.UUID) (*user.User, error)
+		FindByEmail(e string) (*user.User, error)
+		FindActiveByEmail(e string) (*user.User, error)
+		UpdatePassword(u *user.User) error
+	}
+
+	// @todo fix naming
 	userRepositories struct {
-		repository    *user.Repository
+		repository    userRepository
 		configuration *configuration.ConfigurationRepository
 		passwordReset *password.ResetRepository
 	}
