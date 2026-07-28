@@ -4,6 +4,7 @@
 - **Language**: Go 1.26+
 - **Frameworks**: Labstack Echo v5
 - **Primary database**: MariaDB 12.1+
+- **Logging**: Grafana Loki
 
 ## Project Structure
 - `bin/`: Service binaries
@@ -12,6 +13,15 @@
 - `internal/`: Core code
 - `templates/`: HTML templates
 - `var/`: Runtime generated code such as logs and Docker volumes
+
+## Service Oriented Architecture
+- Every service is a separate `main.go` in the `cmd/` directory.
+- Every service has its own port for API.
+
+## UI
+- SPA web application built with Vue 3.
+- Desktop application built with GTK 4.
+- Mobile (Android) application built with Kotlin.
 
 ## Development Workflow
 - **Linting**: Always run `go fmt ./...` before suggesting code.
