@@ -15,13 +15,13 @@ type (
 	// Reset represents a data structure for storing information about a password reset.
 	Reset struct {
 		Id     uuid.UUID `json:"id"`
-		UserId uuid.UUID `db:"user_id" json:"userId"`
+		UserId uuid.UUID `db:"user_id" json:"user_id"`
 
 		Ip        string `db:"ip" json:"-"`
 		UserAgent string `db:"user_agent" json:"-"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
-		OpenedAt  *time.Time `db:"opened_at" json:"-"`
+		OpenedAt  *time.Time `db:"opened_at" json:"opened_at"`
 		ExpireAt  time.Time  `db:"expire_at" json:"-"`
 	}
 
@@ -33,6 +33,7 @@ type (
 	}
 )
 
+// Create creates a new password reset entity with the provided data.
 func (r *ResetRepository) Create(pr *Reset) error {
 	query := `
 		INSERT INTO user_password_resets (id, user_id, ip, user_agent, created_at, expire_at)
@@ -47,10 +48,25 @@ func (r *ResetRepository) Create(pr *Reset) error {
 	return nil
 }
 
-// @todo use this insead of find by ID
-func (r *ResetRepository) UpdateOpenedAt(id *uuid.UUID) (*Reset, error) {
-	// update opened_at and return password reset token entity
-	return nil, nil
+// Update updates a password reset entity with the provided data.
+func (r *ResetRepository) Update(pr *Reset) error {
+	query := `
+		UPDATE user_password_resets
+		SET 
+		    user_password_resets.user_id = :user_id, 
+		    user_password_resets.ip = :ip, 
+		    user_password_resets.user_agent = :user_agent,
+		    user_password_resets.opened_at = :opened_at,
+		    user_password_resets.expire_at = :expire_at
+		WHERE user_password_resets.id = :id
+	`
+
+	_, err := r.database.NamedExec(query, pr)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // UpdateExpireAt updates all future user password resets with expiration date of this moment

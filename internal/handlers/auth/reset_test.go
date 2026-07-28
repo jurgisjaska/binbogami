@@ -205,7 +205,7 @@ func TestReset(t *testing.T) {
 				},
 			}
 
-			req := httptest.NewRequest(http.MethodGet, "/auth/reset-password/test", bytes.NewBufferString(tt.payload))
+			req := httptest.NewRequest(http.MethodPost, "/auth/reset-password", bytes.NewBufferString(tt.payload))
 			if tt.contentType != "" {
 				req.Header.Set(echo.HeaderContentType, tt.contentType)
 			}
@@ -219,6 +219,103 @@ func TestReset(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, rec.Code)
 			for _, expectedStr := range tt.expectInBody {
 				assert.Contains(t, rec.Body.String(), expectedStr)
+			}
+		})
+	}
+}
+
+func TestOpen(t *testing.T) {
+	e := echo.New()
+
+	logger := slog.New(slog.NewTextHandler(io.Discard, nil))
+	secret := "test-secret-key-32-chars-long-12345"
+	config := &internal.Config{
+		Secret: secret,
+	}
+
+	tokenDaniel := uuid.MustParse("27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1")
+
+	resetDaniel := &password.Reset{
+		Id:        tokenDaniel,
+		UserId:    uuid.MustParse("2b63b228-b21c-11ee-9a7a-5ab75f0c1cab"),
+		Ip:        "::1",
+		UserAgent: "PostmanRuntime/7.51.0",
+		CreatedAt: time.Now(),
+		ExpireAt:  time.Now().Add(time.Hour * 2),
+	}
+
+	tests := []struct {
+		name           string
+		paramID        string
+		failOnUpdate   bool
+		expectedStatus int
+		expectInBody   []string
+		checkOpenedAt  bool
+	}{
+		{
+			name:           "Invalid password reset token UUID format",
+			paramID:        "invalid-uuid-string",
+			expectedStatus: http.StatusBadRequest,
+			expectInBody:   []string{"incorrect password reset token"},
+		},
+		{
+			name:           "Password reset token not found",
+			paramID:        "11111111-1111-1111-1111-111111111111",
+			expectedStatus: http.StatusNotFound,
+			expectInBody:   []string{"password reset token not found"},
+		},
+		{
+			name:           "Database error updating password reset token",
+			paramID:        "27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1",
+			failOnUpdate:   true,
+			expectedStatus: http.StatusInternalServerError,
+			expectInBody:   []string{"failed to update password reset token"},
+		},
+		{
+			name:           "Successful password reset token open",
+			paramID:        "27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1",
+			expectedStatus: http.StatusOK,
+			expectInBody:   []string{"success", tokenDaniel.String()},
+			checkOpenedAt:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resetCopy := *resetDaniel
+			mockResetRepo := &mockPasswordResetRepository{
+				resetsByID: map[uuid.UUID]*password.Reset{
+					tokenDaniel: &resetCopy,
+				},
+				failOnUpdate: tt.failOnUpdate,
+			}
+
+			h := &Auth{
+				echo:          e,
+				configuration: config,
+				auditlog:      logger,
+				user: &userRepositories{
+					passwordReset: mockResetRepo,
+				},
+			}
+
+			req := httptest.NewRequest(http.MethodGet, "/auth/reset-password/"+tt.paramID, nil)
+			rec := httptest.NewRecorder()
+
+			c := e.NewContext(req, rec)
+			c.SetPath("/auth/reset-password/:id")
+			c.SetPathValues(echo.PathValues{echo.PathValue{Name: "id", Value: tt.paramID}})
+
+			err := h.open(c)
+			require.NoError(t, err)
+
+			assert.Equal(t, tt.expectedStatus, rec.Code)
+			for _, expectedStr := range tt.expectInBody {
+				assert.Contains(t, rec.Body.String(), expectedStr)
+			}
+
+			if tt.checkOpenedAt {
+				assert.NotNil(t, resetCopy.OpenedAt)
 			}
 		})
 	}

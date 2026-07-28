@@ -50,6 +50,7 @@ type (
 		Find(id uuid.UUID) (*password.Reset, error)
 		FindManyByUser(u *user.User, limit int) (*password.Resets, error)
 		UpdateExpireAt(u *user.User) error
+		Update(pr *password.Reset) error
 	}
 
 	userRepositories struct {
@@ -71,6 +72,7 @@ func (h *Auth) initialize() *Auth {
 	h.echo.POST("/auth/signup", h.signup)
 
 	h.echo.POST("/auth/forgot-password", h.forgot)
+	h.echo.GET("/auth/reset-password/:id", h.open)
 	h.echo.POST("/auth/reset-password", h.reset)
 
 	return h

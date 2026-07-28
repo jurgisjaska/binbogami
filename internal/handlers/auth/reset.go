@@ -2,11 +2,39 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/labstack/echo/v5"
 )
+
+// open sets the opened_at field to the current time.
+func (h *Auth) open(c *echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		h.auditlog.Warn("password reset open error: incorrect password reset token", "error", err.Error())
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect password reset token"))
+	}
+
+	// retrieve the password reset token
+	entity, err := h.user.passwordReset.Find(id)
+	if err != nil {
+		h.auditlog.Warn("password reset open error: password reset token not found", "error", err.Error())
+		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
+	}
+
+	n := time.Now()
+	entity.OpenedAt = &n
+	err = h.user.passwordReset.Update(entity)
+	if err != nil {
+		h.auditlog.Warn("password reset open error: failed to update token", "error", err.Error())
+		return c.JSON(http.StatusInternalServerError, api.Error("failed to update password reset token"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
 
 func (h *Auth) reset(c *echo.Context) error {
 	request := &auth.ResetPasswordRequest{}

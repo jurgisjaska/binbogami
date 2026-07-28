@@ -26,6 +26,7 @@ type mockPasswordResetRepository struct {
 	resetsByID           map[uuid.UUID]*password.Reset
 	failOnCreate         bool
 	failOnUpdateExpireAt bool
+	failOnUpdate         bool
 }
 
 func (m *mockPasswordResetRepository) Create(pr *password.Reset) error {
@@ -60,6 +61,16 @@ func (m *mockPasswordResetRepository) FindManyByUser(u *user.User, limit int) (*
 func (m *mockPasswordResetRepository) UpdateExpireAt(u *user.User) error {
 	if m.failOnUpdateExpireAt {
 		return errors.New("database error updating expire_at")
+	}
+	return nil
+}
+
+func (m *mockPasswordResetRepository) Update(pr *password.Reset) error {
+	if m.failOnUpdate {
+		return errors.New("database error updating password reset")
+	}
+	if m.resetsByID != nil {
+		m.resetsByID[pr.Id] = pr
 	}
 	return nil
 }
