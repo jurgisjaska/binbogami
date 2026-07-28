@@ -45,15 +45,6 @@ type (
 		resetPassword resetPasswordMailer
 	}
 
-	// @todo fix naming and move to user package
-	userRepository interface {
-		Create(u *user.User) error
-		Find(id uuid.UUID) (*user.User, error)
-		FindByEmail(e string) (*user.User, error)
-		FindActiveByEmail(e string) (*user.User, error)
-		UpdatePassword(u *user.User) error
-	}
-
 	passwordResetRepository interface {
 		Create(pr *password.Reset) error
 		Find(id uuid.UUID) (*password.Reset, error)
@@ -61,9 +52,8 @@ type (
 		UpdateExpireAt(u *user.User) error
 	}
 
-	// @todo fix naming
 	userRepositories struct {
-		repository    userRepository
+		repository    user.UserRepository
 		configuration *configuration.ConfigurationRepository
 		passwordReset passwordResetRepository
 	}
@@ -81,7 +71,7 @@ func (h *Auth) initialize() *Auth {
 	h.echo.POST("/auth/signup", h.signup)
 
 	h.echo.POST("/auth/forgot-password", h.forgot)
-	h.echo.GET("/auth/reset-password/:id", h.reset)
+	h.echo.POST("/auth/reset-password", h.reset)
 
 	return h
 }

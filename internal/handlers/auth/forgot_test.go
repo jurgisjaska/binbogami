@@ -22,8 +22,10 @@ import (
 )
 
 type mockPasswordResetRepository struct {
-	resets       map[uuid.UUID]password.Resets
-	failOnCreate bool
+	resets               map[uuid.UUID]password.Resets
+	resetsByID           map[uuid.UUID]*password.Reset
+	failOnCreate         bool
+	failOnUpdateExpireAt bool
 }
 
 func (m *mockPasswordResetRepository) Create(pr *password.Reset) error {
@@ -38,7 +40,12 @@ func (m *mockPasswordResetRepository) Create(pr *password.Reset) error {
 }
 
 func (m *mockPasswordResetRepository) Find(id uuid.UUID) (*password.Reset, error) {
-	return nil, nil
+	if m.resetsByID != nil {
+		if pr, ok := m.resetsByID[id]; ok {
+			return pr, nil
+		}
+	}
+	return nil, errors.New("password reset token not found")
 }
 
 func (m *mockPasswordResetRepository) FindManyByUser(u *user.User, limit int) (*password.Resets, error) {
@@ -51,6 +58,9 @@ func (m *mockPasswordResetRepository) FindManyByUser(u *user.User, limit int) (*
 }
 
 func (m *mockPasswordResetRepository) UpdateExpireAt(u *user.User) error {
+	if m.failOnUpdateExpireAt {
+		return errors.New("database error updating expire_at")
+	}
 	return nil
 }
 
@@ -190,7 +200,7 @@ func TestForgot(t *testing.T) {
 			contentType:    echo.MIMEApplicationJSON,
 			payload:        `{"email":"daniel.jackson@sgc.example.com"}`,
 			expectedStatus: http.StatusUnprocessableEntity,
-			expectInBody:   []string{"too many reset requests"},
+			expectInBody:   []string{"too many password resets"},
 		},
 		{
 			name:           "Database error on reset creation",

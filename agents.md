@@ -19,8 +19,8 @@
 - Every service has its own port for API.
 
 ## UI
-- SPA web application built with Vue 3.
-- Desktop application built with GTK 4.
+- [Web application](https://github.com/jurgisjaska/binbogami-web) built with Vue 3 
+- [Desktop application](https://github.com/jurgisjaska/binbogami-desktop) built with GTK 4.
 - Mobile (Android) application built with Kotlin.
 
 ## Development Workflow

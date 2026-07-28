@@ -7,9 +7,22 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-type Repository struct {
-	database *sqlx.DB
-}
+type (
+	// UserRepository defines the interface for managing user entities in the database.
+	UserRepository interface {
+		Find(id uuid.UUID) (*User, error)
+		FindActive(id uuid.UUID) (*User, error)
+		FindActiveByEmail(e string) (*User, error)
+		FindByEmail(e string) (*User, error)
+		FindMany(filter string) (*Users, error)
+		Create(u *User) error
+		UpdatePassword(u *User) error
+	}
+
+	Repository struct {
+		database *sqlx.DB
+	}
+)
 
 // Find retrieves a User from the database by its UUID.
 func (r *Repository) Find(id uuid.UUID) (*User, error) {

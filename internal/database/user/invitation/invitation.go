@@ -20,12 +20,12 @@ type (
 		Id        *uuid.UUID `json:"id"`
 		Email     string     `json:"email"`
 		Role      *int       `json:"role"`
-		CreatedBy *uuid.UUID `db:"created_by" json:"createdBy"`
+		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		OpenedAt  *time.Time `db:"opened_at" json:"openedAt"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
-		ExpiredAt time.Time  `db:"expired_at" json:"expiredAt"`
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		OpenedAt  *time.Time `db:"opened_at" json:"opened_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+		ExpiredAt time.Time  `db:"expired_at" json:"expired_at"`
 	}
 
 	Invitations []*Invitation

@@ -20,7 +20,7 @@ type (
 		Ip        string `db:"ip" json:"-"`
 		UserAgent string `db:"user_agent" json:"-"`
 
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		OpenedAt  *time.Time `db:"opened_at" json:"-"`
 		ExpireAt  time.Time  `db:"expire_at" json:"-"`
 	}

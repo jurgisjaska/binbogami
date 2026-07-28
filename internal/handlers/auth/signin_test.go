@@ -21,7 +21,9 @@ import (
 )
 
 type mockUserRepository struct {
-	activeUsers map[string]*user.User
+	activeUsers          map[string]*user.User
+	usersByID            map[uuid.UUID]*user.User
+	failOnUpdatePassword bool
 }
 
 func (m *mockUserRepository) FindActiveByEmail(email string) (*user.User, error) {
@@ -32,12 +34,30 @@ func (m *mockUserRepository) FindActiveByEmail(email string) (*user.User, error)
 	return u, nil
 }
 
-func (m *mockUserRepository) Create(u *user.User) error             { return nil }
-func (m *mockUserRepository) Find(id uuid.UUID) (*user.User, error) { return nil, nil }
+func (m *mockUserRepository) Create(u *user.User) error { return nil }
+func (m *mockUserRepository) Find(id uuid.UUID) (*user.User, error) {
+	if m.usersByID != nil {
+		if u, ok := m.usersByID[id]; ok {
+			return u, nil
+		}
+	}
+	return nil, errors.New("user not found")
+}
 func (m *mockUserRepository) FindByEmail(e string) (*user.User, error) {
 	return nil, nil
 }
-func (m *mockUserRepository) UpdatePassword(u *user.User) error { return nil }
+func (m *mockUserRepository) FindActive(id uuid.UUID) (*user.User, error) {
+	return nil, nil
+}
+func (m *mockUserRepository) FindMany(filter string) (*user.Users, error) {
+	return nil, nil
+}
+func (m *mockUserRepository) UpdatePassword(u *user.User) error {
+	if m.failOnUpdatePassword {
+		return errors.New("database error updating password")
+	}
+	return nil
+}
 
 func TestSignin(t *testing.T) {
 	e := echo.New()

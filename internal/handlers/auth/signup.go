@@ -77,6 +77,9 @@ func (h *Auth) signup(c *echo.Context) error {
 		_ = h.invitation.Delete(inv)
 	}
 
+	// @todo: send welcome email
+	// @todo: send an email confirm request
+
 	return c.JSON(
 		http.StatusOK,
 		api.Success(

@@ -14,7 +14,7 @@ type (
 
 		UserId uuid.UUID `db:"user_id" json:"userId"`
 
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
 	}
 )

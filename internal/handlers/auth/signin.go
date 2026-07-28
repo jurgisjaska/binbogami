@@ -43,5 +43,7 @@ func (h *Auth) signin(c *echo.Context) error {
 	response := auth.SigninResponse{Token: t, User: u}
 	h.auditlog.Info("signed in", "user_id", u.Id)
 
+	// @todo: invalidate all password reset tokens
+
 	return c.JSON(http.StatusOK, api.Success(response, api.CreateRequest(c)))
 }
