@@ -36,11 +36,16 @@ type (
 	}
 
 	// @todo go level up on a tree if there will not be any other mailers
-	mailer struct {
-		resetPassword *mail.ResetPassword
+	resetPasswordMailer interface {
+		Send(u *user.User, pr *password.Reset) error
 	}
 
-	// @todo fix naming
+	// @todo go level up on a tree if there will not be any other mailers
+	mailer struct {
+		resetPassword resetPasswordMailer
+	}
+
+	// @todo fix naming and move to user package
 	userRepository interface {
 		Create(u *user.User) error
 		Find(id uuid.UUID) (*user.User, error)
@@ -49,11 +54,18 @@ type (
 		UpdatePassword(u *user.User) error
 	}
 
+	passwordResetRepository interface {
+		Create(pr *password.Reset) error
+		Find(id uuid.UUID) (*password.Reset, error)
+		FindManyByUser(u *user.User, limit int) (*password.Resets, error)
+		UpdateExpireAt(u *user.User) error
+	}
+
 	// @todo fix naming
 	userRepositories struct {
 		repository    userRepository
 		configuration *configuration.ConfigurationRepository
-		passwordReset *password.ResetRepository
+		passwordReset passwordResetRepository
 	}
 )
 
