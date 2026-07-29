@@ -53,14 +53,14 @@ func (h *Auth) forgot(c *echo.Context) error {
 	// save new password reset
 	err = h.user.passwordReset.Create(reset)
 	if err != nil {
-		h.auditlog.Warn("forgot error: unable to create password reset token", "user_id", user.Id, "error", err.Error())
+		h.auditlog.Error("forgot error: unable to create password reset token", "user_id", user.Id, "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
 	// send email with reset password link
 	err = h.mailer.resetPassword.Send(user, reset)
 	if err != nil {
-		h.auditlog.Warn("forgot error: email error", "user_id", user.Id, "email", user.Email, "error", err.Error())
+		h.auditlog.Error("forgot error: email error", "user_id", user.Id, "email", user.Email, "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 

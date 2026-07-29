@@ -77,7 +77,7 @@ func (h *Auth) reset(c *echo.Context) error {
 
 	err = h.user.repository.UpdatePassword(user)
 	if err != nil {
-		h.auditlog.Warn("password reset error: failed to update password", "error", err.Error(), "token", request.Token)
+		h.auditlog.Error("password reset error: failed to update password", "error", err.Error(), "token", request.Token)
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
@@ -85,7 +85,7 @@ func (h *Auth) reset(c *echo.Context) error {
 	entity.ExpireAt = n
 	err = h.user.passwordReset.Update(entity)
 	if err != nil {
-		h.auditlog.Warn("password reset error: failed to update token", "error", err.Error(), "token", request.Token)
+		h.auditlog.Error("password reset error: failed to update token", "error", err.Error(), "token", request.Token)
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
