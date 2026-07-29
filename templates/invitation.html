@@ -1,33 +1,95 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
-    <title>Reset Password</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/versions/bulma-no-dark-mode.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Invitation - Binbogami</title>
     <style>
-        body, html {
-            background: #e8e8e8;
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f6f8;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
+        }
+        table {
+            border-spacing: 0;
+        }
+        td {
+            padding: 0;
+        }
+        img {
+            border: 0;
+        }
+        a {
+            color: #206bc4;
+            text-decoration: none;
+        }
+        @media screen and (max-width: 600px) {
+            .email-container {
+                width: 100% !important;
+                padding: 10px !important;
+            }
+            .card-body {
+                padding: 24px 20px !important;
+            }
+            .card-header {
+                padding: 24px 20px 16px 20px !important;
+            }
         }
     </style>
 </head>
-<body>
+<body style="background-color: #f4f6f8; margin: 0; padding: 0;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f4f6f8; width: 100%; margin: 0; padding: 40px 0;">
+        <tr>
+            <td align="center">
+                <!-- Main Container -->
+                <table role="presentation" class="email-container" width="540" cellpadding="0" cellspacing="0" border="0" style="width: 540px; max-width: 540px; margin: 0 auto;">
+                    <!-- Card Header / Logo -->
+                    <tr>
+                        <td align="center" class="card-header" style="padding: 32px 32px 24px 32px; background-color: #ffffff; border-top-left-radius: 8px; border-top-right-radius: 8px; border-left: 1px solid #e6e8ea; border-right: 1px solid #e6e8ea; border-top: 1px solid #e6e8ea;">
+                            <a href="#" style="display: inline-block;">
+                                <img src="logo.png" alt="Binbogami" width="180" style="display: block; width: 180px; max-width: 100%; height: auto; border: 0; margin: 0 auto;" />
+                            </a>
+                        </td>
+                    </tr>
+                    <!-- Card Body -->
+                    <tr>
+                        <td class="card-body" style="background-color: #ffffff; padding: 8px 32px 32px 32px; border-left: 1px solid #e6e8ea; border-right: 1px solid #e6e8ea;">
+                            <h1 style="margin: 0 0 20px 0; font-size: 20px; font-weight: 600; color: #1e293b; text-align: center;">You've Been Invited</h1>
+                            <p style="margin: 0 0 16px 0; font-size: 15px; line-height: 1.5; color: #475569;">{{.Sender}} invited you to join personal finance management tool.</p>
+                            <p style="margin: 0 0 24px 0; font-size: 15px; line-height: 1.5; color: #475569;">Please click on the link below to join:</p>
+                            
+                            <!-- Button -->
+                            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 28px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{.URL}}" target="_blank" style="display: inline-block; background-color: #206bc4; color: #ffffff; font-size: 14px; font-weight: 600; text-decoration: none; padding: 12px 28px; border-radius: 6px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); border: 1px solid #206bc4;">Join</a>
+                                    </td>
+                                </tr>
+                            </table>
 
-<div id="app">
-    <div class="section">
-        <div class="columns is-centered is-vcentered">
-            <div class="column is-one-third">
-                <div class="box">
-                    <div class="signin-view content">
-                        <header class="has-text-centered mb-6"><h1>Invitation</h1></header>
-                        <p>{{.Sender}} invited you to join personal finance management tool.</p>
-                        <p>Please click on the link below to join.</p>
-                        <a href="{{.URL}}" class="button is-primary is-fullwidth mt-6">Join</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Fallback Link -->
+                            <p style="margin: 24px 0 8px 0; font-size: 12px; color: #64748b; line-height: 1.4;">If the button above does not work, copy and paste this link into your web browser:</p>
+                            <div style="font-size: 12px; color: #206bc4; word-break: break-all; font-family: SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; background-color: #f8fafc; padding: 10px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+                                <a href="{{.URL}}" target="_blank" style="color: #206bc4; text-decoration: underline;">{{.URL}}</a>
+                            </div>
 
+                            <!-- Security Note -->
+                            <p style="margin: 24px 0 0 0; font-size: 13px; line-height: 1.5; color: #94a3b8; padding-top: 20px; border-top: 1px solid #e9ecef;">If you were not expecting this invitation, no further action is required.</p>
+                        </td>
+                    </tr>
+                    <!-- Card Footer -->
+                    <tr>
+                        <td style="background-color: #f8fafc; padding: 16px 32px; border-bottom-left-radius: 8px; border-bottom-right-radius: 8px; border-left: 1px solid #e6e8ea; border-right: 1px solid #e6e8ea; border-bottom: 1px solid #e6e8ea; text-align: center;">
+                            <p style="margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.4;">&copy; Binbogami. All rights reserved.</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>

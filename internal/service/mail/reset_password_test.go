@@ -33,7 +33,7 @@ func TestResetPassword_CreateMessage(t *testing.T) {
 			wantSub: []string{
 				"Dear Jonas Quinn,",
 				"http://localhost:8080/reset-password/00000000-0000-0000-0000-000000000001",
-				"data:image/png;base64,",
+				"logo.png",
 				"Reset Your Password",
 				"#206bc4",
 			},
