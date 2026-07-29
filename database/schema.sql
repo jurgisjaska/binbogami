@@ -111,15 +111,16 @@ create table if not exists invitations
     email      varchar(128) not null,
     role       int          null,
     created_by uuid         not null,
+    user_id    uuid         null,
     created_at timestamp    not null,
     opened_at  timestamp    null,
     deleted_at timestamp    null,
     expired_at timestamp    not null,
     constraint invitations_users_id_fk
-        foreign key (created_by) references users (id)
+        foreign key (created_by) references users (id),
+    constraint invitations_accepted_users_id_fk
+        foreign key (user_id) references users (id)
 );
-
-
 
 CREATE TABLE IF NOT EXISTS locations
 (

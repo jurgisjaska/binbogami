@@ -9,7 +9,7 @@ import (
 type Public struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	invitation *invitation.InvitationRepository
+	invitation invitation.Repository
 }
 
 func (h *Public) initialize() *Public {

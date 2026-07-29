@@ -19,15 +19,18 @@ import (
 func (h *Auth) signup(c *echo.Context) error {
 	request := &auth.SignupRequest{}
 	if err := c.Bind(request); err != nil {
+		h.auditlog.Warn("signup error: bad request", "error", err.Error())
 		return c.JSON(http.StatusBadRequest, api.Error(requestError))
 	}
 
 	if err := c.Validate(request); err != nil {
+		h.auditlog.Warn("signup error: validation error", "error", err.Error())
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(validationError, err.Error()))
 	}
 
 	existingUser, err := h.user.repository.FindByEmail(request.Email)
 	if existingUser != nil {
+		h.auditlog.Warn("signup error: bad request", "email", request.Email)
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
 
@@ -35,8 +38,8 @@ func (h *Auth) signup(c *echo.Context) error {
 	var inv *invitation.Invitation
 	var confirmedAt *time.Time
 
-	if request.InvitationId != nil {
-		inv, err = h.invitation.Find(*request.InvitationId)
+	if request.Invitation != nil {
+		inv, err = h.invitation.Find(*request.Invitation)
 		if err == nil {
 			n := time.Now()
 			confirmedAt = &n
@@ -52,6 +55,7 @@ func (h *Auth) signup(c *echo.Context) error {
 		Email:       request.Email,
 		Name:        request.Name,
 		Surname:     request.Surname,
+		Position:    request.Position,
 		Salt:        random.String(16),
 		Role:        role,
 		CreatedAt:   time.Now(),
@@ -74,6 +78,7 @@ func (h *Auth) signup(c *echo.Context) error {
 	}
 
 	if inv != nil {
+		inv.UserId = &u.Id
 		_ = h.invitation.Delete(inv)
 	}
 

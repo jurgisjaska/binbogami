@@ -13,6 +13,14 @@ const (
 )
 
 type (
+	// Repository defines the interface for managing invitation entities in the database.
+	Repository interface {
+		Open(id uuid.UUID) (*Invitation, error)
+		Find(id uuid.UUID) (*Invitation, error)
+		Create(model *models.InvitationRequest) (Invitations, error)
+		Delete(invitation *Invitation) error
+	}
+
 	// Invitation defines an entity of every invitation to join send out by the email.
 	// Id is used as unique key to ensure the invitation can only be used once.
 	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
@@ -21,6 +29,7 @@ type (
 		Email     string     `json:"email"`
 		Role      *int       `json:"role"`
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
+		UserId    *uuid.UUID `db:"user_id" json:"user_id"`
 
 		CreatedAt time.Time  `db:"created_at" json:"created_at"`
 		OpenedAt  *time.Time `db:"opened_at" json:"opened_at"`
@@ -101,9 +110,9 @@ func (r *InvitationRepository) Delete(invitation *Invitation) error {
 
 func (r *InvitationRepository) flush(invitation *Invitation) error {
 	query := `
-		INSERT INTO invitations (id, email, created_by, created_at, opened_at, expired_at, deleted_at)
-		VALUES (:id, :email, :created_by, :created_at, :opened_at, :expired_at, :deleted_at)
-		ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at
+		INSERT INTO invitations (id, email, role, created_by, user_id, created_at, opened_at, expired_at, deleted_at)
+		VALUES (:id, :email, :role, :created_by, :user_id, :created_at, :opened_at, :expired_at, :deleted_at)
+		ON DUPLICATE KEY UPDATE opened_at = :opened_at, deleted_at = :deleted_at, user_id = :user_id
 	`
 	_, err := r.database.NamedExec(query, invitation)
 	if err != nil {

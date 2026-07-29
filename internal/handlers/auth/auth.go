@@ -27,7 +27,7 @@ type (
 	Auth struct {
 		echo          *echo.Echo
 		database      *sqlx.DB
-		invitation    *invitation.InvitationRepository
+		invitation    invitation.Repository
 		configuration *internal.Config
 		mailer        *mailer
 		user          *userRepositories

@@ -12,12 +12,13 @@ type (
 		RepeatedPassword string     `validate:"required,gte=8,eqfield=Password" json:"repeated_password"`
 		Name             string     `validate:"required,gte=3,lt=64" json:"name"`
 		Surname          string     `validate:"required,gte=3,lt=64" json:"surname"`
-		InvitationId     *uuid.UUID `validate:"omitempty,uuid" json:"invitation_id"`
+		Position         *string    `validate:"omitempty,gte=3,lt=64" json:"position"`
+		Invitation       *uuid.UUID `validate:"omitempty,uuid" json:"invitation_id"`
 	}
 
 	// SignupResponse represents the response data structure for the signup process.
 	SignupResponse struct {
-		User  interface{} `json:"user"`
-		Token string      `json:"token"`
+		User  any    `json:"user"`
+		Token string `json:"token"`
 	}
 )
