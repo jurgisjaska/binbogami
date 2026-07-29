@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
@@ -45,18 +44,10 @@ type (
 		resetPassword resetPasswordMailer
 	}
 
-	passwordResetRepository interface {
-		Create(pr *password.Reset) error
-		Find(id uuid.UUID) (*password.Reset, error)
-		FindManyByUser(u *user.User, limit int) (*password.Resets, error)
-		UpdateExpireAt(u *user.User) error
-		Update(pr *password.Reset) error
-	}
-
 	userRepositories struct {
 		repository    user.UserRepository
 		configuration *configuration.ConfigurationRepository
-		passwordReset passwordResetRepository
+		passwordReset password.PasswordResetRepository
 	}
 )
 

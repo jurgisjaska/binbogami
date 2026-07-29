@@ -83,7 +83,11 @@ func (h *Auth) reset(c *echo.Context) error {
 
 	n := time.Now()
 	entity.ExpireAt = n
-	_ = h.user.passwordReset.Update(entity)
+	err = h.user.passwordReset.Update(entity)
+	if err != nil {
+		h.auditlog.Warn("password reset error: failed to update token", "error", err.Error(), "token", request.Token)
+		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
+	}
 
 	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))
 }

@@ -27,6 +27,14 @@ type (
 
 	Resets []Reset
 
+	// PasswordResetRepository defines the interface for managing user password reset entities in the database.
+	PasswordResetRepository interface {
+		Create(pr *Reset) error
+		Find(id uuid.UUID) (*Reset, error)
+		FindManyByUser(u *user.User, limit int) (*Resets, error)
+		Update(pr *Reset) error
+	}
+
 	// ResetRepository represents a repository for storing user Reset data.
 	ResetRepository struct {
 		database *sqlx.DB
@@ -62,23 +70,6 @@ func (r *ResetRepository) Update(pr *Reset) error {
 	`
 
 	_, err := r.database.NamedExec(query, pr)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// UpdateExpireAt updates all future user password resets with expiration date of this moment
-// invalidate all password resets for the user
-func (r *ResetRepository) UpdateExpireAt(u *user.User) error {
-	query := `
-		UPDATE user_password_resets
-		SET user_password_resets.expire_at = :expire_at
-		WHERE user_password_resets.user_id = :user_id AND user_password_resets.expire_at > NOW()
-	`
-
-	_, err := r.database.NamedExec(query, map[string]interface{}{"expire_at": time.Now(), "user_id": u.Id})
 	if err != nil {
 		return err
 	}

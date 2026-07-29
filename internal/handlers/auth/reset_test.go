@@ -60,30 +60,44 @@ func TestReset(t *testing.T) {
 	tokenDaniel := uuid.MustParse("27b8bb9a-dcfd-41cd-b60c-00f6cb7b89a1")
 	tokenTealc := uuid.MustParse("aa7d1712-c6d0-488a-8b0d-0172f28b05d0")
 	tokenOrphan := uuid.MustParse("88888888-8888-8888-8888-888888888888")
+	tokenUnopened := uuid.MustParse("77777777-7777-7777-7777-777777777777")
 
+	now := time.Now()
 	resetDaniel := &password.Reset{
 		Id:        tokenDaniel,
 		UserId:    danielID,
 		Ip:        "::1",
 		UserAgent: "PostmanRuntime/7.51.0",
-		CreatedAt: time.Now(),
-		ExpireAt:  time.Now().Add(time.Hour * 2),
+		CreatedAt: now,
+		OpenedAt:  &now,
+		ExpireAt:  now.Add(time.Hour * 2),
 	}
 	resetTealc := &password.Reset{
 		Id:        tokenTealc,
 		UserId:    tealcID,
 		Ip:        "::1",
 		UserAgent: "PostmanRuntime/7.51.0",
-		CreatedAt: time.Now(),
-		ExpireAt:  time.Now().Add(time.Hour * 2),
+		CreatedAt: now,
+		OpenedAt:  &now,
+		ExpireAt:  now.Add(time.Hour * 2),
 	}
 	resetOrphan := &password.Reset{
 		Id:        tokenOrphan,
 		UserId:    orphanUserID,
 		Ip:        "::1",
 		UserAgent: "PostmanRuntime/7.51.0",
-		CreatedAt: time.Now(),
-		ExpireAt:  time.Now().Add(time.Hour * 2),
+		CreatedAt: now,
+		OpenedAt:  &now,
+		ExpireAt:  now.Add(time.Hour * 2),
+	}
+	resetUnopened := &password.Reset{
+		Id:        tokenUnopened,
+		UserId:    danielID,
+		Ip:        "::1",
+		UserAgent: "PostmanRuntime/7.51.0",
+		CreatedAt: now,
+		OpenedAt:  nil,
+		ExpireAt:  now.Add(time.Hour * 2),
 	}
 
 	tests := []struct {
@@ -138,6 +152,13 @@ func TestReset(t *testing.T) {
 			expectInBody:   []string{"password reset token not found"},
 		},
 		{
+			name:           "Unopened password reset token fixture",
+			contentType:    echo.MIMEApplicationJSON,
+			payload:        `{"password":"newpassword123","repeated_password":"newpassword123","token":"77777777-7777-7777-7777-777777777777"}`,
+			expectedStatus: http.StatusUnauthorized,
+			expectInBody:   []string{"password reset token not opened"},
+		},
+		{
 			name:           "Token linked to non-existent user fixture",
 			contentType:    echo.MIMEApplicationJSON,
 			payload:        `{"password":"newpassword123","repeated_password":"newpassword123","token":"88888888-8888-8888-8888-888888888888"}`,
@@ -188,11 +209,12 @@ func TestReset(t *testing.T) {
 
 			mockResetRepo := &mockPasswordResetRepository{
 				resetsByID: map[uuid.UUID]*password.Reset{
-					tokenDaniel: resetDaniel,
-					tokenTealc:  resetTealc,
-					tokenOrphan: resetOrphan,
+					tokenDaniel:   resetDaniel,
+					tokenTealc:    resetTealc,
+					tokenOrphan:   resetOrphan,
+					tokenUnopened: resetUnopened,
 				},
-				failOnUpdateExpireAt: tt.failOnUpdateExpireAt,
+				failOnUpdate: tt.failOnUpdateExpireAt,
 			}
 
 			h := &Auth{

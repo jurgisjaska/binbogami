@@ -15,18 +15,18 @@ func (h *Auth) signin(c *echo.Context) error {
 	request := &auth.SigninRequest{}
 	if err := c.Bind(request); err != nil {
 		h.auditlog.Warn("signin error", "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, api.Error(credentialError))
+		return c.JSON(http.StatusBadRequest, api.Error(credentialError))
 	}
 
 	if err := c.Validate(request); err != nil {
 		h.auditlog.Warn("signin error", "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+		return c.JSON(http.StatusBadRequest, api.Errors(credentialError, err.Error()))
 	}
 
 	u, err := h.user.repository.FindActiveByEmail(request.Email)
 	if err != nil {
 		h.auditlog.Warn("signin error", "email", request.Email, "error", err.Error())
-		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+		return c.JSON(http.StatusUnprocessableEntity, api.Errors(credentialError, err.Error()))
 	}
 
 	password := h.buildPassword(request.Password, u.Salt)
