@@ -18,26 +18,26 @@ import (
 // including user login, registration, and JWT token management.
 
 func main() {
-	log.Println("Starting auth service")
+	log.Println("starting auth service")
 
 	config, err := internal.CreateConfig()
 	if err != nil {
-		log.Fatalln("Configuration load failure")
+		log.Fatalln("configuration load failure")
 	}
 
 	logger := slog.New(audithandler.CreateLoki(config.Loki))
 	logger = logger.With("service", "auth").WithGroup(audithandler.GroupSystem)
 	slog.SetDefault(logger)
-	slog.Info("Starting auth service")
-	defer slog.Warn("Stopping auth service")
+	slog.Info("starting auth service")
+	defer slog.Warn("stopping auth service")
 
 	auditlog := slog.New(audithandler.CreateLoki(config.Loki))
 	auditlog = auditlog.With("service", "auth").WithGroup(audithandler.GroupAudit)
 
 	database, err := internal.ConnectDatabase(config.Database)
 	if err != nil {
-		slog.Error("Database connection failure", "error", err, "group", "system")
-		log.Fatalln("Database connection failure")
+		slog.Error("database connection failure", "error", err, "group", "system")
+		log.Fatalln("database connection failure")
 	}
 	defer func() { _ = database.Close() }()
 
@@ -57,6 +57,6 @@ func main() {
 	auth.CreateAuth(e, database, config, dialer, auditlog)
 
 	if err := e.Start(fmt.Sprintf(":%d", config.Auth.Port)); err != nil {
-		e.Logger.Error("Failed to start server", "error", err)
+		e.Logger.Error("failed to start server", "error", err)
 	}
 }

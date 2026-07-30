@@ -30,7 +30,7 @@ func (h *Auth) signup(c *echo.Context) error {
 
 	existingUser, err := h.user.repository.FindByEmail(request.Email)
 	if existingUser != nil {
-		h.auditlog.Warn("signup error: bad request", "email", request.Email)
+		h.auditlog.Warn("signup error: email address already in use", "email", request.Email)
 		return c.JSON(http.StatusUnprocessableEntity, api.Error("email address already in use"))
 	}
 
@@ -64,19 +64,23 @@ func (h *Auth) signup(c *echo.Context) error {
 
 	u.Password, err = h.hashPassword(request.Password, u.Salt)
 	if err != nil {
+		h.auditlog.Error("signup error: password hashing failure", "email", request.Email, "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
 	err = h.user.repository.Create(u)
 	if err != nil {
+		h.auditlog.Error("signup error: failed to create user", "email", request.Email, "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
 	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
+		h.auditlog.Error("signup error: token creation error", "user_id", u.Id, "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
+	// @todo make an update and add user_id
 	if inv != nil {
 		inv.UserId = &u.Id
 		_ = h.invitation.Delete(inv)
@@ -84,6 +88,8 @@ func (h *Auth) signup(c *echo.Context) error {
 
 	// @todo: send welcome email
 	// @todo: send an email confirm request
+
+	h.auditlog.Info("user signup", "user_id", u.Id)
 
 	return c.JSON(
 		http.StatusOK,
