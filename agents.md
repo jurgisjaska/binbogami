@@ -34,12 +34,15 @@
   - Use camelCase for internal and PascalCase for exported members. Follow Go acronym rules (e.g., `JSONData`, not `JsonData`).
   - Use `CreateXxx` for constructor functions
   - **Repositories**:
-    - `FindBy*`: Find single entity by something
+    - `FindBy*`: Find a single entity by something
     - `FindManyBy*`: Find many entities by something
     - `Save`: Persist entity (create or update)
     - `Create(entity *Entity) error`: Persist new entity in the database
     - `Update(entity *Entity) error`: Persist existing entity in the database
-    - `Find(id uuid.UUID) (*Entity, Error)`: Find single entity by UUID
+    - `Find(id uuid.UUID) (*Entity, Error)`: Find a single entity by UUID
+    - Repository interfaces are named using pattern `*Repository`
+    - Repositories are structs named `Repository` if the package contains only one repository.
+    - If the package contains multiple repositories, the name of the repository is formed using pattern `EntityRepository` and interfaces include a package name.
   - **REST API Handlers**:
     - **GET** for multiple entities assigned endpoint `/resources` and function name `index`
     - **GET** for sinle entity assigned endpoint `/resources/{:id}` and function name `show`

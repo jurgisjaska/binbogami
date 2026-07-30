@@ -80,10 +80,11 @@ func (h *Auth) signup(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
 	}
 
-	// @todo make an update and add user_id
 	if inv != nil {
+		n := time.Now()
+		inv.DeletedAt = &n
 		inv.UserId = &u.Id
-		_ = h.invitation.Delete(inv)
+		_ = h.invitation.Update(inv)
 	}
 
 	// @todo: send welcome email

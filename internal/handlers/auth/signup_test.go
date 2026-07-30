@@ -76,6 +76,13 @@ func (m *mockSignupInvitationRepository) Create(model *models.InvitationRequest)
 	return nil, nil
 }
 
+func (m *mockSignupInvitationRepository) Update(inv *invitation.Invitation) error {
+	if m.invitations != nil && inv.Id != nil {
+		m.invitations[*inv.Id] = inv
+	}
+	return nil
+}
+
 func (m *mockSignupInvitationRepository) Delete(inv *invitation.Invitation) error {
 	if m.deleted == nil {
 		m.deleted = make(map[uuid.UUID]*invitation.Invitation)

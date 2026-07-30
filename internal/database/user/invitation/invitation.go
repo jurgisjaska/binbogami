@@ -13,14 +13,6 @@ const (
 )
 
 type (
-	// Repository defines the interface for managing invitation entities in the database.
-	Repository interface {
-		Open(id uuid.UUID) (*Invitation, error)
-		Find(id uuid.UUID) (*Invitation, error)
-		Create(model *models.InvitationRequest) (Invitations, error)
-		Delete(invitation *Invitation) error
-	}
-
 	// Invitation defines an entity of every invitation to join send out by the email.
 	// Id is used as unique key to ensure the invitation can only be used once.
 	// ExpiredAt defined the invitation expiration. Every invitation should be valid for 24 hours.
@@ -39,13 +31,22 @@ type (
 
 	Invitations []*Invitation
 
-	InvitationRepository struct {
+	// InvitationRepository defines the interface for managing invitation entities in the database.
+	InvitationRepository interface {
+		Open(id uuid.UUID) (*Invitation, error)
+		Find(id uuid.UUID) (*Invitation, error)
+		Create(model *models.InvitationRequest) (Invitations, error)
+		Update(i *Invitation) error
+		Delete(invitation *Invitation) error
+	}
+
+	Repository struct {
 		database *sqlx.DB
 	}
 )
 
 // Open retrieves the invitation entity from the database by its UUID and marks invitation as opened.
-func (r *InvitationRepository) Open(id uuid.UUID) (*Invitation, error) {
+func (r *Repository) Open(id uuid.UUID) (*Invitation, error) {
 	invitation, err := r.Find(id)
 	if err != nil {
 		return nil, err
@@ -54,15 +55,23 @@ func (r *InvitationRepository) Open(id uuid.UUID) (*Invitation, error) {
 	now := time.Now()
 	invitation.OpenedAt = &now
 
-	if err := r.flush(invitation); err != nil {
+	if err := r.Update(invitation); err != nil {
 		return nil, err
 	}
 
 	return invitation, nil
 }
 
+// Delete marks the invitation as deleted in the database.
+func (r *Repository) Delete(invitation *Invitation) error {
+	now := time.Now()
+	invitation.DeletedAt = &now
+
+	return r.Update(invitation)
+}
+
 // Find retrieves the invitation entity form the database by its UUID.
-func (r *InvitationRepository) Find(id uuid.UUID) (*Invitation, error) {
+func (r *Repository) Find(id uuid.UUID) (*Invitation, error) {
 	query := `
 		SELECT * FROM invitations WHERE id = ? AND deleted_at IS NULL AND expired_at > CURRENT_TIMESTAMP()
 	`
@@ -75,7 +84,9 @@ func (r *InvitationRepository) Find(id uuid.UUID) (*Invitation, error) {
 	return invitation, nil
 }
 
-func (r *InvitationRepository) Create(model *models.InvitationRequest) (Invitations, error) {
+// Create generates new invitations based on the provided InvitationRequest and persists them in the database.
+// @todo this should be refactored to use defined coding style
+func (r *Repository) Create(model *models.InvitationRequest) (Invitations, error) {
 	invitations := Invitations{}
 	for _, email := range model.Email {
 		id, err := uuid.NewUUID()
@@ -101,14 +112,29 @@ func (r *InvitationRepository) Create(model *models.InvitationRequest) (Invitati
 	return invitations, nil
 }
 
-func (r *InvitationRepository) Delete(invitation *Invitation) error {
-	now := time.Now()
-	invitation.DeletedAt = &now
+// Update updates an existing invitation record in the database with the provided invitation entity values.
+func (r *Repository) Update(i *Invitation) error {
+	query := `
+		UPDATE invitations 
+		SET 
+			email = :email,
+			role = :role,
+			user_id = :user_id,
+		    opened_at = :opened_at,
+		    deleted_at = :deleted_at,
+		    expired_at = :expired_at
+		WHERE id = :id
+	`
 
-	return r.flush(invitation)
+	_, err := r.database.NamedExec(query, i)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (r *InvitationRepository) flush(invitation *Invitation) error {
+func (r *Repository) flush(invitation *Invitation) error {
 	query := `
 		INSERT INTO invitations (id, email, role, created_by, user_id, created_at, opened_at, expired_at, deleted_at)
 		VALUES (:id, :email, :role, :created_by, :user_id, :created_at, :opened_at, :expired_at, :deleted_at)
@@ -122,6 +148,6 @@ func (r *InvitationRepository) flush(invitation *Invitation) error {
 	return nil
 }
 
-func CreateInvitation(d *sqlx.DB) *InvitationRepository {
-	return &InvitationRepository{database: d}
+func CreateInvitation(d *sqlx.DB) *Repository {
+	return &Repository{database: d}
 }
