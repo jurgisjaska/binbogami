@@ -83,18 +83,6 @@ func (m *mockSignupInvitationRepository) Update(inv *invitation.Invitation) erro
 	return nil
 }
 
-func (m *mockSignupInvitationRepository) Delete(inv *invitation.Invitation) error {
-	if m.deleted == nil {
-		m.deleted = make(map[uuid.UUID]*invitation.Invitation)
-	}
-	now := time.Now()
-	inv.DeletedAt = &now
-	if inv.Id != nil {
-		m.deleted[*inv.Id] = inv
-	}
-	return nil
-}
-
 func TestSignup(t *testing.T) {
 	e := echo.New()
 	e.Validator = &api.Validator{Validator: validator.New()}

@@ -37,7 +37,6 @@ type (
 		Find(id uuid.UUID) (*Invitation, error)
 		Create(model *models.InvitationRequest) (Invitations, error)
 		Update(i *Invitation) error
-		Delete(invitation *Invitation) error
 	}
 
 	Repository struct {
@@ -60,14 +59,6 @@ func (r *Repository) Open(id uuid.UUID) (*Invitation, error) {
 	}
 
 	return invitation, nil
-}
-
-// Delete marks the invitation as deleted in the database.
-func (r *Repository) Delete(invitation *Invitation) error {
-	now := time.Now()
-	invitation.DeletedAt = &now
-
-	return r.Update(invitation)
 }
 
 // Find retrieves the invitation entity form the database by its UUID.
