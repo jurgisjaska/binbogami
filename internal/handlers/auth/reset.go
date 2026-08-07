@@ -33,6 +33,8 @@ func (h *Auth) open(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Error("failed to update password reset token"))
 	}
 
+	h.auditlog.Info("password reset opened", "token", id)
+
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
@@ -89,5 +91,6 @@ func (h *Auth) reset(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
+	h.auditlog.Info("password reset successful", "user_id", user.Id)
 	return c.JSON(http.StatusOK, api.Success(user, api.CreateRequest(c)))
 }
