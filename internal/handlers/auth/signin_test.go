@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
@@ -22,6 +23,7 @@ import (
 
 type mockUserRepository struct {
 	activeUsers          map[string]*user.User
+	notDeletedUsers      map[string]*user.User
 	usersByID            map[uuid.UUID]*user.User
 	failOnUpdatePassword bool
 }
@@ -30,6 +32,19 @@ func (m *mockUserRepository) FindActiveByEmail(email string) (*user.User, error)
 	u, ok := m.activeUsers[email]
 	if !ok {
 		return nil, errors.New("user not found or inactive")
+	}
+	return u, nil
+}
+
+func (m *mockUserRepository) FindNotDeletedByEmail(email string) (*user.User, error) {
+	if m.notDeletedUsers != nil {
+		if u, ok := m.notDeletedUsers[email]; ok {
+			return u, nil
+		}
+	}
+	u, ok := m.activeUsers[email]
+	if !ok {
+		return nil, errors.New("user not found or deleted")
 	}
 	return u, nil
 }
@@ -80,15 +95,28 @@ func TestSignin(t *testing.T) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(combined), bcrypt.DefaultCost)
 	require.NoError(t, err)
 
+	now := time.Now()
 	// Fixtures matching database/fixtures.sql
 	activeUserTealc := &user.User{
-		Id:       uuid.MustParse("aff84550-b21f-11ee-8ac0-5ab75f0c1cab"),
-		Email:    "tealc.of.chulak@sgc.example.com",
-		Name:     "Teal'c",
-		Surname:  "Chulak",
-		Salt:     salt,
-		Password: string(hashedPassword),
-		Role:     1,
+		Id:          uuid.MustParse("aff84550-b21f-11ee-8ac0-5ab75f0c1cab"),
+		Email:       "tealc.of.chulak@sgc.example.com",
+		Name:        "Teal'c",
+		Surname:     "Chulak",
+		Salt:        salt,
+		Password:    string(hashedPassword),
+		Role:        1,
+		ConfirmedAt: &now,
+	}
+
+	unconfirmedUserCameron := &user.User{
+		Id:          uuid.MustParse("c0f8c245-1b3d-4d5f-9234-8c7d6e5f4a3b"),
+		Email:       "cameron.mitchell@sgc.example.com",
+		Name:        "Cameron",
+		Surname:     "Mitchell",
+		Salt:        salt,
+		Password:    string(hashedPassword),
+		Role:        1,
+		ConfirmedAt: nil,
 	}
 
 	mockRepo := &mockUserRepository{
@@ -96,6 +124,10 @@ func TestSignin(t *testing.T) {
 			"tealc.of.chulak@sgc.example.com": activeUserTealc,
 			// jonas.quinn@sgc.example.com is deleted in fixtures -> omitted from activeUsers map
 			// cameron.mitchell@sgc.example.com is unconfirmed in fixtures -> omitted from activeUsers map
+		},
+		notDeletedUsers: map[string]*user.User{
+			"tealc.of.chulak@sgc.example.com":  activeUserTealc,
+			"cameron.mitchell@sgc.example.com": unconfirmedUserCameron,
 		},
 	}
 
@@ -162,7 +194,7 @@ func TestSignin(t *testing.T) {
 			contentType:    echo.MIMEApplicationJSON,
 			payload:        `{"email":"cameron.mitchell@sgc.example.com","password":"sholva123"}`,
 			expectedStatus: http.StatusUnauthorized,
-			expectInBody:   []string{credentialError},
+			expectInBody:   []string{"user not confirmed", "cameron.mitchell@sgc.example.com"},
 		},
 		{
 			name:           "Wrong password for active user fixture",

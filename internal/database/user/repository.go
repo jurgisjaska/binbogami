@@ -13,6 +13,7 @@ type (
 		Find(id uuid.UUID) (*User, error)
 		FindActive(id uuid.UUID) (*User, error)
 		FindActiveByEmail(e string) (*User, error)
+		FindNotDeletedByEmail(e string) (*User, error)
 		FindByEmail(e string) (*User, error)
 		FindMany(filter string) (*Users, error)
 		Create(u *User) error
@@ -54,6 +55,11 @@ func (r *Repository) FindActive(id uuid.UUID) (*User, error) {
 // (not deleted and confirmed).
 func (r *Repository) FindActiveByEmail(e string) (*User, error) {
 	return r.findByEmail(e, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL AND confirmed_at IS NOT NULL")
+}
+
+// FindNotDeletedByEmail retrieves a user by their email address, ensuring the user has not been soft-deleted.
+func (r *Repository) FindNotDeletedByEmail(e string) (*User, error) {
+	return r.findByEmail(e, "SELECT * FROM users WHERE email = ? AND deleted_at IS NULL")
 }
 
 // FindByEmail retrieves a user from the database based on their email address.

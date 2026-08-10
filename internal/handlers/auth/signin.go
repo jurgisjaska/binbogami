@@ -23,10 +23,15 @@ func (h *Auth) signin(c *echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, api.Errors(credentialError, err.Error()))
 	}
 
-	u, err := h.user.repository.FindActiveByEmail(request.Email)
+	u, err := h.user.repository.FindNotDeletedByEmail(request.Email)
 	if err != nil {
 		h.auditlog.Warn("signin error: user not found", "email", request.Email, "error", err.Error())
 		return c.JSON(http.StatusUnauthorized, api.Errors(credentialError, err.Error()))
+	}
+
+	if u.ConfirmedAt == nil {
+		h.auditlog.Warn("signin error: user not confirmed", "user_id", u.Id)
+		return c.JSON(http.StatusUnauthorized, api.Errors("user not confirmed", u))
 	}
 
 	password := h.buildPassword(request.Password, u.Salt)

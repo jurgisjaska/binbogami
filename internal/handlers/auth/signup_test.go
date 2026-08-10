@@ -46,8 +46,11 @@ func (m *mockSignupUserRepository) Create(u *user.User) error {
 func (m *mockSignupUserRepository) Find(id uuid.UUID) (*user.User, error)          { return nil, nil }
 func (m *mockSignupUserRepository) FindActive(id uuid.UUID) (*user.User, error)    { return nil, nil }
 func (m *mockSignupUserRepository) FindActiveByEmail(e string) (*user.User, error) { return nil, nil }
-func (m *mockSignupUserRepository) FindMany(filter string) (*user.Users, error)    { return nil, nil }
-func (m *mockSignupUserRepository) UpdatePassword(u *user.User) error              { return nil }
+func (m *mockSignupUserRepository) FindNotDeletedByEmail(e string) (*user.User, error) {
+	return nil, nil
+}
+func (m *mockSignupUserRepository) FindMany(filter string) (*user.Users, error) { return nil, nil }
+func (m *mockSignupUserRepository) UpdatePassword(u *user.User) error           { return nil }
 
 type mockSignupInvitationRepository struct {
 	invitations map[uuid.UUID]*invitation.Invitation
@@ -78,7 +81,7 @@ func (m *mockSignupInvitationRepository) Create(model *models.InvitationRequest)
 
 func (m *mockSignupInvitationRepository) Update(inv *invitation.Invitation) error {
 	if m.invitations != nil && inv.Id != nil {
-		m.invitations[*inv.Id] = inv
+
 	}
 	return nil
 }
