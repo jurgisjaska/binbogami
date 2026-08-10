@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io"
 	"log/slog"
@@ -15,6 +16,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
+	authModels "github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
 	"github.com/labstack/echo/v5"
@@ -173,6 +175,7 @@ func TestSignup(t *testing.T) {
 		checkUserConfirmed   bool
 		expectedAssignedRole int
 		checkInvitationUser  *uuid.UUID
+		expectToken          bool
 	}{
 		{
 			name:           "Invalid JSON payload",
@@ -236,6 +239,7 @@ func TestSignup(t *testing.T) {
 			payload:        `{"email":"charles.kawalsky@sgc.example.com","password":"password123","repeated_password":"password123","name":"Charles","surname":"Kawalsky","invitation_id":"e4cbf223-4444-4ef8-bb6d-6bb9bd380a55"}`,
 			expectedStatus: http.StatusOK,
 			expectInBody:   []string{"success", "charles.kawalsky@sgc.example.com"},
+			expectToken:    false,
 		},
 		{
 			name:           "Database error on user creation",
@@ -246,12 +250,13 @@ func TestSignup(t *testing.T) {
 			expectInBody:   []string{"internal server error"},
 		},
 		{
-			name:                 "Successful signup without invitation",
+			name:                 "Successful signup without invitation (unconfirmed, no token)",
 			contentType:          echo.MIMEApplicationJSON,
 			payload:              `{"email":"ronon.dex@sgc.example.com","password":"password123","repeated_password":"password123","name":"Ronon","surname":"Dex"}`,
 			expectedStatus:       http.StatusOK,
 			expectInBody:         []string{"success", "ronon.dex@sgc.example.com"},
 			expectedAssignedRole: user.RoleDefault,
+			expectToken:          false,
 		},
 		{
 			name:                 "Successful signup with valid invitation fixture (george.hammond)",
@@ -262,6 +267,7 @@ func TestSignup(t *testing.T) {
 			checkUserConfirmed:   true,
 			expectedAssignedRole: user.RoleDefault,
 			checkInvitationUser:  invitationsMap[hammondInvID].UserId,
+			expectToken:          true,
 		},
 		{
 			name:                 "Successful signup with valid invitation fixture with role set (walter.harriman)",
@@ -272,6 +278,7 @@ func TestSignup(t *testing.T) {
 			checkUserConfirmed:   true,
 			expectedAssignedRole: roleEditor,
 			checkInvitationUser:  invitationsMap[harrimanInvID].UserId,
+			expectToken:          true,
 		},
 		{
 			name:                 "Successful signup with valid opened invitation fixture (bratac)",
@@ -282,6 +289,7 @@ func TestSignup(t *testing.T) {
 			checkUserConfirmed:   true,
 			expectedAssignedRole: roleEditor,
 			checkInvitationUser:  invitationsMap[bratacInvID].UserId,
+			expectToken:          true,
 		},
 	}
 
@@ -325,12 +333,25 @@ func TestSignup(t *testing.T) {
 				createdUser := mockUserRepo.createdUsers[len(mockUserRepo.createdUsers)-1]
 				if tt.checkUserConfirmed {
 					assert.NotNil(t, createdUser.ConfirmedAt)
+				} else {
+					assert.Nil(t, createdUser.ConfirmedAt)
 				}
 				if tt.expectedAssignedRole != 0 {
 					assert.Equal(t, tt.expectedAssignedRole, createdUser.Role)
 				}
 				if tt.checkInvitationUser != nil {
 					assert.Equal(t, createdUser.Id, *tt.checkInvitationUser)
+				}
+
+				var resp struct {
+					Data authModels.SignupResponse `json:"data"`
+				}
+				err := json.Unmarshal(rec.Body.Bytes(), &resp)
+				require.NoError(t, err)
+				if tt.expectToken {
+					assert.NotEmpty(t, resp.Data.Token)
+				} else {
+					assert.Empty(t, resp.Data.Token)
 				}
 			}
 		})

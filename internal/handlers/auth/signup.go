@@ -74,6 +74,14 @@ func (h *Auth) signup(c *echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, api.Errors(internalError, err.Error()))
 	}
 
+	if u.ConfirmedAt == nil {
+		h.auditlog.Info("user signup: without invitation", "user_id", u.Id)
+		return c.JSON(
+			http.StatusOK,
+			api.Success(auth.SignupResponse{User: u, Token: ""}, api.CreateRequest(c)),
+		)
+	}
+
 	t, err := token.CreateToken(u, h.configuration.Secret)
 	if err != nil {
 		h.auditlog.Error("signup error: token creation error", "user_id", u.Id, "error", err.Error())
@@ -91,12 +99,8 @@ func (h *Auth) signup(c *echo.Context) error {
 	// @todo: send an email confirm request
 
 	h.auditlog.Info("user signup", "user_id", u.Id)
-
 	return c.JSON(
 		http.StatusOK,
-		api.Success(
-			auth.SignupResponse{User: u, Token: t},
-			api.CreateRequest(c),
-		),
+		api.Success(auth.SignupResponse{User: u, Token: t}, api.CreateRequest(c)),
 	)
 }
