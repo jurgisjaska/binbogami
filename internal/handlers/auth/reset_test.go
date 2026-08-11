@@ -328,7 +328,7 @@ func TestOpen(t *testing.T) {
 			c.SetPath("/auth/reset-password/:id")
 			c.SetPathValues(echo.PathValues{echo.PathValue{Name: "id", Value: tt.paramID}})
 
-			err := h.open(c)
+			err := h.openReset(c)
 			require.NoError(t, err)
 
 			assert.Equal(t, tt.expectedStatus, rec.Code)

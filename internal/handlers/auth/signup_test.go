@@ -15,7 +15,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
-	"github.com/jurgisjaska/binbogami/internal/api/models"
 	authModels "github.com/jurgisjaska/binbogami/internal/api/models/auth"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/database/user/invitation"
@@ -59,16 +58,6 @@ type mockSignupInvitationRepository struct {
 	deleted     map[uuid.UUID]*invitation.Invitation
 }
 
-func (m *mockSignupInvitationRepository) Open(id uuid.UUID) (*invitation.Invitation, error) {
-	inv, ok := m.invitations[id]
-	if !ok {
-		return nil, errors.New("invitation not found")
-	}
-	now := time.Now()
-	inv.OpenedAt = &now
-	return inv, nil
-}
-
 func (m *mockSignupInvitationRepository) Find(id uuid.UUID) (*invitation.Invitation, error) {
 	inv, ok := m.invitations[id]
 	if !ok || inv.DeletedAt != nil {
@@ -77,13 +66,9 @@ func (m *mockSignupInvitationRepository) Find(id uuid.UUID) (*invitation.Invitat
 	return inv, nil
 }
 
-func (m *mockSignupInvitationRepository) Create(model *models.InvitationRequest) (invitation.Invitations, error) {
-	return nil, nil
-}
-
 func (m *mockSignupInvitationRepository) Update(inv *invitation.Invitation) error {
 	if m.invitations != nil && inv.Id != nil {
-
+		m.invitations[*inv.Id] = inv
 	}
 	return nil
 }

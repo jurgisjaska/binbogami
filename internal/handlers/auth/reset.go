@@ -10,8 +10,8 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-// open sets the opened_at field to the current time.
-func (h *Auth) open(c *echo.Context) error {
+// openReset sets the opened_at field to the current time.
+func (h *Auth) openReset(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		h.auditlog.Warn("password reset open error: incorrect password reset token", "error", err.Error())
@@ -25,16 +25,17 @@ func (h *Auth) open(c *echo.Context) error {
 		return c.JSON(http.StatusNotFound, api.Error("password reset token not found"))
 	}
 
-	n := time.Now()
-	entity.OpenedAt = &n
-	err = h.user.passwordReset.Update(entity)
-	if err != nil {
-		h.auditlog.Warn("password reset open error: failed to update token", "error", err.Error())
-		return c.JSON(http.StatusInternalServerError, api.Error("failed to update password reset token"))
+	if entity.OpenedAt == nil {
+		n := time.Now()
+		entity.OpenedAt = &n
+		err = h.user.passwordReset.Update(entity)
+		if err != nil {
+			h.auditlog.Warn("password reset open error: failed to update token", "error", err.Error())
+			return c.JSON(http.StatusInternalServerError, api.Error("failed to update password reset token"))
+		}
 	}
 
 	h.auditlog.Info("password reset opened", "token", id)
-
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 

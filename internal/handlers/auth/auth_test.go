@@ -135,6 +135,7 @@ func TestInitialize(t *testing.T) {
 		{http.MethodPost, "/auth/forgot-password"},
 		{http.MethodGet, "/auth/reset-password/:id"},
 		{http.MethodPost, "/auth/reset-password"},
+		{http.MethodGet, "/auth/invitation/:id"},
 	}
 
 	for _, er := range expectedRoutes {
@@ -169,5 +170,5 @@ func TestCreateAuth(t *testing.T) {
 	assert.NotNil(t, auth.user)
 
 	routes := e.Router().Routes()
-	assert.Len(t, routes, 5)
+	assert.Len(t, routes, 6)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/handlers/public"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
 	echojwt "github.com/labstack/echo-jwt/v5"
@@ -37,11 +36,6 @@ func main() {
 	}))
 	e.HTTPErrorHandler = api.CustomHTTPErrorHandler
 	e.Validator = &api.Validator{Validator: validator.New()}
-
-	// public resources that are not related with auth
-	// must be accessible without authentication
-	pg := e.Group("/public")
-	public.CreatePublic(pg, database)
 
 	// main API
 	g := e.Group("/v1")
