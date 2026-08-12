@@ -3,15 +3,28 @@
 
 PROJECT=binbogami
 SERVICE?=binbogami
+comma := ,
+SERVICES := $(strip $(subst $(comma), ,$(SERVICE)))
+
 include .env
 export $(shell sed 's/=.*//' .env)
 
 build:
-	@go build -o ./bin/${SERVICE} ./cmd/${SERVICE}
+	@for s in $(SERVICES); do \
+		echo "Building $$s..."; \
+		go build -o ./bin/$$s ./cmd/$$s || exit 1; \
+	done
 
 run:
-	@$(MAKE) build SERVICE=${SERVICE}
-	@bin/${SERVICE}
+	@$(MAKE) build SERVICE="$(SERVICE)"
+	-@pids=""; \
+	trap 'kill $$pids 2>/dev/null; trap - INT TERM EXIT; exit 0' INT TERM EXIT; \
+	for s in $(SERVICES); do \
+		echo "Starting $$s..."; \
+		./bin/$$s & \
+		pids="$$pids $$!"; \
+	done; \
+	wait 2>/dev/null || true
 
 test:
 	@go test -v -cover -coverprofile=coverage.out ./...

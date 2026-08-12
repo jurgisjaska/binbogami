@@ -17,6 +17,7 @@ type (
 		Database *Database
 		Mail     *Mail
 		Auth     *Auth
+		User     *User
 		Loki     *Connection
 	}
 
@@ -55,6 +56,10 @@ type (
 		Secret string
 		*URI
 	}
+
+	User struct {
+		*URI
+	}
 )
 
 // CreateConfig loads the configuration from the environment and creates an instance of config.
@@ -69,6 +74,9 @@ func CreateConfig() (*Config, error) {
 		Auth: &Auth{
 			Secret: os.Getenv("AUTH_SERVICE_SECRET"),
 			URI:    uri("AUTH_SERVICE"),
+		},
+		User: &User{
+			URI: uri("USER_SERVICE"),
 		},
 		Web: uri("WEB_APPLICATION"),
 		Database: &Database{
