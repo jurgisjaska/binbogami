@@ -30,11 +30,13 @@ func (h *User) initialize() *User {
 func (h *User) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
+		h.auditlog.Warn("user show error: incorrect user", "error", err.Error())
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect user"))
 	}
 
 	user, err := h.repository.Find(id)
 	if err != nil {
+		h.auditlog.Warn("user show error: user not found", "error", err.Error())
 		return c.JSON(http.StatusNotFound, api.Error("user not found"))
 	}
 
@@ -45,6 +47,7 @@ func (h *User) index(c *echo.Context) error {
 	filter := c.QueryParam("filter")
 	users, err := h.repository.FindMany(filter)
 	if err != nil {
+		h.auditlog.Warn("user index error: no users found", "error", err.Error())
 		return c.JSON(http.StatusNotFound, api.Error("no users found"))
 	}
 

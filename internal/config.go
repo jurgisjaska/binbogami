@@ -18,6 +18,7 @@ type (
 		Mail     *Mail
 		Auth     *Auth
 		User     *User
+		Finance  *Finance
 		Loki     *Connection
 	}
 
@@ -60,6 +61,10 @@ type (
 	User struct {
 		*URI
 	}
+
+	Finance struct {
+		*URI
+	}
 )
 
 // CreateConfig loads the configuration from the environment and creates an instance of config.
@@ -77,6 +82,9 @@ func CreateConfig() (*Config, error) {
 		},
 		User: &User{
 			URI: uri("USER_SERVICE"),
+		},
+		Finance: &Finance{
+			URI: uri("FINANCE_SERVICE"),
 		},
 		Web: uri("WEB_APPLICATION"),
 		Database: &Database{
