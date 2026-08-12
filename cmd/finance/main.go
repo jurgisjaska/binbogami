@@ -16,7 +16,7 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 )
 
-//
+// Finance service provides finance related functionality.
 
 func main() {
 	log.Println("starting finance service")
@@ -58,6 +58,7 @@ func main() {
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
 
 	finance.CreateFinance(g, database, auditlog)
+	finance.CreateCategory(g, database, auditlog)
 
 	if err := e.Start(fmt.Sprintf(":%d", config.Finance.Port)); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

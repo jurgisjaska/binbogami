@@ -9,6 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
+	"github.com/jurgisjaska/binbogami/internal/handlers/v1/finance"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
@@ -45,7 +46,7 @@ func main() {
 	user.CreateConfiguration(g, database)
 
 	v1.CreateBook(g, database)
-	v1.CreateCategory(g, database)
+	finance.CreateCategory(g, database)
 	v1.CreateLocation(g, database)
 
 	v1.CreateEntry(g, database)
