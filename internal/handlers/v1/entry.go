@@ -20,7 +20,7 @@ type Entry struct {
 
 	book     *book.Repository
 	category *category.Repository
-	location *location.LocationRepository
+	location *location.Repository
 }
 
 func (h *Entry) initialize() *Entry {

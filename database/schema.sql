@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS locations
         PRIMARY KEY,
     name        VARCHAR(128) NOT NULL,
     description TEXT         NULL,
+    address     TEXT         NULL,
     created_by  UUID     NOT NULL,
     created_at  TIMESTAMP    NOT NULL,
     updated_at  TIMESTAMP    NULL ON UPDATE CURRENT_TIMESTAMP(),

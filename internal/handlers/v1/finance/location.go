@@ -15,7 +15,7 @@ import (
 type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *location.LocationRepository
+	repository *location.Repository
 	auditlog   *slog.Logger
 }
 
@@ -31,16 +31,16 @@ func (h *Location) initialize() *Location {
 func (h *Location) index(c *echo.Context) error {
 	request := api.CreateRequest(c)
 
-	var categories *location.Location
+	var locations *location.Locations
 	var t int
 	var err error
 
-	categories, t, err = h.repository.FindMany(request)
+	locations, t, err = h.repository.FindMany(request)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, api.Success(categories, request, t))
+	return c.JSON(http.StatusOK, api.Success(locations, request, t))
 }
 
 func (h *Location) show(c *echo.Context) error {
@@ -51,8 +51,8 @@ func (h *Location) show(c *echo.Context) error {
 
 	entity, err := h.repository.Find(id)
 	if err != nil {
-		h.auditlog.Warn("location show error: category not found", "error", err.Error())
-		return c.JSON(http.StatusNotFound, api.Error("category not found"))
+		h.auditlog.Warn("location show error: location not found", "error", err.Error())
+		return c.JSON(http.StatusNotFound, api.Error("location not found"))
 	}
 
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))

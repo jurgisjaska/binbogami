@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 )
@@ -14,6 +15,7 @@ type (
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
+		Address     *string    `json:"address"`
 
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
@@ -24,13 +26,13 @@ type (
 
 	Locations []Location
 
-	LocationRepository struct {
+	Repository struct {
 		database *sqlx.DB
 	}
 )
 
 // Find retrieves a Location from the repository by its ID.
-func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
+func (r *Repository) Find(id uuid.UUID) (*Location, error) {
 	Location := &Location{}
 	err := r.database.Get(Location, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id.String())
 	if err != nil {
@@ -40,8 +42,27 @@ func (r *LocationRepository) Find(id uuid.UUID) (*Location, error) {
 	return Location, nil
 }
 
+func (r *Repository) FindMany(request *api.Request) (*Locations, int, error) {
+	locations := &Locations{}
+	query := `SELECT * FROM locations WHERE deleted_at IS NULL LIMIT ? OFFSET ?`
+
+	err := r.database.Select(locations, query, request.Limit, request.Offset())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query = `SELECT COUNT(id) FROM locations WHERE deleted_at IS NULL`
+	var count int
+	err = r.database.Get(&count, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return locations, count, nil
+}
+
 // ByBook retrieves a Location from the repository by the given CreateBook and Location IDs.
-func (r *LocationRepository) ByBook(book *book.Book, id *uuid.UUID) (*Location, error) {
+func (r *Repository) ByBook(book *book.Book, id *uuid.UUID) (*Location, error) {
 	query := `
 		SELECT locations.* 
 		FROM locations 
@@ -62,7 +83,7 @@ func (r *LocationRepository) ByBook(book *book.Book, id *uuid.UUID) (*Location, 
 }
 
 // ManyByBook retrieves locations associated with a book.
-func (r *LocationRepository) ManyByBook(book *book.Book) (*Locations, error) {
+func (r *Repository) ManyByBook(book *book.Book) (*Locations, error) {
 	locations := &Locations{}
 	query := `
 		SELECT locations.* 
@@ -83,7 +104,7 @@ func (r *LocationRepository) ManyByBook(book *book.Book) (*Locations, error) {
 	return locations, nil
 }
 
-func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
+func (r *Repository) Create(c *models.Location) (*Location, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
@@ -93,13 +114,14 @@ func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
 		Id:          &id,
 		Name:        c.Name,
 		Description: c.Description,
+		Address:     c.Address,
 		CreatedBy:   c.CreatedBy,
 		CreatedAt:   time.Now(),
 	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO locations (id, name, description, created_by, created_at)
-		VALUES (:id, :name, :description, :created_by, :created_at)
+		INSERT INTO locations (id, name, description, address, created_by, created_at)
+		VALUES (:id, :name, :description, :address, :created_by, :created_at)
 	`, Location)
 
 	if err != nil {
@@ -109,7 +131,7 @@ func (r *LocationRepository) Create(c *models.Location) (*Location, error) {
 	return Location, nil
 }
 
-// CreateLocation creates a new instance of LocationRepository with the specified database connection.
-func CreateLocation(d *sqlx.DB) *LocationRepository {
-	return &LocationRepository{database: d}
+// CreateLocation creates a new instance of Repository with the specified database connection.
+func CreateLocation(d *sqlx.DB) *Repository {
+	return &Repository{database: d}
 }

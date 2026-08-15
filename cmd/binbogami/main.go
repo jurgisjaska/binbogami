@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/jurgisjaska/binbogami/internal"
@@ -46,8 +47,8 @@ func main() {
 	user.CreateConfiguration(g, database)
 
 	v1.CreateBook(g, database)
-	finance.CreateCategory(g, database)
-	finance.CreateLocation(g, database)
+	finance.CreateCategory(g, database, slog.Default())
+	finance.CreateLocation(g, database, slog.Default())
 
 	v1.CreateEntry(g, database)
 
