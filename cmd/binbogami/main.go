@@ -47,7 +47,7 @@ func main() {
 
 	v1.CreateBook(g, database)
 	finance.CreateCategory(g, database)
-	v1.CreateLocation(g, database)
+	finance.CreateLocation(g, database)
 
 	v1.CreateEntry(g, database)
 

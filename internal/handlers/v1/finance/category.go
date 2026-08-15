@@ -53,11 +53,12 @@ func (h *Category) index(c *echo.Context) error {
 func (h *Category) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect category id"))
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))
 	}
 
 	entity, err := h.repository.Find(id)
 	if err != nil {
+		h.auditlog.Warn("category show error: category not found", "error", err.Error())
 		return c.JSON(http.StatusNotFound, api.Error("category not found"))
 	}
 

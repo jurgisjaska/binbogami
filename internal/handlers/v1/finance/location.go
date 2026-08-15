@@ -1,13 +1,13 @@
-package v1
+package finance
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
-	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/location"
 	"github.com/labstack/echo/v5"
 )
@@ -16,17 +16,46 @@ type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
 	repository *location.LocationRepository
-	book       *book.Repository
+	auditlog   *slog.Logger
 }
 
 func (h *Location) initialize() *Location {
 	h.repository = location.CreateLocation(h.database)
-	h.book = book.CreateBook(h.database)
 
-	h.echo.POST("/locations", h.create)
-	h.echo.GET("/books/:id/locations", h.byBook)
+	h.echo.GET("/locations", h.index)
+	h.echo.GET("/locations/:id", h.show)
 
 	return h
+}
+
+func (h *Location) index(c *echo.Context) error {
+	request := api.CreateRequest(c)
+
+	var categories *location.Location
+	var t int
+	var err error
+
+	categories, t, err = h.repository.FindMany(request)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(categories, request, t))
+}
+
+func (h *Location) show(c *echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect location"))
+	}
+
+	entity, err := h.repository.Find(id)
+	if err != nil {
+		h.auditlog.Warn("location show error: category not found", "error", err.Error())
+		return c.JSON(http.StatusNotFound, api.Error("category not found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
 func (h *Location) one(c *echo.Context) error {
@@ -43,6 +72,7 @@ func (h *Location) one(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Location) create(c *echo.Context) error {
 	location := &models.Location{}
 	if err := c.Bind(location); err != nil {
@@ -62,25 +92,6 @@ func (h *Location) create(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Location) byBook(c *echo.Context) error {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
-	}
-
-	book, err := h.book.Find(id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("book not found"))
-	}
-
-	locations, err := h.repository.ManyByBook(book)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no locations found"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(locations, api.CreateRequest(c)))
-}
-
-func CreateLocation(g *echo.Group, d *sqlx.DB) *Location {
-	return (&Location{echo: g, database: d}).initialize()
+func CreateLocation(g *echo.Group, d *sqlx.DB, l *slog.Logger) *Location {
+	return (&Location{echo: g, database: d, auditlog: l}).initialize()
 }
