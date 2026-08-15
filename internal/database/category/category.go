@@ -34,13 +34,13 @@ type (
 
 // Find retrieves a category by its ID.
 func (r *Repository) Find(id uuid.UUID) (*Category, error) {
-	category := &Category{}
-	err := r.database.Get(category, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id.String())
+	c := &Category{}
+	err := r.database.Get(c, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return category, nil
+	return c, nil
 }
 
 func (r *Repository) FindMany(request *api.Request) (*Categories, int, error) {

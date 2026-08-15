@@ -58,20 +58,6 @@ func (h *Location) show(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Location) one(c *echo.Context) error {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect location"))
-	}
-
-	location, err := h.repository.Find(id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("location not found"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(location, api.CreateRequest(c)))
-}
-
 // @deprecated
 func (h *Location) create(c *echo.Context) error {
 	location := &models.Location{}
@@ -92,6 +78,7 @@ func (h *Location) create(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
+// CreateLocation initializes the Location resource, sets up routes, and returns the created Location instance.
 func CreateLocation(g *echo.Group, d *sqlx.DB, l *slog.Logger) *Location {
 	return (&Location{echo: g, database: d, auditlog: l}).initialize()
 }

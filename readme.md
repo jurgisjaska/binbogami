@@ -80,14 +80,16 @@ Database uses plural table names (ex.: `users`) and snake_case names with suffix
 
 Convention for repository method naming and return types.
 
-| Method             | Return     | Description                                                        |
-|--------------------|------------|--------------------------------------------------------------------|
-| Get({id})          | Entity     | Query single entity by ID                                          |
-| FindBy...({value}) | Collection | Query collection of entities by field in the method name and value |
-| Find({criteria})   | Collection | Query collection of entities by filter criteria                    |
-| Save({entity})     | Entity     | Persist entity (create or update)                                  |
-| Create({entity})   | Entity     | Persist **new** entity in the database                             |
-| Update({entity})   | Entity     | Persist **existing** entity to the database                        |
+| Method | Return | Description |
+|---|---|---|
+| `Find(id uuid.UUID)` | `(*Entity, error)` | Find a single entity by UUID |
+| `FindBy*({value})` | `(*Entity, error)` | Find a single entity by something |
+| `FindManyBy*({value})` | `(Collection, error)` | Find many entities by something |
+| `Save({entity})` | `error` | Persist entity (create or update) |
+| `Create(entity *Entity)` | `error` | Persist **new** entity in the database |
+| `Update(entity *Entity)` | `error` | Persist **existing** entity in the database |
 
-Methods that return collection always return collection, if there are no records collection will empty.
-If entity is returned failing query will return `nil`.
+- Repository interfaces are named using pattern `*Repository`.
+- Repositories are structs named `Repository` if the package contains only one repository.
+- If the package contains multiple repositories, the name of the repository is formed using pattern `EntityRepository` and interfaces include a package name.
+

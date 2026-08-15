@@ -33,13 +33,13 @@ type (
 
 // Find retrieves a Location from the repository by its ID.
 func (r *Repository) Find(id uuid.UUID) (*Location, error) {
-	Location := &Location{}
-	err := r.database.Get(Location, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id.String())
+	l := &Location{}
+	err := r.database.Get(l, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id.String())
 	if err != nil {
 		return nil, err
 	}
 
-	return Location, nil
+	return l, nil
 }
 
 func (r *Repository) FindMany(request *api.Request) (*Locations, int, error) {
