@@ -9,7 +9,6 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
-	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/finance"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/user"
 	echojwt "github.com/labstack/echo-jwt/v5"
@@ -46,11 +45,11 @@ func main() {
 	// user.CreateUser(g, database)
 	user.CreateConfiguration(g, database)
 
-	v1.CreateBook(g, database)
+	finance.CreateBook(g, database)
 	finance.CreateCategory(g, database, slog.Default())
 	finance.CreateLocation(g, database, slog.Default())
 
-	v1.CreateEntry(g, database)
+	finance.CreateEntry(g, database)
 
 	if err := e.Start(fmt.Sprintf(":%d", config.App.Port)); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

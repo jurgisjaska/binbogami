@@ -1,6 +1,6 @@
 services:
   mariadb:
-    image: mariadb:12.2
+    image: mariadb:12.3
     container_name: "binbogami_mariadb"
     restart: "no"
     volumes:

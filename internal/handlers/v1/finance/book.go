@@ -1,4 +1,4 @@
-package v1
+package finance
 
 import (
 	"net/http"
@@ -11,6 +11,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 	"github.com/jurgisjaska/binbogami/internal/database/book"
 	"github.com/jurgisjaska/binbogami/internal/database/user"
+	"github.com/jurgisjaska/binbogami/internal/handlers/v1"
 	"github.com/labstack/echo/v5"
 )
 
@@ -66,7 +67,7 @@ func (h *Book) index(c *echo.Context) error {
 
 func (h *Book) create(c *echo.Context) error {
 	request := &models.CreateBook{}
-	u, err := currentUser(h.userRepository, c)
+	u, err := v1.CurrentUser(h.userRepository, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
@@ -98,7 +99,7 @@ func (h *Book) create(c *echo.Context) error {
 
 func (h *Book) update(c *echo.Context) error {
 	request := &models.UpdateBook{}
-	_, err := currentUser(h.userRepository, c)
+	_, err := v1.CurrentUser(h.userRepository, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
@@ -129,7 +130,7 @@ func (h *Book) update(c *echo.Context) error {
 }
 
 func (h *Book) destroy(c *echo.Context) error {
-	_, err := currentUser(h.userRepository, c)
+	_, err := v1.CurrentUser(h.userRepository, c)
 	if err != nil {
 		return c.JSON(http.StatusForbidden, api.Error(err.Error()))
 	}
