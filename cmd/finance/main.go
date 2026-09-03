@@ -8,7 +8,9 @@ import (
 	"github.com/go-playground/validator/v10"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/api"
+	mw "github.com/jurgisjaska/binbogami/internal/api/middleware"
 	"github.com/jurgisjaska/binbogami/internal/api/token"
+	"github.com/jurgisjaska/binbogami/internal/database/user"
 	"github.com/jurgisjaska/binbogami/internal/handlers/v1/finance"
 	audithandler "github.com/jurgisjaska/binbogami/internal/service/log"
 	echojwt "github.com/labstack/echo-jwt/v5"
@@ -56,6 +58,9 @@ func main() {
 
 	g := e.Group("/v1")
 	g.Use(echojwt.WithConfig(token.CreateJWTConfig(config.Secret)))
+
+	r := user.CreateUser(database)
+	g.Use(mw.UserActive(r))
 
 	finance.CreateFinance(g, database, auditlog)
 	finance.CreateCategory(g, database, auditlog)

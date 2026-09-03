@@ -45,7 +45,7 @@ func main() {
 	// user.CreateUser(g, database)
 	user.CreateConfiguration(g, database)
 
-	finance.CreateBook(g, database)
+	finance.CreateBook(g, database, slog.Default())
 	finance.CreateCategory(g, database, slog.Default())
 	finance.CreateLocation(g, database, slog.Default())
 
