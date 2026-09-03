@@ -16,7 +16,7 @@ import (
 type Entry struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *entry.EntryRepository
+	repository *entry.Repository
 
 	book     *book.Repository
 	category *category.Repository

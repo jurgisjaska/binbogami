@@ -37,6 +37,7 @@ func (h *Location) index(c *echo.Context) error {
 
 	locations, t, err = h.repository.FindMany(request)
 	if err != nil {
+		h.auditlog.Warn("location index error: incorrect request", "error", err.Error())
 		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
 	}
 
@@ -46,6 +47,7 @@ func (h *Location) index(c *echo.Context) error {
 func (h *Location) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
+		h.auditlog.Warn("location show error: incorrect location", "error", err.Error())
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect location"))
 	}
 

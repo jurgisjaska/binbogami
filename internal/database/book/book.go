@@ -22,13 +22,13 @@ type (
 		Name        string    `json:"name"`
 		Description *string   `json:"description"`
 
-		CreatedBy uuid.UUID `db:"created_by" json:"createdBy"`
+		CreatedBy uuid.UUID `db:"created_by" json:"created_by"`
 		Author    *string   `db:"-" json:"author"`
 
-		CreatedAt time.Time  `db:"created_at" json:"createdAt"`
-		UpdatedAt *time.Time `db:"updated_at" json:"updatedAt"`
-		DeletedAt *time.Time `db:"deleted_at" json:"deletedAt"`
-		ClosedAt  *time.Time `db:"closed_at" json:"closedAt"`
+		CreatedAt time.Time  `db:"created_at" json:"created_at"`
+		UpdatedAt *time.Time `db:"updated_at" json:"updated_at"`
+		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
+		ClosedAt  *time.Time `db:"closed_at" json:"closed_at"`
 	}
 
 	Books []Book
@@ -38,8 +38,18 @@ type (
 	}
 )
 
+func (r *Repository) Find(id uuid.UUID) (*Book, error) {
+	book := &Book{}
+	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return book, nil
+}
+
 // FindMany retrieves a list of books from the database based on the provided request and status.
-func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, error) {
+func (r *Repository) FindMany(request *api.Request, status string) (*Books, int, error) {
 	books := &Books{}
 	query := fmt.Sprintf(`
 			SELECT b.* FROM books AS b 
@@ -48,7 +58,7 @@ func (r *Repository) FindMany(req *api.Request, status string) (*Books, int, err
 		r.statusQuery(status),
 	)
 
-	err := r.database.Select(books, query, req.Limit, req.Offset())
+	err := r.database.Select(books, query, request.Limit, request.Offset())
 	if err != nil {
 		return nil, 0, err
 	}
@@ -135,17 +145,6 @@ func (r *Repository) Update(book *Book) error {
 	}
 
 	return nil
-}
-
-// Find retrieves a book by its ID from the database if it exists and hasn't been marked as deleted.
-func (r *Repository) Find(id uuid.UUID) (*Book, error) {
-	book := &Book{}
-	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)
-	if err != nil {
-		return nil, err
-	}
-
-	return book, nil
 }
 
 func (r *Repository) AddObject(book *Book, m models.BookObject) (*object, error) {

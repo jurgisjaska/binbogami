@@ -1,6 +1,7 @@
 package finance
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -20,11 +21,11 @@ const (
 	destroyClose  = "close"
 )
 
-// Book represents a book handlers.
 type Book struct {
 	echo           *echo.Group
 	database       *sqlx.DB
 	repository     *book.Repository
+	auditlog       *slog.Logger
 	userRepository *user.Repository
 }
 
@@ -33,9 +34,10 @@ func (h *Book) initialize() *Book {
 	h.userRepository = user.CreateUser(h.database)
 
 	h.echo.GET("/books", h.index)
-	h.echo.POST("/books", h.create)
-	h.echo.PUT("/books/:id", h.update)
 	h.echo.GET("/books/:id", h.show)
+
+	h.echo.PUT("/books/:id", h.update)
+	h.echo.POST("/books", h.create)
 	h.echo.DELETE("/books/:id", h.destroy)
 	h.echo.POST("/books/:id/categories", h.add)
 	h.echo.POST("/books/:id/locations", h.add)
@@ -65,6 +67,21 @@ func (h *Book) index(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(books, req, t))
 }
 
+func (h *Book) show(c *echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
+	}
+
+	entity, err := h.repository.Find(id)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, api.Error("no books found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
+}
+
+// @deprecated
 func (h *Book) create(c *echo.Context) error {
 	request := &models.CreateBook{}
 	u, err := v1.CurrentUser(h.userRepository, c)
@@ -97,6 +114,7 @@ func (h *Book) create(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Book) update(c *echo.Context) error {
 	request := &models.UpdateBook{}
 	_, err := v1.CurrentUser(h.userRepository, c)
@@ -129,6 +147,7 @@ func (h *Book) update(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(book, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Book) destroy(c *echo.Context) error {
 	_, err := v1.CurrentUser(h.userRepository, c)
 	if err != nil {
@@ -165,6 +184,7 @@ func (h *Book) destroy(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
+// @deprecated
 func (h *Book) add(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
@@ -194,21 +214,8 @@ func (h *Book) add(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func (h *Book) show(c *echo.Context) error {
-	id, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, api.Error("incorrect book"))
-	}
-
-	entity, err := h.repository.Find(id)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, api.Error("no books found"))
-	}
-
-	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
-}
-
-// CreateBook creates a new instance of Book handlers.
-func CreateBook(g *echo.Group, d *sqlx.DB) *Book {
-	return (&Book{echo: g, database: d}).initialize()
+// CreateBook sets up the Book handler with routes, database, and logger, and initializes it.
+// Returns the initialized Book.
+func CreateBook(g *echo.Group, d *sqlx.DB, l *slog.Logger) *Book {
+	return (&Book{echo: g, database: d, auditlog: l}).initialize()
 }

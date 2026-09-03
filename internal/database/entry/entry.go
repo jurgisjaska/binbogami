@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
 )
 
@@ -24,12 +25,44 @@ type (
 		DeletedAt *time.Time `db:"deleted_at" json:"deleted_at"`
 	}
 
-	EntryRepository struct {
+	Entries []Entry
+
+	Repository struct {
 		database *sqlx.DB
 	}
 )
 
-func (r *EntryRepository) Create(e *models.Entry) (*Entry, error) {
+func (r *Repository) Find(id uuid.UUID) (*Entry, error) {
+	e := &Entry{}
+	err := r.database.Get(e, "SELECT * FROM entries WHERE id = ? AND deleted_at IS NULL", id)
+	if err != nil {
+		return nil, err
+	}
+
+	return e, nil
+}
+
+func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
+	entries := &Entries{}
+	query := "SELECT * FROM entries WHERE deleted_at IS NULL LIMIT ? OFFSET ?"
+
+	err := r.database.Select(entries, query, request.Limit, request.Offset())
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query = `SELECT COUNT(id) FROM categories WHERE deleted_at IS NULL`
+	var count int
+	err = r.database.Get(&count, query)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return entries, count, nil
+}
+
+// @deprecated
+func (r *Repository) Create(e *models.Entry) (*Entry, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		return nil, err
@@ -58,6 +91,6 @@ func (r *EntryRepository) Create(e *models.Entry) (*Entry, error) {
 	return entry, nil
 }
 
-func CreateEntry(d *sqlx.DB) *EntryRepository {
-	return &EntryRepository{database: d}
+func CreateEntry(d *sqlx.DB) *Repository {
+	return &Repository{database: d}
 }

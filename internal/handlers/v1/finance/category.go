@@ -43,6 +43,7 @@ func (h *Category) index(c *echo.Context) error {
 
 	categories, t, err = h.repository.FindMany(request)
 	if err != nil {
+		h.auditlog.Warn("category index error: failed to find categories", "error", err.Error())
 		return c.JSON(http.StatusNotFound, api.Error(err.Error()))
 	}
 
@@ -53,6 +54,7 @@ func (h *Category) index(c *echo.Context) error {
 func (h *Category) show(c *echo.Context) error {
 	id, err := uuid.Parse(c.Param("id"))
 	if err != nil {
+		h.auditlog.Warn("category show error: incorrect category", "error", err.Error())
 		return c.JSON(http.StatusBadRequest, api.Error("incorrect category"))
 	}
 
