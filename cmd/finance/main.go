@@ -16,7 +16,7 @@ import (
 	"github.com/labstack/echo/v5/middleware"
 )
 
-// Finance service provides finance related functionality.
+// Finance service provides finance-related functionality.
 
 func main() {
 	log.Println("starting finance service")
@@ -27,7 +27,7 @@ func main() {
 	}
 
 	logger := slog.New(audithandler.CreateLoki(config.Loki))
-	logger = logger.With("service", "finance").WithGroup(audithandler.GroupSystem)
+	logger = logger.With("service", "_").WithGroup(audithandler.GroupSystem)
 	slog.SetDefault(logger)
 	slog.Info("starting finance service")
 	defer slog.Warn("stopping finance service")
@@ -60,7 +60,7 @@ func main() {
 	finance.CreateFinance(g, database, auditlog)
 	finance.CreateCategory(g, database, auditlog)
 	finance.CreateLocation(g, database, auditlog)
-	// book
+	finance.CreateBook(g, database, auditlog)
 	// entry
 
 	if err := e.Start(fmt.Sprintf(":%d", config.Finance.Port)); err != nil {

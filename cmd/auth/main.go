@@ -26,7 +26,7 @@ func main() {
 	}
 
 	logger := slog.New(audithandler.CreateLoki(config.Loki))
-	logger = logger.With("service", "auth").WithGroup(audithandler.GroupSystem)
+	logger = logger.With("service", "_").WithGroup(audithandler.GroupSystem)
 	slog.SetDefault(logger)
 	slog.Info("starting auth service")
 	defer slog.Warn("stopping auth service")
