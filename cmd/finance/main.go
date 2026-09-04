@@ -66,7 +66,7 @@ func main() {
 	finance.CreateCategory(g, database, auditlog)
 	finance.CreateLocation(g, database, auditlog)
 	finance.CreateBook(g, database, auditlog)
-	// entry
+	finance.CreateEntry(g, database, auditlog)
 
 	if err := e.Start(fmt.Sprintf(":%d", config.Finance.Port)); err != nil {
 		e.Logger.Error("failed to start server", "error", err)
