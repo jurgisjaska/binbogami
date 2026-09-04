@@ -60,6 +60,7 @@ func (r *Repository) Find(id uuid.UUID) (*Book, error) {
 // FindMany retrieves a list of books from the database based on the provided request and status.
 func (r *Repository) FindMany(request *api.Request, status string) (*Books, int, error) {
 	books := &Books{}
+
 	query := fmt.Sprintf(`
 			SELECT b.* FROM books AS b 
 		    WHERE b.deleted_at IS NULL %s LIMIT ? OFFSET ?

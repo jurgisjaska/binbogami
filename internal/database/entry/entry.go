@@ -57,7 +57,7 @@ func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
 		return nil, 0, err
 	}
 
-	query = `SELECT COUNT(id) FROM categories WHERE deleted_at IS NULL`
+	query = `SELECT COUNT(id) FROM entries WHERE deleted_at IS NULL`
 	var count int
 	err = r.database.Get(&count, query)
 	if err != nil {
