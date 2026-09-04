@@ -27,7 +27,7 @@ func main() {
 	}
 
 	logger := slog.New(audithandler.CreateLoki(config.Loki))
-	logger = logger.With("service", "user").WithGroup(audithandler.GroupSystem)
+	logger = logger.With("service", "_").WithGroup(audithandler.GroupSystem)
 	slog.SetDefault(logger)
 	slog.Info("starting user service")
 	defer slog.Warn("stopping user service")
