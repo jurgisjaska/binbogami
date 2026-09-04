@@ -15,7 +15,7 @@ import (
 type Location struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *location.Repository
+	repository location.LocationRepository
 	auditlog   *slog.Logger
 }
 
@@ -53,7 +53,7 @@ func (h *Location) show(c *echo.Context) error {
 
 	entity, err := h.repository.Find(id)
 	if err != nil {
-		h.auditlog.Warn("location show error: location not found", "error", err.Error())
+		h.auditlog.Warn("location show error: location not found", "error", err.Error(), "location_id", id)
 		return c.JSON(http.StatusNotFound, api.Error("location not found"))
 	}
 

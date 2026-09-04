@@ -11,6 +11,14 @@ import (
 )
 
 type (
+	LocationRepository interface {
+		Find(id uuid.UUID) (*Location, error)
+		FindMany(request *api.Request) (*Locations, int, error)
+		ByBook(book *book.Book, id *uuid.UUID) (*Location, error)
+		ManyByBook(book *book.Book) (*Locations, error)
+		Create(l *models.Location) (*Location, error)
+	}
+
 	Location struct {
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`

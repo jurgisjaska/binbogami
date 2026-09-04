@@ -1,8 +1,10 @@
 package finance
 
 import (
+	"log/slog"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
@@ -16,11 +18,12 @@ import (
 type Entry struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *entry.Repository
+	repository entry.EntryRepository
+	auditlog   *slog.Logger
 
-	book     *book.Repository
-	category *category.Repository
-	location *location.Repository
+	book     book.BookRepository
+	category category.CategoryRepository
+	location location.LocationRepository
 }
 
 func (h *Entry) initialize() *Entry {
@@ -29,9 +32,44 @@ func (h *Entry) initialize() *Entry {
 	h.category = category.CreateCategory(h.database)
 	h.location = location.CreateLocation(h.database)
 
+	h.echo.GET("/entries", h.index)
+	h.echo.GET("/entries/:id", h.show)
+
 	h.echo.POST("/entries", h.create)
 
 	return h
+}
+
+func (h *Entry) index(c *echo.Context) error {
+	request := api.CreateRequest(c)
+
+	var entries *entry.Entries
+	var t int
+	var err error
+
+	entries, t, err = h.repository.FindMany(request)
+	if err != nil {
+		h.auditlog.Warn("entry index error: failed to find entries", "error", err.Error())
+		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entries, request, t))
+}
+
+func (h *Entry) show(c *echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		h.auditlog.Warn("entry show error: incorrect entry", "error", err.Error())
+		return c.JSON(http.StatusBadRequest, api.Error("incorrect entry"))
+	}
+
+	entity, err := h.repository.Find(id)
+	if err != nil {
+		h.auditlog.Warn("entry show error: entry not found", "error", err.Error(), "entry_id", id)
+		return c.JSON(http.StatusNotFound, api.Error("entry not found"))
+	}
+
+	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
 func (h *Entry) create(c *echo.Context) error {
@@ -71,6 +109,6 @@ func (h *Entry) create(c *echo.Context) error {
 	return c.JSON(http.StatusOK, api.Success(entity, api.CreateRequest(c)))
 }
 
-func CreateEntry(g *echo.Group, d *sqlx.DB) *Entry {
-	return (&Entry{echo: g, database: d}).initialize()
+func CreateEntry(g *echo.Group, d *sqlx.DB, l *slog.Logger) *Entry {
+	return (&Entry{echo: g, database: d, auditlog: l}).initialize()
 }

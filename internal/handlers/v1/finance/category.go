@@ -15,7 +15,7 @@ import (
 type Category struct {
 	echo       *echo.Group
 	database   *sqlx.DB
-	repository *category.Repository
+	repository category.CategoryRepository
 	auditlog   *slog.Logger
 }
 
@@ -60,7 +60,7 @@ func (h *Category) show(c *echo.Context) error {
 
 	entity, err := h.repository.Find(id)
 	if err != nil {
-		h.auditlog.Warn("category show error: category not found", "error", err.Error())
+		h.auditlog.Warn("category show error: category not found", "error", err.Error(), "category_id", id)
 		return c.JSON(http.StatusNotFound, api.Error("category not found"))
 	}
 

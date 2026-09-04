@@ -49,7 +49,7 @@ func main() {
 	finance.CreateCategory(g, database, slog.Default())
 	finance.CreateLocation(g, database, slog.Default())
 
-	finance.CreateEntry(g, database)
+	finance.CreateEntry(g, database, slog.Default())
 
 	if err := e.Start(fmt.Sprintf(":%d", config.App.Port)); err != nil {
 		e.Logger.Error("failed to start server", "error", err)

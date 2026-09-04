@@ -11,6 +11,15 @@ import (
 )
 
 type (
+	CategoryRepository interface {
+		Find(id uuid.UUID) (*Category, error)
+		FindMany(request *api.Request) (*Categories, int, error)
+		ByBook(book *book.Book, id *uuid.UUID) (*Category, error)
+		ManyByBook(book *book.Book) (*Categories, error)
+		Create(c *models.Category) (*Category, error)
+		Remove(c *Category) error
+	}
+
 	Category struct {
 		Id          *uuid.UUID `json:"id"`
 		Name        string     `json:"name"`

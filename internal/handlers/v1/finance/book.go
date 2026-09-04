@@ -24,9 +24,9 @@ const (
 type Book struct {
 	echo           *echo.Group
 	database       *sqlx.DB
-	repository     *book.Repository
+	repository     book.BookRepository
 	auditlog       *slog.Logger
-	userRepository *user.Repository
+	userRepository user.UserRepository
 }
 
 func (h *Book) initialize() *Book {
@@ -75,6 +75,7 @@ func (h *Book) show(c *echo.Context) error {
 
 	entity, err := h.repository.Find(id)
 	if err != nil {
+		h.auditlog.Warn("book show error: incorrect book", "error", err.Error(), "book_id", id)
 		return c.JSON(http.StatusNotFound, api.Error("no books found"))
 	}
 

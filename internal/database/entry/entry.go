@@ -10,6 +10,12 @@ import (
 )
 
 type (
+	EntryRepository interface {
+		Find(id uuid.UUID) (*Entry, error)
+		FindMany(request *api.Request) (*Entries, int, error)
+		Create(e *models.Entry) (*Entry, error)
+	}
+
 	Entry struct {
 		Id          *uuid.UUID `json:"id"`
 		Amount      float64    `json:"amount"`

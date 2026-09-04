@@ -17,6 +17,15 @@ const (
 )
 
 type (
+	BookRepository interface {
+		Find(id uuid.UUID) (*Book, error)
+		FindMany(request *api.Request, status string) (*Books, int, error)
+		FindManyByName(req *api.Request, status string, search string) (*Books, int, error)
+		Create(book *Book) error
+		Update(book *Book) error
+		AddObject(book *Book, model models.BookObject) (any, error)
+	}
+
 	Book struct {
 		Id          uuid.UUID `json:"id"`
 		Name        string    `json:"name"`
@@ -147,7 +156,7 @@ func (r *Repository) Update(book *Book) error {
 	return nil
 }
 
-func (r *Repository) AddObject(book *Book, m models.BookObject) (*object, error) {
+func (r *Repository) AddObject(book *Book, m models.BookObject) (any, error) {
 	e := buildObject(book, m)
 	query := fmt.Sprintf(`
 		INSERT INTO %s (id, book_id, %s, created_by, created_at)
@@ -160,7 +169,7 @@ func (r *Repository) AddObject(book *Book, m models.BookObject) (*object, error)
 		return nil, err
 	}
 
-	return &e, nil
+	return e, nil
 }
 
 func CreateBook(d *sqlx.DB) *Repository {
