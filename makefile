@@ -45,14 +45,14 @@ setup:
 	@cp -f .env.example .env
 	@go get ./...
 	@sudo -v
-	@if ! grep -q ${PROJECT} /etc/hosts; then \
-		sudo -- sh -c "echo '127.0.0.1	${PROJECT}' >> /etc/hosts"; \
-		sudo -- sh -c "echo '127.0.0.1	mariadb' >> /etc/hosts"; \
-		sudo -- sh -c "echo '127.0.0.1	mailcatcher' >> /etc/hosts"; \
-	fi
+	@for host in $(PROJECT) mariadb mailcatcher; do \
+		if ! grep -v '^[[:space:]]*#' /etc/hosts | grep -E -q "[[:space:]]$$host([[:space:]]|$$)"; then \
+			sudo -- sh -c "echo '127.0.0.1	$$host' >> /etc/hosts"; \
+		fi; \
+	done
 	@if ! docker network ls | grep -q ${PROJECT}; then \
-  		docker network create ${PROJECT}; \
-  	fi
+		docker network create ${PROJECT}; \
+	fi
 
 schema:
 	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/schema.sql

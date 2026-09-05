@@ -1,8 +1,11 @@
 package entry
 
 import (
+	"fmt"
+	"log"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -50,16 +53,30 @@ func (r *Repository) Find(id uuid.UUID) (*Entry, error) {
 
 func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
 	entries := &Entries{}
-	query := "SELECT * FROM entries WHERE deleted_at IS NULL LIMIT ? OFFSET ?"
+	q := squirrel.Select("*").From("entries").Where("deleted_at IS NULL")
 
-	err := r.database.Select(entries, query, request.Limit, request.Offset())
+	if request.Search != "" {
+		q = q.Where(squirrel.Like{"description": fmt.Sprintf("%%%s%%", request.Search)})
+	}
+
+	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()
+	log.Println(query)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	query = `SELECT COUNT(id) FROM entries WHERE deleted_at IS NULL`
+	err = r.database.Select(entries, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query, args, err = q.RemoveColumns().Columns("COUNT(id)").ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
 	var count int
-	err = r.database.Get(&count, query)
+	err = r.database.Get(&count, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}

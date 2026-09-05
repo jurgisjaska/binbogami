@@ -52,3 +52,5 @@
 
 ## Agent Instructions
 - When writing tests, place them in `_test.go` files in the same package.
+- Always use Go when writing helper scripts for agents.
+- When generating fixtures and other demo data always use Stargate SG-1 theme.

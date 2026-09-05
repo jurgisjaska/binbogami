@@ -46,7 +46,7 @@ type (
 // Find retrieves a category by its ID.
 func (r *Repository) Find(id uuid.UUID) (*Category, error) {
 	c := &Category{}
-	err := r.database.Get(c, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id.String())
+	err := r.database.Get(c, "SELECT * FROM categories WHERE id = ? AND deleted_at IS NULL", id)
 	if err != nil {
 		return nil, err
 	}

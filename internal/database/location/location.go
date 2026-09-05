@@ -1,8 +1,10 @@
 package location
 
 import (
+	"fmt"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -42,7 +44,7 @@ type (
 // Find retrieves a Location from the repository by its ID.
 func (r *Repository) Find(id uuid.UUID) (*Location, error) {
 	l := &Location{}
-	err := r.database.Get(l, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id.String())
+	err := r.database.Get(l, "SELECT * FROM locations WHERE id = ? AND deleted_at IS NULL", id)
 	if err != nil {
 		return nil, err
 	}
@@ -52,16 +54,29 @@ func (r *Repository) Find(id uuid.UUID) (*Location, error) {
 
 func (r *Repository) FindMany(request *api.Request) (*Locations, int, error) {
 	locations := &Locations{}
-	query := `SELECT * FROM locations WHERE deleted_at IS NULL LIMIT ? OFFSET ?`
+	q := squirrel.Select("*").From("locations").Where("deleted_at IS NULL")
 
-	err := r.database.Select(locations, query, request.Limit, request.Offset())
+	if request.Search != "" {
+		q = q.Where(squirrel.Like{"name": fmt.Sprintf("%%%s%%", request.Search)})
+	}
+
+	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	query = `SELECT COUNT(id) FROM locations WHERE deleted_at IS NULL`
+	err = r.database.Select(locations, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query, args, err = q.RemoveColumns().Columns("COUNT(id)").ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
 	var count int
-	err = r.database.Get(&count, query)
+	err = r.database.Get(&count, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}
