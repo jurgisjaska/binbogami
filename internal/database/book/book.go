@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
@@ -47,6 +48,13 @@ type (
 	}
 )
 
+var sortable = map[string]bool{
+	"name":        true,
+	"description": true,
+	"created_at":  true,
+	"closed_at":   true,
+}
+
 func (r *Repository) Find(id uuid.UUID) (*Book, error) {
 	book := &Book{}
 	err := r.database.Get(book, "SELECT * FROM books WHERE id = ? AND deleted_at IS NULL", id)
@@ -60,25 +68,29 @@ func (r *Repository) Find(id uuid.UUID) (*Book, error) {
 // FindMany retrieves a list of books from the database based on the provided request and status.
 func (r *Repository) FindMany(request *api.Request, status string) (*Books, int, error) {
 	books := &Books{}
+	q := squirrel.Select("b.*").From("books AS b").Where("b.deleted_at IS NULL " + r.statusQuery(status))
 
-	query := fmt.Sprintf(`
-			SELECT b.* FROM books AS b 
-		    WHERE b.deleted_at IS NULL %s LIMIT ? OFFSET ?
-		`,
-		r.statusQuery(status),
-	)
+	if request.Sort != "" && sortable[request.Sort] {
+		q = q.OrderBy(fmt.Sprintf("%s %s", request.Sort, request.Order))
+	}
 
-	err := r.database.Select(books, query, request.Limit, request.Offset())
+	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	query = fmt.Sprintf(
-		`SELECT COUNT(b.id) FROM books AS b WHERE b.deleted_at IS NULL %s`,
-		r.statusQuery(status),
-	)
+	err = r.database.Select(books, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query, args, err = q.RemoveColumns().Columns("COUNT(b.id)").ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
 	var count int
-	err = r.database.Get(&count, query)
+	err = r.database.Get(&count, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -88,24 +100,31 @@ func (r *Repository) FindMany(request *api.Request, status string) (*Books, int,
 
 func (r *Repository) FindManyByName(req *api.Request, status string, search string) (*Books, int, error) {
 	books := &Books{}
-	query := fmt.Sprintf(`
-			SELECT b.* FROM books AS b 
-            WHERE b.name LIKE ? AND b.deleted_at IS NULL %s LIMIT ? OFFSET ?
-		`,
-		r.statusQuery(status),
-	)
+	q := squirrel.Select("b.*").From("books AS b").
+		Where(squirrel.Like{"b.name": fmt.Sprintf("%%%s%%", search)}).
+		Where("b.deleted_at IS NULL " + r.statusQuery(status))
 
-	err := r.database.Select(books, query, fmt.Sprintf("%%%s%%", search), req.Limit, req.Offset())
+	if req.Sort != "" && sortable[req.Sort] {
+		q = q.OrderBy(fmt.Sprintf("%s %s", req.Sort, req.Order))
+	}
+
+	query, args, err := q.Limit(uint64(req.Limit)).Offset(uint64(req.Offset())).ToSql()
 	if err != nil {
 		return nil, 0, err
 	}
 
-	query = fmt.Sprintf(
-		`SELECT COUNT(b.id) FROM books AS b WHERE b.name LIKE ? AND b.deleted_at IS NULL %s`,
-		r.statusQuery(status),
-	)
+	err = r.database.Select(books, query, args...)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	query, args, err = q.RemoveColumns().Columns("COUNT(b.id)").ToSql()
+	if err != nil {
+		return nil, 0, err
+	}
+
 	var count int
-	err = r.database.Get(&count, query, fmt.Sprintf("%%%s%%", search))
+	err = r.database.Get(&count, query, args...)
 	if err != nil {
 		return nil, 0, err
 	}

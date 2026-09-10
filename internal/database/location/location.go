@@ -41,6 +41,13 @@ type (
 	}
 )
 
+var sortable = map[string]bool{
+	"name":        true,
+	"description": true,
+	"address":     true,
+	"created_at":  true,
+}
+
 // Find retrieves a Location from the repository by its ID.
 func (r *Repository) Find(id uuid.UUID) (*Location, error) {
 	l := &Location{}
@@ -58,6 +65,10 @@ func (r *Repository) FindMany(request *api.Request) (*Locations, int, error) {
 
 	if request.Search != "" {
 		q = q.Where(squirrel.Like{"name": fmt.Sprintf("%%%s%%", request.Search)})
+	}
+
+	if request.Sort != "" && sortable[request.Sort] {
+		q = q.OrderBy(fmt.Sprintf("%s %s", request.Sort, request.Order))
 	}
 
 	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()

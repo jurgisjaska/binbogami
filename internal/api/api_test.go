@@ -58,7 +58,7 @@ func TestCreateRequest(t *testing.T) {
 	}{
 		{
 			name:       "DefaultValues",
-			urlParams:  "?page=&limit=&order_by=&order=",
+			urlParams:  "?page=&limit=&sort=&order=",
 			wantResult: &Request{defaultPage, defaultLimit, "", defaultOrder, defaultSearch},
 		},
 		{
@@ -67,8 +67,8 @@ func TestCreateRequest(t *testing.T) {
 			wantResult: &Request{2, 5, "", defaultOrder, defaultSearch},
 		},
 		{
-			name:       "OrderByAndOrder",
-			urlParams:  "?order_by=name&order=asc",
+			name:       "SortAndOrder",
+			urlParams:  "?sort=name&order=asc",
 			wantResult: &Request{defaultPage, defaultLimit, "name", "asc", defaultSearch},
 		},
 		{

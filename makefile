@@ -55,8 +55,12 @@ setup:
 	fi
 
 schema:
+	@echo "Applying database schema..."
 	@MYSQL_PWD="$(DATABASE_PASSWORD)" mysql -u $(DATABASE_USERNAME) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/schema.sql
+	@echo "Database schema applied."
 
 fixtures:
+	@echo "Loading database fixtures..."
 	@MYSQL_PWD="$(DATABASE_PASSWORD)" mysql -u $(DATABASE_USERNAME) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/fixtures.sql
+	@echo "Database fixtures loaded."
 

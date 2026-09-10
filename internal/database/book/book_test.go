@@ -149,3 +149,19 @@ func TestBuildObject(t *testing.T) {
 		assert.Equal(t, "location_id", obj.field())
 	})
 }
+
+func TestSortable(t *testing.T) {
+	expectedFields := []string{"name", "description", "created_at", "closed_at"}
+	for _, field := range expectedFields {
+		t.Run("Field_"+field+"_is_sortable", func(t *testing.T) {
+			assert.True(t, sortable[field])
+		})
+	}
+
+	unexpectedFields := []string{"id", "created_by", "deleted_at", "updated_at", "invalid"}
+	for _, field := range unexpectedFields {
+		t.Run("Field_"+field+"_is_not_sortable", func(t *testing.T) {
+			assert.False(t, sortable[field])
+		})
+	}
+}

@@ -41,6 +41,12 @@ type (
 	}
 )
 
+var sortable = map[string]bool{
+	"amount":      true,
+	"description": true,
+	"created_at":  true,
+}
+
 func (r *Repository) Find(id uuid.UUID) (*Entry, error) {
 	e := &Entry{}
 	err := r.database.Get(e, "SELECT * FROM entries WHERE id = ? AND deleted_at IS NULL", id)
@@ -57,6 +63,10 @@ func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
 
 	if request.Search != "" {
 		q = q.Where(squirrel.Like{"description": fmt.Sprintf("%%%s%%", request.Search)})
+	}
+
+	if request.Sort != "" && sortable[request.Sort] {
+		q = q.OrderBy(fmt.Sprintf("%s %s", request.Sort, request.Order))
 	}
 
 	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()

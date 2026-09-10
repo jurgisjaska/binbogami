@@ -36,15 +36,17 @@ type (
 		Page   int     `json:"page"`
 		Pages  float64 `json:"pages"`
 		Search string  `json:"search"`
+		Sort   string  `json:"sort"`
+		Order  string  `json:"order"`
 	}
 
 	// Request represents the structure for making a request.
 	Request struct {
-		Page    int    `json:"page"`
-		Limit   int    `json:"limit"`
-		OrderBy string `json:"order_by"`
-		Order   string `json:"order"`
-		Search  string `json:"search"`
+		Page   int    `json:"page"`
+		Limit  int    `json:"limit"`
+		Sort   string `json:"sort"`
+		Order  string `json:"order"`
+		Search string `json:"search"`
 	}
 )
 
@@ -52,7 +54,7 @@ type (
 func CreateRequest(c *echo.Context) *Request {
 	page, _ := strconv.Atoi(c.QueryParam("page"))
 	limit, _ := strconv.Atoi(c.QueryParam("limit"))
-	orderBy := strings.ToLower(c.QueryParam("order_by"))
+	sort := strings.ToLower(c.QueryParam("sort"))
 	order := strings.ToLower(c.QueryParam("order"))
 	search := strings.ToLower(c.QueryParam("search"))
 
@@ -68,7 +70,7 @@ func CreateRequest(c *echo.Context) *Request {
 		order = defaultOrder
 	}
 
-	return &Request{page, limit, orderBy, order, search}
+	return &Request{page, limit, sort, order, search}
 }
 
 // Offset calculates the offset based on the current page and limit.
@@ -89,6 +91,8 @@ func Success(data interface{}, req *Request, t ...int) *Response {
 			Page:   req.Page,
 			Pages:  pages,
 			Search: req.Search,
+			Sort:   req.Sort,
+			Order:  req.Order,
 		},
 	}
 }
