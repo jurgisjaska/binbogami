@@ -27,6 +27,7 @@ type (
 		Name        string     `json:"name"`
 		Description *string    `json:"description"`
 		Color       *string    `json:"color"`
+		Icon        *string    `json:"icon"`
 
 		CreatedBy *uuid.UUID `db:"created_by" json:"created_by"`
 
@@ -139,13 +140,15 @@ func (r *Repository) Create(c *models.Category) (*Category, error) {
 		Id:          &id,
 		Name:        c.Name,
 		Description: c.Description,
+		Color:       c.Color,
+		Icon:        c.Icon,
 		CreatedBy:   c.CreatedBy,
 		CreatedAt:   time.Now(),
 	}
 
 	_, err = r.database.NamedExec(`
-		INSERT INTO categories (id, name, description, created_by, created_at)
-		VALUES (:id, :name, :description, :created_by, :created_at)
+		INSERT INTO categories (id, name, description, color, icon, created_by, created_at)
+		VALUES (:id, :name, :description, :color, :icon, :created_by, :created_at)
 	`, category)
 
 	if err != nil {

@@ -55,7 +55,8 @@ setup:
 	fi
 
 schema:
-	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/schema.sql
+	@MYSQL_PWD="$(DATABASE_PASSWORD)" mysql -u $(DATABASE_USERNAME) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/schema.sql
 
 fixtures:
-	@mysql -u $(DATABASE_USERNAME) -p$(DATABASE_PASSWORD) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/fixtures.sql
+	@MYSQL_PWD="$(DATABASE_PASSWORD)" mysql -u $(DATABASE_USERNAME) -h $(DATABASE_HOSTNAME) -P $(DATABASE_PORT) $(DATABASE_NAME) < database/fixtures.sql
+

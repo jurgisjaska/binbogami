@@ -78,6 +78,10 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 	color2 := "#2196F3"
 	color3 := "#000000"
 
+	icon1 := "boxes-stacked"
+	icon2 := "microscope"
+	icon3 := "user-secret"
+
 	cat1ID := uuid.MustParse("d4c3b2a1-0e9f-48d7-b6c5-a4b3c2d1e0f9")
 	cat2ID := uuid.MustParse("f9e8d7c6-b5a4-4321-80f1-e2d3c4b5a697")
 	catDeletedID := uuid.MustParse("fedcba98-7654-4321-8fed-cba987654321")
@@ -88,6 +92,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 			Name:        "Mission Supplies",
 			Description: &desc1,
 			Color:       &color1,
+			Icon:        &icon1,
 			CreatedBy:   &jackID,
 			CreatedAt:   now,
 		},
@@ -96,6 +101,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 			Name:        "Artifact Research",
 			Description: &desc2,
 			Color:       &color2,
+			Icon:        &icon2,
 			CreatedBy:   &danielID,
 			CreatedAt:   now,
 		},
@@ -104,6 +110,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 			Name:        "NID Black Budget",
 			Description: &desc3,
 			Color:       &color3,
+			Icon:        &icon3,
 			CreatedBy:   &jackID,
 			CreatedAt:   now,
 			DeletedAt:   &now,
@@ -126,7 +133,7 @@ func TestCategoryIndex(t *testing.T) {
 			targetURL:      "/v1/categories",
 			mockRepo:       &mockCategoryRepository{categories: createCategoryTestFixtures()},
 			expectedStatus: http.StatusOK,
-			expectInBody:   []string{"Mission Supplies", "Artifact Research"},
+			expectInBody:   []string{"Mission Supplies", "Artifact Research", "boxes-stacked", "microscope"},
 		},
 		{
 			name:           "Database error on FindMany",
@@ -175,7 +182,7 @@ func TestCategoryShow(t *testing.T) {
 			targetURL:      "/v1/categories/d4c3b2a1-0e9f-48d7-b6c5-a4b3c2d1e0f9",
 			mockRepo:       &mockCategoryRepository{categories: createCategoryTestFixtures()},
 			expectedStatus: http.StatusOK,
-			expectInBody:   []string{"d4c3b2a1-0e9f-48d7-b6c5-a4b3c2d1e0f9", "Mission Supplies"},
+			expectInBody:   []string{"d4c3b2a1-0e9f-48d7-b6c5-a4b3c2d1e0f9", "Mission Supplies", "boxes-stacked"},
 		},
 		{
 			name:           "Show non-existent category UUID",
