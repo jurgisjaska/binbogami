@@ -25,6 +25,9 @@ func (h *Location) initialize() *Location {
 	h.echo.GET("/locations", h.index)
 	h.echo.GET("/locations/:id", h.show)
 
+	// stats
+	// entries
+
 	return h
 }
 

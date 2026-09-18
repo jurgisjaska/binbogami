@@ -47,7 +47,7 @@ func (h *Entry) index(c *echo.Context) error {
 	var t int
 	var err error
 
-	entries, t, err = h.repository.FindMany(request)
+	entries, t, err = h.repository.FindMany(request, nil)
 	if err != nil {
 		h.auditlog.Warn("entry index error: failed to find entries", "error", err.Error())
 		return c.JSON(http.StatusInternalServerError, api.Error(err.Error()))

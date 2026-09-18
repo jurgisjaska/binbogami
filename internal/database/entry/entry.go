@@ -10,19 +10,21 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
+	"github.com/jurgisjaska/binbogami/internal/database"
 )
 
 type (
 	EntryRepository interface {
 		Find(id uuid.UUID) (*Entry, error)
-		FindMany(request *api.Request) (*Entries, int, error)
+		FindMany(request *api.Request, filter *database.Filter) (*Entries, int, error)
+		FindManyByCategory(id uuid.UUID, request *api.Request) (*Entries, int, error)
 		Create(e *models.Entry) (*Entry, error)
 	}
 
 	Entry struct {
-		Id          *uuid.UUID `json:"id"`
-		Amount      float64    `json:"amount"`
-		Description *string    `json:"description"`
+		Id          uuid.UUID `json:"id"`
+		Amount      float64   `json:"amount"`
+		Description *string   `json:"description"`
 
 		BookId     uuid.UUID  `db:"book_id" json:"book_id"`
 		CategoryId *uuid.UUID `db:"category_id" json:"category_id"`
@@ -57,7 +59,7 @@ func (r *Repository) Find(id uuid.UUID) (*Entry, error) {
 	return e, nil
 }
 
-func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
+func (r *Repository) FindMany(request *api.Request, filter *database.Filter) (*Entries, int, error) {
 	entries := &Entries{}
 	q := squirrel.Select("*").From("entries").Where("deleted_at IS NULL")
 
@@ -67,6 +69,10 @@ func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
 
 	if request.Sort != "" && sortable[request.Sort] {
 		q = q.OrderBy(fmt.Sprintf("%s %s", request.Sort, request.Order))
+	}
+
+	if filter != nil {
+		q = q.Where(filter.ToSql())
 	}
 
 	query, args, err := q.Limit(uint64(request.Limit)).Offset(uint64(request.Offset())).ToSql()
@@ -94,6 +100,11 @@ func (r *Repository) FindMany(request *api.Request) (*Entries, int, error) {
 	return entries, count, nil
 }
 
+func (r *Repository) FindManyByCategory(id uuid.UUID, request *api.Request) (*Entries, int, error) {
+	f := database.Filter{Field: "category_id", Id: id}
+	return r.FindMany(request, &f)
+}
+
 // @deprecated
 func (r *Repository) Create(e *models.Entry) (*Entry, error) {
 	id, err := uuid.NewUUID()
@@ -102,7 +113,7 @@ func (r *Repository) Create(e *models.Entry) (*Entry, error) {
 	}
 
 	entry := &Entry{
-		Id:          &id,
+		Id:          id,
 		Amount:      e.Amount,
 		Description: e.Description,
 		BookId:      e.BookId,
