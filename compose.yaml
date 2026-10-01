@@ -46,6 +46,18 @@ services:
       - ".env.docker"
     networks:
       - "binbogami"
+  redis:
+    image: redis:8.10-alpine
+    container_name: "binbogami_redis"
+    restart: "no"
+    volumes:
+      - "./var/volumes/redis:/data"
+    ports:
+      - "6379:6379"
+    env_file:
+      - ".env.docker"
+    networks:
+      - "binbogami"
 networks:
   binbogami:
     name: "binbogami"

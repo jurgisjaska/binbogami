@@ -20,6 +20,7 @@ type (
 		User     *User
 		Finance  *Finance
 		Loki     *Connection
+		Redis    *Redis
 	}
 
 	// Database represents the database configuration.
@@ -34,6 +35,11 @@ type (
 	Mail struct {
 		Sender     string
 		Connection *Connection
+	}
+
+	Redis struct {
+		Connection  *Connection
+		Concurrency int
 	}
 
 	// Connection represents the connection configuration for local or 3rd party service.
@@ -110,6 +116,15 @@ func CreateConfig() (*Config, error) {
 			Port:     port(os.Getenv("LOKI_PORT")),
 			Username: os.Getenv("LOKI_USERNAME"),
 			Password: os.Getenv("LOKI_PASSWORD"),
+		},
+		Redis: &Redis{
+			Connection: &Connection{
+				Hostname: os.Getenv("REDIS_HOSTNAME"),
+				Port:     port(os.Getenv("REDIS_PORT")),
+				Username: os.Getenv("REDIS_USERNAME"),
+				Password: os.Getenv("REDIS_PASSWORD"),
+			},
+			Concurrency: 10,
 		},
 	}, nil
 }
