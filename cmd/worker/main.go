@@ -7,6 +7,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/jurgisjaska/binbogami/internal"
+	"github.com/jurgisjaska/binbogami/internal/queue"
 	audithandler "github.com/jurgisjaska/binbogami/internal/service/log"
 )
 
@@ -37,6 +38,7 @@ func main() {
 	)
 
 	mux := asynq.NewServeMux()
+	mux.HandleFunc(queue.TypeOCR, queue.HandleOCR)
 
 	if err := server.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)
