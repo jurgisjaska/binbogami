@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/jurgisjaska/binbogami/internal/api"
 	"github.com/jurgisjaska/binbogami/internal/api/models"
+	"github.com/jurgisjaska/binbogami/internal/database"
 	"github.com/jurgisjaska/binbogami/internal/database/entry"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
@@ -34,7 +35,7 @@ func (m *mockEntryRepository) Find(id uuid.UUID) (*entry.Entry, error) {
 	return e, nil
 }
 
-func (m *mockEntryRepository) FindMany(request *api.Request) (*entry.Entries, int, error) {
+func (m *mockEntryRepository) FindMany(request *api.Request, filter *database.Filter) (*entry.Entries, int, error) {
 	if m.failOnFindMany {
 		return nil, 0, errors.New("database error finding entries")
 	}
@@ -46,6 +47,10 @@ func (m *mockEntryRepository) FindMany(request *api.Request) (*entry.Entries, in
 		res = append(res, *e)
 	}
 	return &res, len(res), nil
+}
+
+func (m *mockEntryRepository) FindManyByCategory(id uuid.UUID, request *api.Request) (*entry.Entries, int, error) {
+	return nil, 0, nil
 }
 
 func (m *mockEntryRepository) Create(e *models.Entry) (*entry.Entry, error) {
@@ -73,7 +78,7 @@ func createEntryTestFixtures() map[uuid.UUID]*entry.Entry {
 
 	return map[uuid.UUID]*entry.Entry{
 		entry1ID: {
-			Id:          &entry1ID,
+			Id:          entry1ID,
 			Amount:      9600.42,
 			Description: &desc1,
 			BookId:      bookID,
@@ -83,7 +88,7 @@ func createEntryTestFixtures() map[uuid.UUID]*entry.Entry {
 			CreatedAt:   now,
 		},
 		entry2ID: {
-			Id:          &entry2ID,
+			Id:          entry2ID,
 			Amount:      399.54,
 			Description: &desc2,
 			BookId:      bookID,
@@ -93,7 +98,7 @@ func createEntryTestFixtures() map[uuid.UUID]*entry.Entry {
 			CreatedAt:   now,
 		},
 		entryDeletedID: {
-			Id:          &entryDeletedID,
+			Id:          entryDeletedID,
 			Amount:      2353.31,
 			Description: &descDeleted,
 			BookId:      bookID,

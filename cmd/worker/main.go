@@ -9,6 +9,7 @@ import (
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/queue"
 	ls "github.com/jurgisjaska/binbogami/internal/service/log"
+	"github.com/jurgisjaska/binbogami/internal/service/ocr"
 )
 
 func main() {
@@ -28,6 +29,13 @@ func main() {
 	auditlog := slog.New(ls.CreateLoki(config.Loki))
 	auditlog = auditlog.With("service", "worker").WithGroup(ls.GroupAudit)
 
+	database, err := internal.ConnectDatabase(config.Database)
+	if err != nil {
+		slog.Error("database connection failure", "error", err, "group", "system")
+		log.Fatalln("database connection failure")
+	}
+	defer func() { _ = database.Close() }()
+
 	server := asynq.NewServer(
 		asynq.RedisClientOpt{
 			Addr: fmt.Sprintf("%s:%d", config.Redis.Connection.Hostname, config.Redis.Connection.Port),
@@ -38,8 +46,10 @@ func main() {
 		},
 	)
 
+	tesseract := ocr.CreateTesseract()
+
 	mux := asynq.NewServeMux()
-	queue.CreateQueue(mux, auditlog)
+	queue.CreateQueue(mux, database, auditlog, tesseract)
 
 	if err := server.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)

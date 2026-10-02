@@ -23,7 +23,7 @@ func TestCategoryStruct(t *testing.T) {
 		{
 			name: "Category with description, color, and icon",
 			category: &Category{
-				Id:          &id,
+				Id:          id,
 				Name:        "Mission Supplies",
 				Description: &desc,
 				Color:       &color,
@@ -37,7 +37,7 @@ func TestCategoryStruct(t *testing.T) {
 		{
 			name: "Category without optional description, color, and icon",
 			category: &Category{
-				Id:          &id,
+				Id:          id,
 				Name:        "Off-World Recon",
 				Description: nil,
 				Color:       nil,

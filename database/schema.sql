@@ -195,3 +195,23 @@ CREATE TABLE IF NOT EXISTS user_configurations
     CONSTRAINT user_configuration_users_id_fk
         FOREIGN KEY (user_id) REFERENCES users (id)
 );
+
+CREATE TABLE IF NOT EXISTS receipts
+(
+    id          UUID          NOT NULL
+        PRIMARY KEY,
+    file_path   VARCHAR(4096) NOT NULL,
+    file_name   VARCHAR(255)  NOT NULL,
+    mime_type   VARCHAR(128)  NOT NULL,
+    text        LONGTEXT      NULL,
+    status      TINYINT       NOT NULL DEFAULT 0
+        COMMENT '0=pending, 1=processing, 2=done, 3=failed',
+    created_by  UUID          NOT NULL,
+    created_at  TIMESTAMP     NOT NULL,
+    updated_at  TIMESTAMP     NULL ON UPDATE CURRENT_TIMESTAMP(),
+    deleted_at  TIMESTAMP     NULL,
+    CONSTRAINT receipts_users_id_fk
+        FOREIGN KEY (created_by) REFERENCES users (id)
+);
+
+

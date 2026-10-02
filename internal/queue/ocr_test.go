@@ -3,6 +3,8 @@ package queue
 import (
 	"context"
 	"encoding/json"
+	"io"
+	"log/slog"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,6 +46,7 @@ func TestHandleOCR(t *testing.T) {
 	task, err := CreateOCR("sgc://dhd-symbols.png")
 	require.NoError(t, err)
 
-	err = ocr(context.Background(), task)
+	q := &Queue{auditlog: slog.New(slog.NewTextHandler(io.Discard, nil))}
+	err = q.ocr(context.Background(), task)
 	assert.NoError(t, err)
 }

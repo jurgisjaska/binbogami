@@ -334,3 +334,128 @@ INSERT INTO binbogami.entries (id, amount, description, book_id, category_id, lo
 ('10000000-0000-4000-8000-00000000009e', 8834.92, 'Symbiote suppressant serum vials (Dr. Fraiser)', '4c3d2e1f-0a9b-4c7d-8e5f-4a3b2c1d0e9f', 'fedcba98-7654-4321-8fed-cba987654321', 'e0000000-0000-4000-8000-000000000043', '05e7257a-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-08 10:14:00', null, '2024-01-18 12:14:00'),
 ('10000000-0000-4000-8000-00000000009f', 3470.97, 'Staff weapon liquid naquadah energy cells recharge', '4c3d2e1f-0a9b-4c7d-8e5f-4a3b2c1d0e9f', 'fedcba98-7654-4321-8fed-cba987654321', 'e0000000-0000-4000-8000-000000000045', '2b63b228-b21c-11ee-9a7a-5ab75f0c1cab', '2024-01-08 11:21:00', null, '2024-01-18 13:21:00'),
 ('10000000-0000-4000-8000-0000000000a0', 3322.76, 'FRED transport vehicle all-terrain tire set', '4c3d2e1f-0a9b-4c7d-8e5f-4a3b2c1d0e9f', 'fedcba98-7654-4321-8fed-cba987654321', 'e0000000-0000-4000-8000-000000000047', 'c0f8c245-1b3d-4d5f-9234-8c7d6e5f4a3b', '2024-01-11 12:28:00', null, '2024-01-21 14:28:00');
+
+--
+-- Add receipts
+--
+INSERT INTO binbogami.receipts (id, file_path, file_name, mime_type, text, status, created_by, created_at, updated_at, deleted_at) VALUES
+(
+    'a0000000-0000-4000-8000-000000000001',
+    '/var/uploads/receipts/2026/01/sg1_ammo_invoice_001.png',
+    'sg1_ammo_invoice_001.png',
+    'image/png',
+    'STARGATE COMMAND -- PROCUREMENT INVOICE\n\nCLASSIFICATION: CONFIDENTIAL\nDOCUMENT NO:    SGC-INV-2026-0001\nDATE:           January 03, 2026\n\nSUPPLIER:       Colt Defense LLC, Hartford CT 06101\nDELIVERED TO:   Gate Room Sub-Level 28, Cheyenne Mountain\n\nITEM   DESCRIPTION                              QTY    UNIT     TOTAL\n-----  ---------------------------------------  -----  -------  ----------\n001    5.7x28mm FN P90 Ball ammunition          5000   $1.92    $9,600.00\n002    P90 50-round translucent magazine         1     $0.42    $0.42\n\nSUBTOTAL:                                                       $9,600.42\nTAX (EXEMPT - GOVT):                                            $0.00\nTOTAL DUE:                                                      $9,600.42\n\nAUTHORISED BY: Major Samantha Carter\nRECEIVED BY:   Sergeant Walter Harriman\n\nEND OF INVOICE',
+    2,
+    '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab',
+    '2026-01-03 09:15:00',
+    '2026-01-03 09:22:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000002',
+    '/var/uploads/receipts/2026/01/naquadah_generator_refit_receipt.png',
+    'naquadah_generator_refit_receipt.png',
+    'image/png',
+    'AREA 51 -- GROOM LAKE ADVANCED TECHNOLOGY DIVISION\n\nCLASSIFICATION: TOP SECRET / SCI\nWORK ORDER NO:  A51-WO-2026-0047\nDATE:           January 06, 2026\n\nCLIENT:         Stargate Command (SGC), Cheyenne Mountain\nTECHNICIAN:     Dr. Bill Lee, Applied Sciences\n\nSERVICES RENDERED\n-----------------\nNaquadah Generator Mark II\n  - Core capacitor bank replacement (x6)     $1,840.00\n  - Field energy regulator recalibration        $920.00\n  - Naquadah fuel cell recharge (partial)     $1,383.56\n\nPARTS\n-----\nMk-II Capacitor array (genuine SGC spec)       $985.00 *\n* No commercial equivalent exists.\n\nTOTAL LABOUR + PARTS:                         $4,143.56\nGOVERNMENT ACCOUNT CHARGE:\n  ACCT: SGC-FINANCE-2026\n\nSIGNED: Dr. Bill Lee             DATE: 2026-01-06\n        Janet Fraiser (witness)  DATE: 2026-01-06\n\nEND OF WORK ORDER',
+    2,
+    '7c8f9a0b-1234-4567-8901-abcdef123456',
+    '2026-01-06 11:30:00',
+    '2026-01-06 11:44:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000003',
+    '/var/uploads/receipts/2026/01/malp_sensor_array_po.pdf',
+    'malp_sensor_array_po.pdf',
+    'application/pdf',
+    'PENTAGON -- HOMEWORLD COMMAND\nDEEP SPACE OPERATIONS PROCUREMENT\n\nPURCHASE ORDER NO:  HWC-PO-2026-0088\nDATE:               January 12, 2026\n\nVENDOR:    Raytheon Technologies, Integrated Defense Systems\nSHIP TO:   SGC Pentagon Liaison, 1400 Defense Pentagon, DC 20301\n\nLINE  DESCRIPTION                               QTY  UNIT PRICE   EXTENDED\n----  ----------------------------------------  ---  ----------   ----------\n1     MALP Telemetry Transceiver Module           2    $3,847.00    $7,694.00\n2     Long-range sensor antenna array (UHF)       1    $1,912.57    $1,912.57\n3     Mounting hardware kit                       1      $552.00      $552.00\n\n                                         SUBTOTAL:               $10,158.57\n                                         TAX (EXEMPT):                $0.00\n                                         TOTAL:                  $10,158.57\n\nFUND CODE:    DST-COVER-STORY\nAPPROVED BY:  General George Hammond\n              Teal\'c (Equipment Specialist)\n\nEND OF PURCHASE ORDER',
+    2,
+    'aff84550-b21f-11ee-8ac0-5ab75f0c1cab',
+    '2026-01-12 14:50:00',
+    '2026-01-15 15:40:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000004',
+    '/var/uploads/receipts/2026/01/iris_blade_workshop_invoice.png',
+    'iris_blade_workshop_invoice.png',
+    'image/png',
+    'SGC INTERNAL WORKSHOP -- SUB-LEVEL 11\nFABRICATION AND MATERIALS INVOICE\n\nJOB REF:    SGC-FAB-2026-0019\nDATE:       January 15, 2026\n\nREQUESTED BY:  Colonel Jack O\'Neill\nJOB DESC:      Titanium-trinium alloy iris replacement blade\n               (Gate Room Sub-Level 28)\n\nMATERIALS\n---------\nTitanium Grade 5 billet (18 kg)         $1,240.00\nTrinium alloy composite inlay (4 kg)      $980.00\nCNC precision machining (14 h)            $420.00\nQuality assurance inspection              $215.00\n\nADJUSTMENT\n----------\nCredit -- returned titanium scrap         -$3,128.02 *\n* Net credit issued per SGC recycling programme.\n\nNET AMOUNT:                              -$3,128.02\n\nAUTHORISED: Dr. Janet Fraiser (Safety)\n            Chief Sgt. Siler (Engineering)\n\nEND OF INVOICE',
+    2,
+    '7c8f9a0b-1234-4567-8901-abcdef123456',
+    '2026-01-15 16:00:00',
+    '2026-01-15 16:18:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000005',
+    '/var/uploads/receipts/2026/01/staff_weapon_recharge_receipt.jpg',
+    'staff_weapon_recharge_receipt.jpg',
+    'image/jpeg',
+    'PROMETHEUS HANGAR -- NEVADA DRY LAKE AIRBASE\nWEAPONS SYSTEMS MAINTENANCE RECEIPT\n\nRECEIPT NO:  PRO-WPN-2026-0033\nDATE:        January 18, 2026\n\nUNIT:        SG-1 Off-world Team\nTECH:        Cameron Mitchell (Weapons Cert. Level 4)\n\nSERVICES\n--------\nStaff weapon plasma discharge cell inspection (x8)    $480.00\nLiquid naquadah energy cell recharge (x8 cells)     $5,440.00\nCell integrity pressure test and seal                 $312.00\nStorage rack re-magnetisation                         $111.28\n\nTOTAL:                                              $6,343.28\n\nCHARGED TO:  SGC-FIN / Mission Supplies / 2026\n\nSIGNATURE:   Teal\'c\n             (First Prime, rtd.  --  SGC Equipment Advisor)\n\nEND OF RECEIPT',
+    2,
+    '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab',
+    '2026-01-18 18:10:00',
+    '2026-01-18 18:29:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000006',
+    '/var/uploads/receipts/2026/01/gate_room_hvac_filters.png',
+    'gate_room_hvac_filters.png',
+    'image/png',
+    'CHEYENNE MOUNTAIN FACILITIES MANAGEMENT\nSUPPLY AND MAINTENANCE RECEIPT\n\nRECEIPT NO:  CMX-FAC-2026-0144\nDATE:        January 24, 2026\nLOCATION:   Sub-Level 28 -- Gate Room HVAC Unit 3\n\nSERVICE PERFORMED BY:  Base Engineering (Sgt. Siler)\n\nITEMS SUPPLIED\n--------------\nHEPA filter cartridge H14 grade (x12)          $1,320.00\nActivated carbon pre-filter roll (5 m)           $480.00\nUV-C germicidal lamp replacement (x4)            $560.00\nSeal gasket set for unit CMX-28-3                $214.00\nLabour -- filter change-out (3 h)                $725.10\n\nTOTAL:                                         $3,299.10\n\nNOTE: Filters replaced on 15-day emergency schedule\ndue to naquadah particulate contamination event\nfollowing P3X-888 gate activation on 2026-01-20.\n\nSIGNED: Sgt. Siler           DATE: 2026-01-24\n\nEND OF RECEIPT',
+    2,
+    '7c8f9a0b-1234-4567-8901-abcdef123456',
+    '2026-01-24 19:25:00',
+    '2026-01-24 19:41:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000007',
+    '/var/uploads/receipts/2026/02/replicator_laser_unit_receipt.png',
+    'replicator_laser_unit_receipt.png',
+    'image/png',
+    'STARGATE COMMAND -- ADVANCED WEAPONS RESEARCH\nEQUIPMENT PROCUREMENT RECEIPT\n\nRECEIPT NO:  SGC-AWR-2026-0055\nDATE:        February 05, 2026\n\nVENDOR:      Lockheed Advanced Development (Skunk Works)\nDELIVERED:   Tok\'ra Tunnels -- Revanna Outpost\n\nDESCRIPTION\n-----------\nAnti-Replicator Laser Disassembly Unit (Mk I)\n  - High-frequency phased pulse emitter\n  - Targeting reticle and quantum-lock calibration\n  - Carrying case (titanium-lined, EMP-shielded)\n\nUNIT PRICE:    $3,326.10\nQUANTITY:     1\nTOTAL:         $3,326.10\n\nAUTHORISATION\n-------------\nRequested by:  Dr. Daniel Jackson\nApproved by:   Colonel Jack O\'Neill\nFund code:     SGC-ARTIFACT-RESEARCH-2026\n\nEND OF RECEIPT',
+    2,
+    '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab',
+    '2026-02-05 14:10:00',
+    '2026-02-05 14:28:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000008',
+    '/var/uploads/receipts/2026/02/gdo_battery_pack_receipt.jpg',
+    'gdo_battery_pack_receipt.jpg',
+    'image/jpeg',
+    NULL,
+    3,
+    '7c8f9a0b-1234-4567-8901-abcdef123456',
+    '2026-02-17 19:50:00',
+    '2026-02-17 19:52:00',
+    null
+),
+(
+    'a0000000-0000-4000-8000-000000000009',
+    '/var/uploads/receipts/2026/03/kgg6_dialer_parts_invoice.png',
+    'kgg6_dialer_parts_invoice.png',
+    'image/png',
+    NULL,
+    0,
+    '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab',
+    '2026-03-01 13:30:00',
+    null,
+    null
+),
+(
+    'a0000000-0000-4000-8000-00000000000a',
+    '/var/uploads/receipts/2026/03/iris_blade_second_replacement.pdf',
+    'iris_blade_second_replacement.pdf',
+    'application/pdf',
+    NULL,
+    1,
+    '1adcdaf6-b21c-11ee-9a7a-5ab75f0c1cab',
+    '2026-03-16 09:30:00',
+    '2026-03-16 09:31:00',
+    null
+);

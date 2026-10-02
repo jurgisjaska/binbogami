@@ -88,7 +88,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 
 	return map[uuid.UUID]*category.Category{
 		cat1ID: {
-			Id:          &cat1ID,
+			Id:          cat1ID,
 			Name:        "Mission Supplies",
 			Description: &desc1,
 			Color:       &color1,
@@ -97,7 +97,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 			CreatedAt:   now,
 		},
 		cat2ID: {
-			Id:          &cat2ID,
+			Id:          cat2ID,
 			Name:        "Artifact Research",
 			Description: &desc2,
 			Color:       &color2,
@@ -106,7 +106,7 @@ func createCategoryTestFixtures() map[uuid.UUID]*category.Category {
 			CreatedAt:   now,
 		},
 		catDeletedID: {
-			Id:          &catDeletedID,
+			Id:          catDeletedID,
 			Name:        "NID Black Budget",
 			Description: &desc3,
 			Color:       &color3,

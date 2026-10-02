@@ -24,7 +24,7 @@ func TestEntryStruct(t *testing.T) {
 		{
 			name: "Entry with description and optional fields",
 			entry: &Entry{
-				Id:          &id,
+				Id:          id,
 				Amount:      9600.42,
 				Description: &desc,
 				BookId:      bookID,
@@ -39,7 +39,7 @@ func TestEntryStruct(t *testing.T) {
 		{
 			name: "Entry without optional description",
 			entry: &Entry{
-				Id:          &id,
+				Id:          id,
 				Amount:      150.00,
 				Description: nil,
 				BookId:      bookID,

@@ -4,6 +4,8 @@ import (
 	"log/slog"
 
 	"github.com/hibiken/asynq"
+	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/service/ocr"
 )
 
 const (
@@ -13,8 +15,10 @@ const (
 
 type (
 	Queue struct {
-		mux      *asynq.ServeMux
-		auditlog *slog.Logger
+		mux       *asynq.ServeMux
+		database  *sqlx.DB
+		auditlog  *slog.Logger
+		tesseract *ocr.Tesseract
 	}
 )
 
@@ -25,6 +29,6 @@ func (q *Queue) initialize() *Queue {
 	return q
 }
 
-func CreateQueue(m *asynq.ServeMux, auditlog *slog.Logger) *Queue {
-	return (&Queue{mux: m, auditlog: auditlog}).initialize()
+func CreateQueue(m *asynq.ServeMux, db *sqlx.DB, auditlog *slog.Logger, t *ocr.Tesseract) *Queue {
+	return (&Queue{mux: m, database: db, auditlog: auditlog, tesseract: t}).initialize()
 }
