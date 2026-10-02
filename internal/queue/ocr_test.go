@@ -44,6 +44,6 @@ func TestHandleOCR(t *testing.T) {
 	task, err := CreateOCR("sgc://dhd-symbols.png")
 	require.NoError(t, err)
 
-	err = HandleOCR(context.Background(), task)
+	err = ocr(context.Background(), task)
 	assert.NoError(t, err)
 }

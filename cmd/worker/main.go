@@ -39,7 +39,7 @@ func main() {
 	)
 
 	mux := asynq.NewServeMux()
-	mux.HandleFunc(queue.TypeOCR, queue.HandleOCR)
+	queue.CreateQueue(mux, auditlog)
 
 	if err := server.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)

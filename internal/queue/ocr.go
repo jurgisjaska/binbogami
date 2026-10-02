@@ -3,7 +3,6 @@ package queue
 import (
 	"context"
 	"encoding/json"
-	"log"
 
 	"github.com/hibiken/asynq"
 )
@@ -23,8 +22,16 @@ func CreateOCR(resource string) (*asynq.Task, error) {
 	return asynq.NewTask(TypeOCR, payload), nil
 }
 
-func HandleOCR(ctx context.Context, t *asynq.Task) error {
-	log.Println("Handling OCR task")
+func (q *Queue) ocr(c context.Context, t *asynq.Task) error {
+	q.auditlog.Info("handling OCR task")
+
+	var p OCR
+	if err := json.Unmarshal(t.Payload(), &p); err != nil {
+		q.auditlog.Error("queue ai error: json unmarshal failed", "error", err.Error())
+		return err
+	}
+
+	q.auditlog.Info("AI task handled", "resource", p.Resource)
 
 	return nil
 }
