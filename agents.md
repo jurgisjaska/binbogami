@@ -1,22 +1,31 @@
 # Agents
 
 ## Project Context
-- **Language**: Go 1.26+
+- **Language**: Go 1.25+ (`go.mod` specifies `go 1.25.0`)
 - **Frameworks**: Labstack Echo v5
-- **Primary database**: MariaDB 12.1+
-- **Logging**: Grafana Loki
+- **Primary database**: MariaDB 12.1+ (`mariadb:12.3` in `compose.yaml`)
+- **Queue & Worker**: Redis 8+ (`redis:8.10-alpine`), Asynq background worker
+- **Logging**: Grafana Loki (custom `slog` handler)
+- **Mail**: Mailcatcher (local SMTP)
 
 ## Project Structure
 - `bin/`: Service binaries
-- `cmd/`: Main files for the services
-- `database/`: SQL queries for database schema and fixtures
-- `internal/`: Core code
-- `templates/`: HTML templates
-- `var/`: Runtime generated code such as logs and Docker volumes
+- `cmd/`: Service entrypoints:
+  - `auth`: Authentication and user invitation/reset service
+  - `binbogami`: Primary API gateway / combined service
+  - `content`: Content service (stub)
+  - `finance`: Finance management service
+  - `user`: User management and configuration service
+  - `worker`: Redis-backed Asynq background task worker (OCR handling)
+- `database/`: SQL queries for database schema (`schema.sql`) and fixtures (`fixtures.sql`)
+- `internal/`: Core code (API routing, database repositories, HTTP handlers, queue workers, domain services)
+- `templates/`: HTML email templates (`invitation.html`, `reset_password.html`)
+- `var/`: Runtime generated code such as logs (`var/logs`) and Docker volumes (`var/volumes`)
 
 ## Service Oriented Architecture
-- Every service is a separate `main.go` in the `cmd/` directory.
-- Every service has its own port for API.
+- Every service is a separate `main.go` in its `cmd/` subdirectory.
+- HTTP API services run on dedicated ports configured via `.env` (`APP_PORT=8101`, `AUTH_SERVICE_PORT=8101`, `USER_SERVICE_PORT=8103`, `FINANCE_SERVICE_PORT=8104`).
+- Asynchronous background tasks are processed by the `worker` service via Asynq and Redis.
 
 ## UI
 - [Web application](https://github.com/jurgisjaska/binbogami-web) built with Vue 3 
@@ -24,31 +33,42 @@
 - Mobile (Android) application built with Kotlin.
 
 ## Development Workflow
-- **Linting**: Always run `go fmt ./...` before suggesting code.
+- **Linting & Formatting**: Always run `go fmt ./...` before suggesting code.
 - **Dependencies**: Use `go mod tidy` after adding new imports.
-- **Testing**: Use standard `go test -v -cover -coverprofile=coverage.out ./...`. Prefer table-driven tests.
-- **Make**: Use GNU Make and commands in makefile for workflow automation.
+- **Testing**:
+  - Run full test suite: `go test -v -cover -coverprofile=coverage.out ./...` or `make test`
+  - Run package-focused tests: `go test -v ./internal/<package>/...`
+  - Prefer table-driven tests.
+- **Make**: Use GNU Make for workflow automation:
+  - `make build`: Build `binbogami` binary into `./bin/`. Override with `SERVICE=<service>` (e.g., `make build SERVICE=auth` or `make build SERVICE=auth,finance,worker`).
+  - `make run`: Build and run services locally.
+  - `make test`: Run tests with coverage reporting.
+  - `make up` / `make down`: Start / stop Docker containers (`mariadb`, `redis`, `loki`, `grafana`, `mailcatcher`).
+  - `make setup`: Initialize local setup (creates `.env`, installs dependencies, sets up `/etc/hosts` and Docker network).
+  - `make schema`: Apply database schema from `database/schema.sql`.
+  - `make fixtures`: Load test fixtures from `database/fixtures.sql`.
 
 ## Coding Standards
 - **Naming**:
   - Use camelCase for internal and PascalCase for exported members. Follow Go acronym rules (e.g., `JSONData`, not `JsonData`).
-  - Use `CreateXxx` for constructor functions
+  - Use `CreateXxx` for constructor functions.
   - **Repositories**:
-    - `FindBy*`: Find a single entity by something
-    - `FindManyBy*`: Find many entities by something
-    - `Save`: Persist entity (create or update)
-    - `Create(entity *Entity) error`: Persist new entity in the database
-    - `Update(entity *Entity) error`: Persist existing entity in the database
-    - `Find(id uuid.UUID) (*Entity, Error)`: Find a single entity by UUID
-    - Repository interfaces are named using pattern `*Repository`
+    - `FindBy*`: Find a single entity by an attribute.
+    - `FindManyBy*`: Find many entities by an attribute.
+    - `Create(entity *Entity) error` or `Create(model *models.Entity) (*Entity, error)`: Persist new entity.
+    - `Update(entity *Entity) error`: Persist existing entity.
+    - `Find(id uuid.UUID) (*Entity, error)`: Find a single entity by UUID.
+    - Repository interfaces are named using pattern `*Repository` (e.g., `UserRepository`, `BookRepository`).
     - Repositories are structs named `Repository` if the package contains only one repository.
     - If the package contains multiple repositories, the name of the repository is formed using pattern `EntityRepository` and interfaces include a package name.
   - **REST API Handlers**:
-    - **GET** for multiple entities assigned endpoint `/resources` and function name `index`
-    - **GET** for sinle entity assigned endpoint `/resources/{:id}` and function name `show`
-    - **POST** for creation assigned endpoint `/resources` and function name `create`
-    - **PUT** for ammendment assigned endpoint `/resources/{:id}` and function name `update`
-    - **DELETE** assigned endpoint `/resources/{:id}` and function name `destroy`
+    - Route parameters follow Echo router syntax (`:id`):
+      - **GET** `/resources`: assigned handler function `index` (fetch multiple entities)
+      - **GET** `/resources/:id`: assigned handler function `show` (fetch single entity)
+      - **POST** `/resources`: assigned handler function `create` (create new entity)
+      - **PUT** `/resources/:id`: assigned handler function `update` (amend existing entity)
+      - **DELETE** `/resources/:id`: assigned handler function `destroy` (delete entity)
+    - JSON API payloads follow `snake_case` naming conventions.
 
 ## Agent Instructions
 - When writing tests, place them in `_test.go` files in the same package.
