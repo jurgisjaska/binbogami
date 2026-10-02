@@ -8,7 +8,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/queue"
-	audithandler "github.com/jurgisjaska/binbogami/internal/service/log"
+	ls "github.com/jurgisjaska/binbogami/internal/service/log"
 )
 
 func main() {
@@ -19,14 +19,14 @@ func main() {
 		log.Fatalln("configuration load failure")
 	}
 
-	logger := slog.New(audithandler.CreateLoki(config.Loki))
-	logger = logger.With("service", "_").WithGroup(audithandler.GroupSystem)
+	logger := slog.New(ls.CreateLoki(config.Loki))
+	logger = logger.With("service", "_").WithGroup(ls.GroupSystem)
 	slog.SetDefault(logger)
 	slog.Info("starting worker service")
 	defer slog.Warn("stopping worker service")
 
-	auditlog := slog.New(audithandler.CreateLoki(config.Loki))
-	auditlog = auditlog.With("service", "worker").WithGroup(audithandler.GroupAudit)
+	auditlog := slog.New(ls.CreateLoki(config.Loki))
+	auditlog = auditlog.With("service", "worker").WithGroup(ls.GroupAudit)
 
 	server := asynq.NewServer(
 		asynq.RedisClientOpt{
@@ -34,6 +34,7 @@ func main() {
 		},
 		asynq.Config{
 			Concurrency: config.Redis.Concurrency,
+			Logger:      ls.CreateAsynq(auditlog),
 		},
 	)
 
