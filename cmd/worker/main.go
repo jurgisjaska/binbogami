@@ -46,7 +46,9 @@ func main() {
 		},
 	)
 
+	// Tesseract OCR engine
 	tesseract := ocr.CreateTesseract()
+	defer func() { _ = tesseract.Close() }()
 
 	mux := asynq.NewServeMux()
 	queue.CreateQueue(mux, database, auditlog, tesseract)

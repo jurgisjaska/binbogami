@@ -19,5 +19,10 @@ func (t *Tesseract) Close() error {
 }
 
 func CreateTesseract() *Tesseract {
-	return &Tesseract{client: gosseract.NewClient()}
+	client := gosseract.NewClient()
+	_ = client.SetLanguage("lit", "eng")
+	_ = client.SetPageSegMode(gosseract.PSM_SINGLE_COLUMN)
+	_ = client.SetVariable("preserve_interword_spaces", "1")
+
+	return &Tesseract{client: client}
 }
