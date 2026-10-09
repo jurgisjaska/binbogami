@@ -45,7 +45,7 @@ setup:
 	@cp -f .env.example .env
 	@go get ./...
 	@sudo -v
-	@for host in $(PROJECT) mariadb mailcatcher; do \
+	@for host in $(PROJECT) mariadb mailcatcher seaweedfs; do \
 		if ! grep -v '^[[:space:]]*#' /etc/hosts | grep -E -q "[[:space:]]$$host([[:space:]]|$$)"; then \
 			sudo -- sh -c "echo '127.0.0.1	$$host' >> /etc/hosts"; \
 		fi; \
