@@ -5,6 +5,7 @@ import (
 
 	"github.com/hibiken/asynq"
 	"github.com/jmoiron/sqlx"
+	"github.com/jurgisjaska/binbogami/internal/service/ai"
 	"github.com/jurgisjaska/binbogami/internal/service/ocr"
 )
 
@@ -19,6 +20,7 @@ type (
 		database  *sqlx.DB
 		auditlog  *slog.Logger
 		tesseract *ocr.Tesseract
+		gemini    *ai.Gemini
 	}
 )
 
@@ -29,6 +31,7 @@ func (q *Queue) initialize() *Queue {
 	return q
 }
 
-func CreateQueue(m *asynq.ServeMux, db *sqlx.DB, auditlog *slog.Logger, t *ocr.Tesseract) *Queue {
-	return (&Queue{mux: m, database: db, auditlog: auditlog, tesseract: t}).initialize()
+// CreateQueue initializes a Queue instance and sets up task handlers for OCR and AI processing tasks.
+func CreateQueue(m *asynq.ServeMux, db *sqlx.DB, auditlog *slog.Logger, t *ocr.Tesseract, ai *ai.Gemini) *Queue {
+	return (&Queue{mux: m, database: db, auditlog: auditlog, tesseract: t, gemini: ai}).initialize()
 }

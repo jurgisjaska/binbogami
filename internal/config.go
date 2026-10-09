@@ -9,7 +9,7 @@ import (
 
 type (
 	// Config represents the configuration for the application.
-	// It contains environment variables, database configuration, and mail configuration.
+	// It contains environment variables, database configuration, mail configuration, and GenAI configuration.
 	Config struct {
 		Secret   string
 		App      *URI
@@ -21,6 +21,7 @@ type (
 		Finance  *Finance
 		Loki     *Connection
 		Redis    *Redis
+		GenAI    *GenAI
 	}
 
 	// Database represents the database configuration.
@@ -40,6 +41,15 @@ type (
 	Redis struct {
 		Connection  *Connection
 		Concurrency int
+	}
+
+	// GenAI represents the Google GenAI configuration.
+	// It holds the API key, enterprise backend flag, project ID, and region location.
+	GenAI struct {
+		APIKey        string
+		UseEnterprise bool
+		Project       string
+		Location      string
 	}
 
 	// Connection represents the connection configuration for local or 3rd party service.
@@ -126,6 +136,12 @@ func CreateConfig() (*Config, error) {
 			},
 			Concurrency: 10,
 		},
+		GenAI: &GenAI{
+			APIKey:        os.Getenv("GOOGLE_API_KEY"),
+			UseEnterprise: boolean(os.Getenv("GOOGLE_GENAI_USE_ENTERPRISE")),
+			Project:       os.Getenv("GOOGLE_CLOUD_PROJECT"),
+			Location:      os.Getenv("GOOGLE_CLOUD_LOCATION"),
+		},
 	}, nil
 }
 
@@ -142,6 +158,21 @@ func port(s string) int {
 	}
 
 	return i
+}
+
+// boolean is a helper method that converts a string to a boolean.
+// It returns false if the string is empty or cannot be converted.
+func boolean(s string) bool {
+	if s == "" {
+		return false
+	}
+
+	b, err := strconv.ParseBool(s)
+	if err != nil {
+		return false
+	}
+
+	return b
 }
 
 // uri is a helper method that creates a URI from environment variables with a given prefix.

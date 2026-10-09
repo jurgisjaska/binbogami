@@ -8,6 +8,7 @@ import (
 	"github.com/hibiken/asynq"
 	"github.com/jurgisjaska/binbogami/internal"
 	"github.com/jurgisjaska/binbogami/internal/queue"
+	"github.com/jurgisjaska/binbogami/internal/service/ai"
 	ls "github.com/jurgisjaska/binbogami/internal/service/log"
 	"github.com/jurgisjaska/binbogami/internal/service/ocr"
 )
@@ -47,11 +48,13 @@ func main() {
 	)
 
 	// Tesseract OCR engine
-	tesseract := ocr.CreateTesseract()
+	tesseract := ocr.CreateTesseract(auditlog)
 	defer func() { _ = tesseract.Close() }()
 
+	gemini, err := ai.CreateGemini(config.GenAI, auditlog)
+
 	mux := asynq.NewServeMux()
-	queue.CreateQueue(mux, database, auditlog, tesseract)
+	queue.CreateQueue(mux, database, auditlog, tesseract, gemini)
 
 	if err := server.Run(mux); err != nil {
 		log.Fatalf("could not run server: %v", err)
