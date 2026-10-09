@@ -51,7 +51,8 @@ func main() {
 	tesseract := ocr.CreateTesseract(auditlog)
 	defer func() { _ = tesseract.Close() }()
 
-	gemini, err := ai.CreateGemini(config.GenAI, auditlog)
+	// Gemini AI engine
+	gemini, err := ai.CreateGemini(ai.ModelGemini35FlashLite, config.GenAI, auditlog)
 
 	mux := asynq.NewServeMux()
 	queue.CreateQueue(mux, database, auditlog, tesseract, gemini)

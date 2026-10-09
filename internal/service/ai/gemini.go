@@ -10,19 +10,21 @@ import (
 
 	"github.com/jurgisjaska/binbogami/internal"
 	"google.golang.org/genai"
+	"google.golang.org/genai/interactions/models/interactions"
 )
 
-const model = "gemini-3.1-flash-lite"
+const ModelGemini35FlashLite interactions.Model = "gemini-3.5-flash-lite"
 
 type (
 	Gemini struct {
+		model    interactions.Model
 		client   *genai.Client
 		auditlog *slog.Logger
 	}
 )
 
 func (g *Gemini) Extract(p string) (string, error) {
-	g.auditlog.Info("extracting text from image", "path", p)
+	g.auditlog.Info("extracting text from image", "engine", "gemini", "path", p)
 
 	b, err := os.ReadFile(p)
 	if err != nil {
@@ -45,15 +47,26 @@ func (g *Gemini) Extract(p string) (string, error) {
 		}, genai.RoleUser),
 	}
 
-	resp, err := g.client.Models.GenerateContent(context.Background(), model, contents, nil)
+	resp, err := g.client.Models.GenerateContent(context.Background(), string(g.model), contents, nil)
 	if err != nil {
 		return "", err
+	}
+
+	if resp.UsageMetadata != nil {
+		g.auditlog.Info("text extracted from image",
+			"path", p,
+			"service", "engine",
+			"prompt_tokens", resp.UsageMetadata.PromptTokenCount,
+			"candidate_tokens", resp.UsageMetadata.CandidatesTokenCount,
+			"total_tokens", resp.UsageMetadata.TotalTokenCount,
+		)
 	}
 
 	return resp.Text(), nil
 }
 
-func CreateGemini(c *internal.GenAI, auditlog *slog.Logger) (*Gemini, error) {
+// CreateGemini initializes a Gemini AI instance with the specified model, GenAI configuration, and audit logger.
+func CreateGemini(model interactions.Model, c *internal.GenAI, auditlog *slog.Logger) (*Gemini, error) {
 	cfg := &genai.ClientConfig{
 		APIKey: c.APIKey,
 	}
@@ -69,5 +82,5 @@ func CreateGemini(c *internal.GenAI, auditlog *slog.Logger) (*Gemini, error) {
 		return nil, err
 	}
 
-	return &Gemini{client: client, auditlog: auditlog}, nil
+	return &Gemini{model: model, client: client, auditlog: auditlog}, nil
 }
